@@ -1,0 +1,121 @@
+import { PYQ } from '@/types';
+
+export const PYQS_DATA: PYQ[] = [
+  {
+    id: 'ras-pre-2023-solved',
+    title: 'RAS Prelims Official Solved Question Paper 2023',
+    examName: 'Rajasthan Administrative Service (RAS)',
+    category: 'RAS',
+    year: 2023,
+    state: 'Rajasthan',
+    questionsCount: 150,
+    pdfSize: '4.2 MB',
+    downloadUrl: '/pyq-files/ras-pre-2023.pdf',
+    hasSolution: true,
+    subject: 'General Knowledge & General Science'
+  },
+  {
+    id: 'ras-pre-2021-solved',
+    title: 'RAS Prelims Solved Question Paper 2021',
+    examName: 'RAS Prelims 2021',
+    category: 'RAS',
+    year: 2021,
+    state: 'Rajasthan',
+    questionsCount: 150,
+    pdfSize: '3.8 MB',
+    downloadUrl: '/pyq-files/ras-pre-2021.pdf',
+    hasSolution: true,
+    subject: 'GK & General Science'
+  },
+  {
+    id: 'si-paper-1-hindi-2021',
+    title: 'Sub Inspector (SI) Official Paper 1 (Samanya Hindi) 2021',
+    examName: 'Rajasthan Police Sub Inspector',
+    category: 'Sub Inspector',
+    year: 2021,
+    state: 'Rajasthan',
+    questionsCount: 100,
+    pdfSize: '2.9 MB',
+    downloadUrl: '/pyq-files/si-hindi-2021.pdf',
+    hasSolution: true,
+    subject: 'Hindi Vyakaran & Prashasnik Shabdavali'
+  },
+  {
+    id: 'si-paper-2-gk-2021',
+    title: 'Sub Inspector (SI) Official Paper 2 (GK & GS) 2021',
+    examName: 'Rajasthan Police Sub Inspector',
+    category: 'Sub Inspector',
+    year: 2021,
+    state: 'Rajasthan',
+    questionsCount: 100,
+    pdfSize: '3.1 MB',
+    downloadUrl: '/pyq-files/si-gk-2021.pdf',
+    hasSolution: true,
+    subject: 'General Knowledge & General Science'
+  },
+  {
+    id: 'cet-grad-2024-shift1',
+    title: 'Rajasthan CET Graduate Level Shift-1 Official Paper 2024',
+    examName: 'Common Eligibility Test (Graduate Level)',
+    category: 'CET',
+    year: 2024,
+    state: 'Rajasthan',
+    questionsCount: 150,
+    pdfSize: '5.1 MB',
+    downloadUrl: '/pyq-files/cet-grad-2024.pdf',
+    hasSolution: true,
+    subject: 'Comprehensive CET Syllabus'
+  },
+  {
+    id: 'cet-12th-2024-shift1',
+    title: 'Rajasthan CET 12th Pass Senior Secondary Level Paper 2024',
+    examName: 'Common Eligibility Test (12th Level)',
+    category: 'CET',
+    year: 2024,
+    state: 'Rajasthan',
+    questionsCount: 150,
+    pdfSize: '4.8 MB',
+    downloadUrl: '/pyq-files/cet-12th-2024.pdf',
+    hasSolution: true,
+    subject: 'Comprehensive CET Syllabus'
+  },
+  {
+    id: 'ssc-gd-2024-shift1-all-india',
+    title: 'SSC GD Constable All Shift Memory Based Paper 2024',
+    examName: 'SSC GD Constable Recruitment',
+    category: 'SSC GD',
+    year: 2024,
+    state: 'All India',
+    questionsCount: 80,
+    pdfSize: '2.5 MB',
+    downloadUrl: '/pyq-files/ssc-gd-2024.pdf',
+    hasSolution: true,
+    subject: 'Maths, Reasoning, English/Hindi & GK'
+  },
+  {
+    id: 'high-court-ldc-2023',
+    title: 'Rajasthan High Court LDC Solved Question Paper 2023',
+    examName: 'Rajasthan High Court LDC',
+    category: 'LDC',
+    year: 2023,
+    state: 'Rajasthan',
+    questionsCount: 150,
+    pdfSize: '3.4 MB',
+    downloadUrl: '/pyq-files/hc-ldc-2023.pdf',
+    hasSolution: true,
+    subject: 'Hindi, English & Rajasthan GK'
+  },
+  {
+    id: 'rajasthan-gk-topicwise-2000-mcq',
+    title: 'Rajasthan GK 2000+ Topicwise PYQ Compilation',
+    examName: 'Rajasthan All Exams PYQ Bank',
+    category: 'Rajasthan GK',
+    year: 2025,
+    state: 'Rajasthan',
+    questionsCount: 2000,
+    pdfSize: '12.5 MB',
+    downloadUrl: '/pyq-files/raj-gk-2000-pyq.pdf',
+    hasSolution: true,
+    subject: 'History, Art & Culture, Geography, Polity'
+  }
+];

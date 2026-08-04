@@ -1,0 +1,447 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { usePathname } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Search,
+  ShoppingBag,
+  Phone,
+  Menu,
+  X,
+  ChevronDown,
+  BookOpen,
+  GraduationCap,
+  Sparkles,
+  Download,
+  FileCheck,
+  Award,
+  Layers,
+  Home,
+  BookMarked,
+  FileText,
+} from 'lucide-react';
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
+import { setCartOpen } from '@/redux/features/cart/cartSlice';
+import { setCounselorModalOpen } from '@/redux/features/ui/uiSlice';
+
+interface NavbarProps {
+  onOpenCounselorModal?: () => void;
+}
+
+export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isCoursesMegaMenuOpen, setIsCoursesMegaMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+  const pathname = usePathname();
+  const dispatch = useAppDispatch();
+  const cartItems = useAppSelector((state) => state.cart.items);
+  const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+
+  const handleCounselorModal = () => {
+    dispatch(setCounselorModalOpen(true));
+    if (onOpenCounselorModal) onOpenCounselorModal();
+  };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 20) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const navLinks = [
+    { name: 'Home', href: '/' },
+    { name: 'All Courses', href: '/courses', hasDropdown: true },
+    { name: 'Books', href: '/books' },
+    { name: 'PYQs', href: '/pyqs' },
+    { name: 'Results', href: '/results' },
+    { name: 'Contact', href: '/contact' },
+  ];
+
+  const courseCategories = [
+    {
+      name: 'Rajasthan GK Master Batches',
+      desc: 'Complete History, Art & Culture, Geography & Polity',
+      href: '/courses?category=rajasthan-gk',
+      icon: <BookOpen className="w-5 h-5 text-amber-600" />,
+    },
+    {
+      name: 'Rajasthan CET 2026',
+      desc: 'Senior Secondary (12th Pass) & Graduate Level Prep',
+      href: '/courses?category=cet',
+      icon: <GraduationCap className="w-5 h-5 text-blue-600" />,
+    },
+    {
+      name: 'SSC GD Target Foundation',
+      desc: 'Mass recruitment preparation for Constable posts',
+      href: '/courses?category=ssc-gd',
+      icon: <Award className="w-5 h-5 text-amber-500" />,
+    },
+    {
+      name: 'RAS Pre + Mains Integrated',
+      desc: 'Comprehensive Civil Services Guidance & Answer Writing',
+      href: '/courses?category=ras',
+      icon: <Sparkles className="w-5 h-5 text-emerald-600" />,
+    },
+    {
+      name: 'High Court LDC & Group D',
+      desc: 'Special Language & Aptitude Mastery Crash Courses',
+      href: '/courses?category=ldc',
+      icon: <Layers className="w-5 h-5 text-purple-600" />,
+    },
+    {
+      name: 'General Science Brahmastra',
+      desc: 'NCERT based Physics, Chemistry & Biology',
+      href: '/courses?category=science',
+      icon: <FileCheck className="w-5 h-5 text-rose-600" />,
+    },
+  ];
+
+  return (
+    <>
+      {/* Top Notification Banner */}
+      <div className="bg-gradient-to-r from-navy-950 via-navy-900 to-navy-950 text-white text-xs py-2 px-4 text-center font-medium relative z-40 hidden md:block border-b border-amber-500/20">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-0.5 bg-yellow-400 text-navy-950 text-[10px] font-black uppercase rounded-full animate-pulse shadow-button-glow">
+              NEW BATCHES LIVE
+            </span>
+            <span className="text-slate-200">🔥 Rajasthan CET 2026 & SSC GD Special Brahmastra Batches are live!</span>
+          </div>
+          <div className="flex items-center gap-4 text-slate-300 text-[11px]">
+            <span>Helpline: <strong className="text-yellow-400 font-bold">+91 7568716768</strong></span>
+            <span>•</span>
+            <button
+              onClick={handleCounselorModal}
+              className="text-yellow-300 hover:text-white font-bold underline flex items-center gap-1 transition-colors"
+            >
+              <Phone className="w-3 h-3 text-yellow-400" />
+              Request Free Callback
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Sticky Navbar */}
+      <header
+        className={`sticky top-0 z-40 transition-all duration-300 ${
+          isScrolled
+            ? 'bg-white/95 backdrop-blur-md shadow-md border-b border-amber-100 py-2.5 sm:py-3'
+            : 'bg-white py-3 sm:py-4 border-b border-amber-100/60'
+        }`}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between gap-3">
+            
+            {/* Brand Logo */}
+            <Link href="/" className="flex items-center gap-2.5 shrink-0 group">
+              <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-2xl overflow-hidden shadow-md border-2 border-amber-400 group-hover:scale-105 transition-transform p-0.5 bg-white">
+                <Image
+                  src="/logo.jpg"
+                  alt="Apni Padhai Logo"
+                  fill
+                  className="object-cover rounded-xl"
+                />
+              </div>
+              <div className="flex flex-col">
+                <span className="font-heading font-extrabold text-xl sm:text-2xl tracking-tight text-navy-900 leading-none">
+                  Apni <span className="text-gradient">Padhai</span>
+                </span>
+                <span className="text-[9px] sm:text-[10px] font-extrabold text-amber-600 tracking-widest uppercase mt-0.5">
+                  Publication & EdTech
+                </span>
+              </div>
+            </Link>
+
+            {/* Desktop Navigation Links */}
+            <nav className="hidden lg:flex items-center gap-1.5 bg-slate-50/80 p-1.5 rounded-full border border-slate-200/80">
+              {navLinks.map((link) => {
+                const isActive = pathname === link.href;
+
+                if (link.hasDropdown) {
+                  return (
+                    <div
+                      key={link.name}
+                      className="relative"
+                      onMouseEnter={() => setIsCoursesMegaMenuOpen(true)}
+                      onMouseLeave={() => setIsCoursesMegaMenuOpen(false)}
+                    >
+                      <button
+                        className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-all ${
+                          isActive || isCoursesMegaMenuOpen
+                            ? 'text-navy-900 bg-yellow-400 shadow-sm'
+                            : 'text-slate-700 hover:text-navy-900 hover:bg-slate-200/60'
+                        }`}
+                      >
+                        <span>{link.name}</span>
+                        <ChevronDown
+                          className={`w-3.5 h-3.5 transition-transform ${
+                            isCoursesMegaMenuOpen ? 'rotate-180 text-navy-900' : 'text-slate-500'
+                          }`}
+                        />
+                      </button>
+
+                      {/* Mega Dropdown Menu */}
+                      <AnimatePresence>
+                        {isCoursesMegaMenuOpen && (
+                          <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 10 }}
+                            transition={{ duration: 0.2 }}
+                            className="absolute top-full left-0 w-[540px] bg-white rounded-3xl shadow-2xl border border-amber-200 p-6 grid grid-cols-2 gap-3 mt-1 z-50"
+                          >
+                            {courseCategories.map((cat, idx) => (
+                              <Link
+                                key={idx}
+                                href={cat.href}
+                                onClick={() => setIsCoursesMegaMenuOpen(false)}
+                                className="flex items-start gap-3 p-3 rounded-2xl hover:bg-amber-50/60 transition-colors group"
+                              >
+                                <div className="p-2.5 bg-slate-100 rounded-xl group-hover:bg-yellow-400 group-hover:shadow-sm transition-all shrink-0">
+                                  {cat.icon}
+                                </div>
+                                <div>
+                                  <h4 className="text-xs font-bold text-navy-900 group-hover:text-amber-700 transition-colors">
+                                    {cat.name}
+                                  </h4>
+                                  <p className="text-[11px] text-slate-500 line-clamp-2 mt-0.5">
+                                    {cat.desc}
+                                  </p>
+                                </div>
+                              </Link>
+                            ))}
+                            <div className="col-span-2 mt-2 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                              <span className="text-slate-500">Looking for custom exam strategy?</span>
+                              <Link
+                                href="/courses"
+                                onClick={() => setIsCoursesMegaMenuOpen(false)}
+                                className="font-bold text-amber-600 hover:underline"
+                              >
+                                View All Batches →
+                              </Link>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  );
+                }
+
+                return (
+                  <Link
+                    key={link.name}
+                    href={link.href}
+                    className={`px-4 py-2 rounded-full text-xs font-bold transition-all ${
+                      isActive
+                        ? 'text-navy-900 bg-yellow-400 shadow-sm'
+                        : 'text-slate-700 hover:text-navy-900 hover:bg-slate-200/60'
+                    }`}
+                  >
+                    {link.name}
+                  </Link>
+                );
+              })}
+            </nav>
+
+            {/* Right Action Icons & Buttons */}
+            <div className="flex items-center gap-1.5 sm:gap-3">
+              {/* Search Toggle */}
+              <button
+                onClick={() => setIsSearchOpen(!isSearchOpen)}
+                className="p-2.5 text-slate-600 hover:text-amber-600 hover:bg-amber-50 rounded-full transition-colors"
+                title="Search courses & books"
+              >
+                <Search className="w-5 h-5" />
+              </button>
+
+              {/* Cart Drawer Button */}
+              <button
+                onClick={() => dispatch(setCartOpen(true))}
+                className="relative p-2.5 text-slate-600 hover:text-amber-600 hover:bg-amber-50 rounded-full transition-colors"
+                title="View Shopping Cart"
+              >
+                <ShoppingBag className="w-5 h-5" />
+                {itemCount > 0 && (
+                  <span className="absolute top-1 right-1 w-4.5 h-4.5 bg-yellow-400 text-navy-950 text-[10px] font-black rounded-full flex items-center justify-center shadow-sm animate-pulse">
+                    {itemCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Talk to Counselor Button */}
+              <button
+                onClick={handleCounselorModal}
+                className="hidden xl:flex items-center gap-1.5 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-navy-900 text-xs font-bold rounded-full transition-colors border border-slate-200"
+              >
+                <Phone className="w-3.5 h-3.5 text-amber-600" />
+                <span>Talk to Counselor</span>
+              </button>
+
+              {/* Download App CTA */}
+              <a
+                href="https://play.google.com/store/search?q=apni+padhai&c=apps"
+                target="_blank"
+                rel="noreferrer"
+                className="hidden sm:flex items-center gap-2 px-4.5 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-yellow-400 hover:to-amber-500 text-navy-950 font-black text-xs rounded-full shadow-button-glow transition-all transform hover:-translate-y-0.5 shrink-0"
+              >
+                <Download className="w-4 h-4" />
+                <span>Download App</span>
+              </a>
+
+              {/* Mobile Menu Toggle */}
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="p-2.5 text-slate-700 hover:text-navy-900 rounded-xl lg:hidden"
+              >
+                {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Global Search Bar Dropdown */}
+        <AnimatePresence>
+          {isSearchOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="border-t border-amber-100 bg-amber-50/50 p-4"
+            >
+              <div className="max-w-3xl mx-auto relative">
+                <Search className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Search for Rajasthan GK, Brahmastra Books, CET, Science, PYQs..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-12 pr-10 py-3 bg-white border border-amber-200 rounded-2xl text-sm focus:outline-none focus:border-yellow-500 shadow-sm text-navy-900"
+                  autoFocus
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Mobile Navigation Drawer */}
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="lg:hidden bg-white border-b border-amber-100 px-5 py-5 space-y-4 shadow-xl overflow-hidden"
+            >
+              <div className="grid grid-cols-2 gap-2">
+                {navLinks.map((link) => (
+                  <Link
+                    key={link.name}
+                    href={link.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={`px-4 py-3 rounded-xl text-xs font-bold text-center transition-colors ${
+                      pathname === link.href
+                        ? 'bg-yellow-400 text-navy-950 font-black'
+                        : 'bg-slate-50 text-navy-900 hover:bg-yellow-100'
+                    }`}
+                  >
+                    {link.name}
+                  </Link>
+                ))}
+              </div>
+
+              <div className="pt-2 border-t border-slate-100 space-y-2">
+                <button
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    handleCounselorModal();
+                  }}
+                  className="w-full flex items-center justify-center gap-2 py-3 bg-slate-100 text-navy-900 rounded-xl text-xs font-bold"
+                >
+                  <Phone className="w-4 h-4 text-amber-600" />
+                  <span>Talk to Academic Counselor</span>
+                </button>
+                <a
+                  href="https://play.google.com/store/search?q=apni+padhai&c=apps"
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="w-full flex items-center justify-center gap-2 py-3 bg-yellow-400 text-navy-950 rounded-xl text-xs font-black shadow-button-glow"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>Install App from Play Store</span>
+                </a>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </header>
+
+      {/* Mobile Floating Quick Action Bottom Bar (Small Devices Only) */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-amber-200 shadow-2xl py-2 px-4 flex items-center justify-around sm:hidden">
+        <Link
+          href="/"
+          className={`flex flex-col items-center gap-0.5 text-[10px] font-bold ${
+            pathname === '/' ? 'text-amber-700 font-black' : 'text-slate-500'
+          }`}
+        >
+          <Home className="w-5 h-5" />
+          <span>Home</span>
+        </Link>
+        <Link
+          href="/courses"
+          className={`flex flex-col items-center gap-0.5 text-[10px] font-bold ${
+            pathname.startsWith('/courses') ? 'text-amber-700 font-black' : 'text-slate-500'
+          }`}
+        >
+          <BookOpen className="w-5 h-5" />
+          <span>Courses</span>
+        </Link>
+        <Link
+          href="/books"
+          className={`flex flex-col items-center gap-0.5 text-[10px] font-bold ${
+            pathname.startsWith('/books') ? 'text-amber-700 font-black' : 'text-slate-500'
+          }`}
+        >
+          <BookMarked className="w-5 h-5" />
+          <span>Books</span>
+        </Link>
+        <Link
+          href="/pyqs"
+          className={`flex flex-col items-center gap-0.5 text-[10px] font-bold ${
+            pathname === '/pyqs' ? 'text-amber-700 font-black' : 'text-slate-500'
+          }`}
+        >
+          <FileText className="w-5 h-5" />
+          <span>PYQs</span>
+        </Link>
+        <button
+          onClick={() => dispatch(setCartOpen(true))}
+          className="relative flex flex-col items-center gap-0.5 text-[10px] font-bold text-slate-500"
+        >
+          <ShoppingBag className="w-5 h-5 text-amber-600" />
+          <span>Cart ({itemCount})</span>
+        </button>
+      </div>
+    </>
+  );
+};
