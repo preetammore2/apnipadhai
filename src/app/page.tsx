@@ -15,9 +15,11 @@ import { CommunitySection } from '@/components/home/CommunitySection';
 import { CounselorModal } from '@/components/layout/CounselorModal';
 import { ArrowRight, Phone, Download, Sparkles } from 'lucide-react';
 import Link from 'next/link';
+import { useTranslation } from '@/i18n/useTranslation';
 
 export default function HomePage() {
   const [isCounselorOpen, setIsCounselorOpen] = useState(false);
+  const { t } = useTranslation();
 
   return (
     <div className="space-y-0">
@@ -61,15 +63,15 @@ export default function HomePage() {
 
         <div className="max-w-4xl mx-auto px-4 relative z-10 space-y-6">
           <span className="px-4 py-1.5 bg-yellow-400/10 text-yellow-300 border border-yellow-400/20 rounded-full text-xs font-black uppercase tracking-wider inline-flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-yellow-400" /> READY TO CRACK YOUR DREAM EXAM?
+            <Sparkles className="w-3.5 h-3.5 text-yellow-400" /> {t('READY TO CRACK YOUR DREAM EXAM?')}
           </span>
 
           <h2 className="text-3xl sm:text-5xl font-black font-heading tracking-tight leading-tight text-white">
-            Start Your Success Journey With Apni Padhai Today
+            {t('Start Your Success Journey With Apni Padhai Today')}
           </h2>
 
           <p className="text-slate-300 text-sm sm:text-base max-w-xl mx-auto">
-            Join 1,00,000+ students preparing with India's smart learning platform. Get instant access to online classes & Brahmastra books.
+            {t("Join 1,00,000+ students preparing with India's smart learning platform. Get instant access to online classes & Brahmastra books.")}
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
@@ -77,7 +79,7 @@ export default function HomePage() {
               href="/courses"
               className="px-8 py-4 bg-yellow-400 hover:bg-yellow-500 text-navy-950 font-black text-sm sm:text-base rounded-2xl shadow-button-glow transition-all flex items-center gap-2 transform hover:-translate-y-1"
             >
-              <span>Explore All Batches</span>
+              <span>{t('Explore All Batches')}</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
 
@@ -88,7 +90,7 @@ export default function HomePage() {
               className="px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold text-sm sm:text-base rounded-2xl border border-white/20 transition-all flex items-center gap-2 transform hover:-translate-y-1"
             >
               <Download className="w-4 h-4 text-yellow-400" />
-              <span>Install App</span>
+              <span>{t('Install App')}</span>
             </a>
 
             <button
@@ -96,7 +98,7 @@ export default function HomePage() {
               className="px-8 py-4 bg-navy-900 hover:bg-black text-slate-200 font-bold text-sm sm:text-base rounded-2xl border border-slate-700 transition-all flex items-center gap-2"
             >
               <Phone className="w-4 h-4 text-amber-400" />
-              <span>Talk to Counselor</span>
+              <span>{t('Talk to Counselor')}</span>
             </button>
           </div>
         </div>

@@ -14,7 +14,7 @@
   }
 
   body {
-    background-color: #FEFCE8;
+    background-color: #F8FAFC;
     color: #0F172A;
     font-family: 'Inter', sans-serif;
     overflow-x: hidden;
@@ -58,6 +58,27 @@
       radial-gradient(at 0% 0%, rgba(234, 179, 8, 0.22) 0px, transparent 50%),
       radial-gradient(at 100% 0%, rgba(245, 158, 11, 0.18) 0px, transparent 50%),
       radial-gradient(at 50% 100%, rgba(253, 230, 138, 0.16) 0px, transparent 50%);
+  }
+
+  .bg-hero-dark {
+    background-color: #020617;
+    background-image: 
+      radial-gradient(at 22% 0%, rgba(234, 179, 8, 0.14) 0px, transparent 48%),
+      radial-gradient(at 88% 12%, rgba(148, 163, 184, 0.08) 0px, transparent 42%),
+      radial-gradient(at 50% 110%, rgba(234, 179, 8, 0.06) 0px, transparent 45%);
+  }
+
+  .bg-grid-light {
+    background-size: 40px 40px;
+    background-image: 
+      linear-gradient(to right, rgba(148, 163, 184, 0.07) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(148, 163, 184, 0.07) 1px, transparent 1px);
+  }
+
+  .text-gradient-gold {
+    background: linear-gradient(135deg, #FDE68A 0%, #FACC15 28%, #EAB308 62%, #CA8A04 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 
   .bg-grid-pattern {
@@ -104,22 +125,23 @@
   }
 }
 
-/* Custom Yellow Scrollbar */
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #FEF9C3;
+  background: #F1F5F9;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #FDE047;
+  background: #EAB308;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #EAB308;
+  background: #CA8A04;
 }
 
 /* Selection */

@@ -4,9 +4,12 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { RESULTS_DATA } from '@/data/results';
-import { Trophy, Award, Star, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { RESULT_HI } from '@/i18n/data';
+import { useTranslation } from '@/i18n/useTranslation';
+import { ArrowRight } from 'lucide-react';
 
 export const ResultsSection: React.FC = () => {
+  const { t, language } = useTranslation();
   return (
     <section className="py-20 bg-white relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -15,13 +18,13 @@ export const ResultsSection: React.FC = () => {
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
           <div>
             <span className="text-xs font-bold text-brand-600 uppercase tracking-widest bg-brand-50 px-3.5 py-1.5 rounded-full">
-              HALL OF FAME 2022-2026
+              {t('HALL OF FAME 2022-2026')}
             </span>
             <h2 className="text-3xl sm:text-4xl font-extrabold font-heading text-navy-900 mt-3">
-              Apni Padhai Selection Champions
+              {t('Apni Padhai Selection Champions')}
             </h2>
             <p className="text-slate-600 text-sm sm:text-base mt-2">
-              Celebrating top rankers who transformed their dedication into official government officer roles.
+              {t('Celebrating top rankers who transformed their dedication into official government officer roles.')}
             </p>
           </div>
 
@@ -29,7 +32,7 @@ export const ResultsSection: React.FC = () => {
             href="/results"
             className="inline-flex items-center gap-2 text-sm font-bold text-brand-600 hover:text-brand-700 transition-colors shrink-0"
           >
-            <span>View Full Ranker Gallery</span>
+            <span>{t('View Full Ranker Gallery')}</span>
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
@@ -51,11 +54,11 @@ export const ResultsSection: React.FC = () => {
               <h3 className="text-base font-bold font-heading text-navy-900 group-hover:text-brand-600 transition-colors">
                 {ranker.name}
               </h3>
-              <p className="text-xs font-bold text-brand-600 mt-0.5">{ranker.exam}</p>
-              <p className="text-[11px] text-slate-500 mb-4">{ranker.district} • Roll No: {ranker.rollNo}</p>
+              <p className="text-xs font-bold text-brand-600 mt-0.5">{language === 'hi' ? RESULT_HI[ranker.id]?.exam ?? ranker.exam : ranker.exam}</p>
+              <p className="text-[11px] text-slate-500 mb-4">{ranker.district} • {t('Roll No:')} {ranker.rollNo}</p>
 
               <p className="text-xs text-slate-600 italic bg-white p-3 rounded-2xl border border-slate-100 line-clamp-3">
-                "{ranker.testimonial}"
+                &ldquo;{language === 'hi' ? RESULT_HI[ranker.id]?.testimonial ?? ranker.testimonial : ranker.testimonial}&rdquo;
               </p>
             </div>
           ))}

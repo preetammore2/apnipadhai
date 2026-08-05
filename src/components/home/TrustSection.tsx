@@ -2,9 +2,11 @@
 
 import React from 'react';
 import { AnimatedCounter } from '@/components/ui/AnimatedCounter';
-import { Users, BookOpen, Download, Award, Building2, MapPin } from 'lucide-react';
+import { Users, BookOpen, Download, Award, MapPin } from 'lucide-react';
+import { useTranslation } from '@/i18n/useTranslation';
 
 export const TrustSection: React.FC = () => {
+  const { t } = useTranslation();
   const stats = [
     {
       label: 'Active Students',
@@ -48,10 +50,10 @@ export const TrustSection: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto mb-10">
           <span className="text-xs font-bold text-brand-600 uppercase tracking-widest bg-brand-50 px-3 py-1 rounded-full">
-            TRUSTED BY ASPIRANTS NATIONWIDE
+            {t('TRUSTED BY ASPIRANTS NATIONWIDE')}
           </span>
           <h2 className="text-2xl sm:text-3xl font-extrabold font-heading text-navy-900 mt-2">
-            A Platform Trusted by over 1 Lakh+ Students
+            {t('A Platform Trusted by over 1 Lakh+ Students')}
           </h2>
         </div>
 
@@ -67,7 +69,7 @@ export const TrustSection: React.FC = () => {
               <div className="text-2xl sm:text-3xl font-black font-heading text-navy-900 tracking-tight">
                 <AnimatedCounter end={stat.value} suffix={stat.suffix} />
               </div>
-              <p className="text-xs font-bold text-slate-500 mt-1">{stat.label}</p>
+              <p className="text-xs font-bold text-slate-500 mt-1">{t(stat.label)}</p>
             </div>
           ))}
         </div>

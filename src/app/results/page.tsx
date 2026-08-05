@@ -3,10 +3,14 @@
 import React from 'react';
 import Image from 'next/image';
 import { RESULTS_DATA } from '@/data/results';
+import { RESULT_HI } from '@/i18n/data';
+import { useTranslation } from '@/i18n/useTranslation';
 import { Trophy, Award, Star, CheckCircle } from 'lucide-react';
 import { AnimatedCounter } from '@/components/ui/AnimatedCounter';
 
 export default function ResultsPage() {
+  const { t, language } = useTranslation();
+
   return (
     <div className="py-12 bg-slate-50 min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
@@ -14,13 +18,13 @@ export default function ResultsPage() {
         {/* Banner */}
         <div className="text-center max-w-3xl mx-auto">
           <span className="text-xs font-bold text-brand-600 uppercase tracking-widest bg-brand-100/80 px-3.5 py-1.5 rounded-full">
-            SELECTION HALL OF FAME
+            {t('SELECTION HALL OF FAME')}
           </span>
           <h1 className="text-3xl sm:text-5xl font-black font-heading text-navy-900 mt-3">
-            Our Exam Champions & Rankers
+            {t('Our Exam Champions & Rankers')}
           </h1>
           <p className="text-slate-600 text-sm sm:text-base mt-2">
-            Over 12,500+ student selections produced across RAS, Sub Inspector, CET, SSC GD, and LDC recruitment exams.
+            {t('Over 12,500+ student selections produced across RAS, Sub Inspector, CET, SSC GD, and LDC recruitment exams.')}
           </p>
         </div>
 
@@ -31,22 +35,22 @@ export default function ResultsPage() {
             <div className="text-3xl font-black font-heading text-navy-900">
               <AnimatedCounter end={12500} suffix="+" />
             </div>
-            <p className="text-xs font-bold text-slate-500 mt-1">Total Officer Selections</p>
+            <p className="text-xs font-bold text-slate-500 mt-1">{t('Total Officer Selections')}</p>
           </div>
           <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-card text-center">
             <Award className="w-8 h-8 text-brand-500 mx-auto mb-2" />
             <div className="text-3xl font-black font-heading text-navy-900">AIR 4</div>
-            <p className="text-xs font-bold text-slate-500 mt-1">Top SI Exam Rank</p>
+            <p className="text-xs font-bold text-slate-500 mt-1">{t('Top SI Exam Rank')}</p>
           </div>
           <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-card text-center">
             <Star className="w-8 h-8 text-emerald-500 mx-auto mb-2" />
             <div className="text-3xl font-black font-heading text-navy-900">Rank 12</div>
-            <p className="text-xs font-bold text-slate-500 mt-1">CET Top State Ranker</p>
+            <p className="text-xs font-bold text-slate-500 mt-1">{t('CET Top State Ranker')}</p>
           </div>
           <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-card text-center">
             <CheckCircle className="w-8 h-8 text-blue-500 mx-auto mb-2" />
             <div className="text-3xl font-black font-heading text-navy-900">98%</div>
-            <p className="text-xs font-bold text-slate-500 mt-1">Direct Book Match Rate</p>
+            <p className="text-xs font-bold text-slate-500 mt-1">{t('Direct Book Match Rate')}</p>
           </div>
         </div>
 
@@ -67,11 +71,15 @@ export default function ResultsPage() {
               <h3 className="text-lg font-bold font-heading text-navy-900 group-hover:text-brand-600 transition-colors">
                 {ranker.name}
               </h3>
-              <p className="text-xs font-bold text-brand-600 mt-0.5">{ranker.exam}</p>
-              <p className="text-[11px] text-slate-500 mb-4">{ranker.district} • Roll No: {ranker.rollNo}</p>
+              <p className="text-xs font-bold text-brand-600 mt-0.5">
+                {language === 'hi' ? RESULT_HI[ranker.id]?.exam ?? ranker.exam : ranker.exam}
+              </p>
+              <p className="text-[11px] text-slate-500 mb-4">
+                {ranker.district} • {t('Roll No:')} {ranker.rollNo}
+              </p>
 
               <p className="text-xs text-slate-600 italic bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                "{ranker.testimonial}"
+                &ldquo;{language === 'hi' ? RESULT_HI[ranker.id]?.testimonial ?? ranker.testimonial : ranker.testimonial}&rdquo;
               </p>
             </div>
           ))}

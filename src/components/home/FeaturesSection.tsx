@@ -16,8 +16,10 @@ import {
   BarChart2,
   Clock,
 } from 'lucide-react';
+import { useTranslation } from '@/i18n/useTranslation';
 
 export const FeaturesSection: React.FC = () => {
+  const { t } = useTranslation();
   const features = [
     {
       title: 'Expert Subject Teachers',
@@ -98,13 +100,13 @@ export const FeaturesSection: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <span className="text-xs font-bold text-brand-600 uppercase tracking-widest bg-brand-100/80 px-3.5 py-1.5 rounded-full">
-            WHY APNI PADHAI
+            {t('WHY APNI PADHAI')}
           </span>
           <h2 className="text-3xl sm:text-4xl font-extrabold font-heading text-navy-900 mt-3">
-            Why Over 100,000 Aspirants Choose Us
+            {t('Why Over 100,000 Aspirants Choose Us')}
           </h2>
           <p className="text-slate-600 text-sm sm:text-base mt-2">
-            Built with modern technology, student-centric pedagogy, and affordable pricing to guarantee your exam success.
+            {t('Built with modern technology, student-centric pedagogy, and affordable pricing to guarantee your exam success.')}
           </p>
         </div>
 
@@ -123,9 +125,9 @@ export const FeaturesSection: React.FC = () => {
                 {feat.icon}
               </div>
               <h3 className="text-base font-bold font-heading text-navy-900 group-hover:text-brand-600 transition-colors mb-1.5">
-                {feat.title}
+                {t(feat.title)}
               </h3>
-              <p className="text-xs text-slate-500 leading-relaxed">{feat.desc}</p>
+              <p className="text-xs text-slate-500 leading-relaxed">{t(feat.desc)}</p>
             </motion.div>
           ))}
         </div>

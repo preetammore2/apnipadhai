@@ -1,27 +1,45 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { COURSES_DATA } from '@/data/courses';
 import { Tabs } from '@/components/ui/Tabs';
 import { Badge } from '@/components/ui/Badge';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Star, Clock, Users, CheckCircle2, ArrowRight, Search } from 'lucide-react';
-import { useCart } from '@/context/CartContext';
+import { Star, Clock, CheckCircle2, ArrowRight, Search } from 'lucide-react';
+import { useAppDispatch } from '@/redux/hooks';
+import { addToCart } from '@/redux/features/cart/cartSlice';
+import { toast } from 'sonner';
+import { useTranslation } from '@/i18n/useTranslation';
+import { COURSE_HI } from '@/i18n/data';
 
-export default function CoursesPage() {
+function CoursesPageContent() {
+  const searchParams = useSearchParams();
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const { addToCart } = useCart();
+  const dispatch = useAppDispatch();
+  const { t, language } = useTranslation();
 
-  const tabOptions = [
-    { id: 'all', label: 'All Courses' },
-    { id: 'rajasthan-gk', label: 'Rajasthan GK' },
-    { id: 'cet', label: 'Rajasthan CET' },
-    { id: 'ssc-gd', label: 'SSC GD' },
-    { id: 'ras', label: 'RAS Pre + Mains' },
-    { id: 'science', label: 'Science' },
-  ];
+  const tabOptions = useMemo(
+    () => [
+      { id: 'all', label: t('All Courses') },
+      { id: 'rajasthan-gk', label: t('Rajasthan GK') },
+      { id: 'cet', label: t('Rajasthan CET') },
+      { id: 'ssc-gd', label: t('SSC GD') },
+      { id: 'ras', label: t('RAS Pre + Mains') },
+      { id: 'science', label: t('Science') },
+    ],
+    [t],
+  );
+
+  useEffect(() => {
+    const categoryParam = searchParams.get('category');
+    if (categoryParam) {
+      const knownTab = tabOptions.some((t) => t.id === categoryParam);
+      setActiveCategory(knownTab ? categoryParam : 'all');
+    }
+  }, [searchParams, tabOptions]);
 
   const filtered = COURSES_DATA.filter((course) => {
     const matchesCategory = activeCategory === 'all' || course.category === activeCategory;
@@ -38,13 +56,13 @@ export default function CoursesPage() {
         {/* Page Banner */}
         <div className="text-center max-w-3xl mx-auto mb-10">
           <span className="text-xs font-bold text-brand-600 uppercase tracking-widest bg-brand-100/80 px-3.5 py-1.5 rounded-full">
-            ONLINE LIVE & RECORDED BATCHES
+            {t('ONLINE LIVE & RECORDED BATCHES')}
           </span>
           <h1 className="text-3xl sm:text-5xl font-black font-heading text-navy-900 mt-3">
-            Explore All Courses
+            {t('Explore All Courses')}
           </h1>
           <p className="text-slate-600 text-sm sm:text-base mt-2">
-            Structured exam prep designed by Rohit Sir & top educators. Includes live classes, DPPs & Test Series.
+            {t('Structured exam prep designed by Rohit Sir & top educators. Includes live classes, DPPs & Test Series.')}
           </p>
 
           {/* Search Input */}
@@ -52,7 +70,7 @@ export default function CoursesPage() {
             <Search className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Search course title or exam (e.g. CET, SI, Science)..."
+              placeholder={t('Search course title or exam (e.g. CET, SI, Science)...')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm focus:outline-none focus:border-brand-500 shadow-sm text-navy-900"
@@ -76,7 +94,7 @@ export default function CoursesPage() {
                 <div className="relative h-48 w-full bg-slate-100 overflow-hidden">
                   <Image
                     src={course.image}
-                    alt={course.title}
+                    alt={language === 'hi' ? COURSE_HI[course.id]?.title ?? course.title : course.title}
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-500"
                   />
@@ -84,7 +102,7 @@ export default function CoursesPage() {
                   
                   <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
                     <Badge variant="primary" size="sm">
-                      {course.targetExam}
+                      {language === 'hi' ? COURSE_HI[course.id]?.targetExam ?? course.targetExam : course.targetExam}
                     </Badge>
                     <span className="px-2.5 py-1 bg-white/90 text-navy-900 text-xs font-bold rounded-full">
                       {course.language}
@@ -93,7 +111,7 @@ export default function CoursesPage() {
 
                   <div className="absolute bottom-3 left-3 right-3 text-white flex items-center justify-between">
                     <span className="text-xs font-medium flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5" /> {course.durationMonths} Months
+                      <Clock className="w-3.5 h-3.5" /> {course.durationMonths} {t('Months')}
                     </span>
                     <span className="text-xs font-bold text-amber-300 flex items-center gap-1">
                       <Star className="w-3.5 h-3.5 fill-amber-300" /> {course.rating} ({course.reviewCount})
@@ -103,10 +121,10 @@ export default function CoursesPage() {
 
                 <div className="p-6">
                   <h3 className="text-lg font-bold font-heading text-navy-900 group-hover:text-brand-600 transition-colors line-clamp-2 mb-2">
-                    {course.title}
+                    {language === 'hi' ? COURSE_HI[course.id]?.title ?? course.title : course.title}
                   </h3>
                   <p className="text-xs text-slate-500 line-clamp-2 mb-4 leading-relaxed">
-                    {course.subtitle}
+                    {language === 'hi' ? COURSE_HI[course.id]?.subtitle ?? course.subtitle : course.subtitle}
                   </p>
 
                   <div className="flex items-center gap-3 p-2.5 bg-slate-50 rounded-2xl border border-slate-100 mb-4">
@@ -115,18 +133,18 @@ export default function CoursesPage() {
                     </div>
                     <div className="text-xs">
                       <p className="font-bold text-navy-900">{course.instructor.name}</p>
-                      <p className="text-[10px] text-slate-500">{course.instructor.role}</p>
+                      <p className="text-[10px] text-slate-500">{language === 'hi' ? COURSE_HI[course.id]?.instructor?.role ?? course.instructor.role : course.instructor.role}</p>
                     </div>
                   </div>
 
                   <div className="space-y-1 text-xs text-slate-600">
                     <div className="flex items-center gap-2">
                       <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-                      <span>{course.totalLectures}+ Live HD Video Classes</span>
+                      <span>{course.totalLectures}+ {t('Live HD Video Classes')}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-                      <span>{course.totalTests}+ Mock Tests & Topic PYQs</span>
+                      <span>{course.totalTests}+ {t('Mock Tests & Topic PYQs')}</span>
                     </div>
                   </div>
                 </div>
@@ -138,15 +156,18 @@ export default function CoursesPage() {
                     <span className="text-2xl font-black font-heading text-brand-600">₹{course.price}</span>
                     <span className="text-xs text-slate-400 line-through">₹{course.originalPrice}</span>
                   </div>
-                  <span className="text-[10px] font-bold text-emerald-600">{course.discountPercentage}% OFF</span>
+                  <span className="text-[10px] font-bold text-emerald-600">{course.discountPercentage}% {t('OFF')}</span>
                 </div>
 
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => addToCart(course, 'course')}
+                    onClick={() => {
+                      dispatch(addToCart({ item: course, type: 'course' }));
+                      toast.success(`${language === 'hi' ? COURSE_HI[course.id]?.title ?? course.title : course.title} ${t('added to cart!')}`);
+                    }}
                     className="px-4 py-2.5 bg-brand-500 hover:bg-brand-600 text-white rounded-xl text-xs font-bold shadow-button-glow transition-all"
                   >
-                    Enroll Now
+                    {t('Enroll Now')}
                   </button>
                   <Link
                     href={`/courses/${course.id}`}
@@ -161,5 +182,13 @@ export default function CoursesPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CoursesPage() {
+  return (
+    <Suspense fallback={null}>
+      <CoursesPageContent />
+    </Suspense>
   );
 }

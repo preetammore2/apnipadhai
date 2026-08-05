@@ -1,26 +1,38 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useCart } from '@/context/CartContext';
-import { ShieldCheck, Truck, ArrowRight, CheckCircle2 } from 'lucide-react';
-import Image from 'next/image';
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
+import { clearCart } from '@/redux/features/cart/cartSlice';
+import { ArrowRight, CheckCircle2, Tag } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import { useTranslation } from '@/i18n/useTranslation';
+import { COURSE_HI, BOOK_HI } from '@/i18n/data';
 
 export default function CheckoutPage() {
-  const { cart, totalAmount, totalSavings, clearCart } = useCart();
+  const { t, language } = useTranslation();
+  const dispatch = useAppDispatch();
+  const cart = useAppSelector((state) => state.cart.items);
+  const couponCode = useAppSelector((state) => state.cart.couponCode);
+  const discountAmount = useAppSelector((state) => state.cart.discountAmount);
+  const totalAmount = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const totalPayable = Math.max(0, totalAmount - discountAmount);
+  const totalSavings = cart.reduce(
+    (sum, item) => sum + (item.originalPrice - item.price) * item.quantity,
+    0
+  );
   const [formData, setFormData] = useState({ name: '', phone: '', email: '', address: '', city: '', pincode: '', paymentMethod: 'upi' });
   const [isOrdered, setIsOrdered] = useState(false);
 
   const handlePlaceOrder = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.phone || !formData.address) {
-      toast.error('Please complete shipping details');
+      toast.error(t('Please complete shipping details'));
       return;
     }
     setIsOrdered(true);
-    toast.success('Order Placed Successfully! Order ID: AP-' + Math.floor(100000 + Math.random() * 900000));
-    clearCart();
+    toast.success(t('Order Placed Successfully! Order ID: AP-') + Math.floor(100000 + Math.random() * 900000));
+    dispatch(clearCart());
   };
 
   if (isOrdered) {
@@ -30,12 +42,12 @@ export default function CheckoutPage() {
           <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
             <CheckCircle2 className="w-10 h-10" />
           </div>
-          <h2 className="text-2xl font-bold font-heading text-navy-900">Order Confirmed!</h2>
+          <h2 className="text-2xl font-bold font-heading text-navy-900">{t('Order Confirmed!')}</h2>
           <p className="text-xs text-slate-500">
-            Thank you for ordering with Apni Padhai Publication. Tracking updates will be sent to your phone number <span className="font-bold text-navy-900">{formData.phone}</span>.
+            {t('Thank you for ordering with Apni Padhai Publication. Tracking updates will be sent to your phone number')} <span className="font-bold text-navy-900">{formData.phone}</span>.
           </p>
           <Link href="/dashboard" className="inline-block px-6 py-3 bg-brand-500 text-white rounded-xl text-xs font-bold shadow-button-glow">
-            Go to Student Dashboard
+            {t('Go to Student Dashboard')}
           </Link>
         </div>
       </div>
@@ -46,19 +58,19 @@ export default function CheckoutPage() {
     <div className="py-12 bg-slate-50 min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        <h1 className="text-3xl font-black font-heading text-navy-900 mb-8">Secure Checkout</h1>
+        <h1 className="text-3xl font-black font-heading text-navy-900 mb-8">{t('Secure Checkout')}</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           
           {/* Shipping Details */}
           <div className="lg:col-span-7">
             <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-card space-y-6">
-              <h3 className="text-xl font-bold font-heading text-navy-900">Shipping & Contact Details</h3>
+              <h3 className="text-xl font-bold font-heading text-navy-900">{t('Shipping & Contact Details')}</h3>
 
               <form onSubmit={handlePlaceOrder} id="checkout-form" className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-navy-900 mb-1">Full Name *</label>
+                    <label className="block text-xs font-bold text-navy-900 mb-1">{t('Full Name *')}</label>
                     <input
                       type="text"
                       required
@@ -69,7 +81,7 @@ export default function CheckoutPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-navy-900 mb-1">Phone Number *</label>
+                    <label className="block text-xs font-bold text-navy-900 mb-1">{t('Phone Number *')}</label>
                     <input
                       type="tel"
                       required
@@ -82,11 +94,11 @@ export default function CheckoutPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-navy-900 mb-1">Delivery Address *</label>
+                  <label className="block text-xs font-bold text-navy-900 mb-1">{t('Delivery Address *')}</label>
                   <textarea
                     rows={3}
                     required
-                    placeholder="House / Flat No, Street, Landmark"
+                    placeholder={t('House / Flat No, Street, Landmark')}
                     value={formData.address}
                     onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-500 text-navy-900"
@@ -95,7 +107,7 @@ export default function CheckoutPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-navy-900 mb-1">City / District *</label>
+                    <label className="block text-xs font-bold text-navy-900 mb-1">{t('City / District *')}</label>
                     <input
                       type="text"
                       required
@@ -106,7 +118,7 @@ export default function CheckoutPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-navy-900 mb-1">Pincode *</label>
+                    <label className="block text-xs font-bold text-navy-900 mb-1">{t('Pincode *')}</label>
                     <input
                       type="text"
                       required
@@ -124,12 +136,12 @@ export default function CheckoutPage() {
           {/* Summary & Payment */}
           <div className="lg:col-span-5 space-y-6">
             <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-card space-y-4">
-              <h3 className="text-lg font-bold font-heading text-navy-900">Order Summary ({cart.length})</h3>
+              <h3 className="text-lg font-bold font-heading text-navy-900">{t('Order Summary')} ({cart.length})</h3>
 
               <div className="space-y-3 max-h-60 overflow-y-auto">
                 {cart.map((item) => (
                   <div key={item.id} className="flex items-center justify-between text-xs border-b border-slate-100 pb-2">
-                    <span className="font-semibold text-navy-900 truncate max-w-[200px]">{item.title} x {item.quantity}</span>
+                    <span className="font-semibold text-navy-900 truncate max-w-[200px]">{language === 'hi' ? (item.type === 'course' ? COURSE_HI[item.id]?.title ?? item.title : BOOK_HI[item.id]?.title ?? item.title) : item.title} x {item.quantity}</span>
                     <span className="font-bold text-brand-600">₹{item.price * item.quantity}</span>
                   </div>
                 ))}
@@ -137,16 +149,24 @@ export default function CheckoutPage() {
 
               <div className="pt-2 space-y-1.5 text-xs text-slate-600">
                 <div className="flex justify-between">
-                  <span>Total Discount Savings</span>
+                  <span>{t('Total Discount Savings')}</span>
                   <span className="font-bold text-emerald-600">-₹{totalSavings}</span>
                 </div>
+                {couponCode && (
+                  <div className="flex justify-between">
+                    <span className="flex items-center gap-1">
+                      <Tag className="w-3.5 h-3.5" /> {t('Coupon Discount')} ({couponCode})
+                    </span>
+                    <span className="font-bold text-emerald-600">-₹{discountAmount}</span>
+                  </div>
+                )}
                 <div className="flex justify-between">
-                  <span>Delivery Charges</span>
-                  <span className="font-bold text-emerald-600">FREE</span>
+                  <span>{t('Delivery Charges')}</span>
+                  <span className="font-bold text-emerald-600">{t('FREE')}</span>
                 </div>
                 <div className="flex justify-between text-navy-900 font-black text-base pt-2 border-t border-slate-200">
-                  <span>Total Payable</span>
-                  <span className="text-brand-600">₹{totalAmount}</span>
+                  <span>{t('Total Payable')}</span>
+                  <span className="text-brand-600">₹{totalPayable}</span>
                 </div>
               </div>
 
@@ -155,7 +175,7 @@ export default function CheckoutPage() {
                 form="checkout-form"
                 className="w-full py-4 bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white font-bold text-sm rounded-2xl shadow-button-glow transition-all flex items-center justify-center gap-2"
               >
-                <span>Place Order Now</span>
+                <span>{t('Place Order Now')}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>

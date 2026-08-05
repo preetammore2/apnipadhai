@@ -2,12 +2,15 @@
 
 import React, { useState } from 'react';
 import { CAREERS_DATA } from '@/data/careers';
+import { CAREER_HI } from '@/i18n/data';
+import { useTranslation } from '@/i18n/useTranslation';
 import { CareerOpening } from '@/types';
-import { Briefcase, MapPin, Clock, CheckCircle2, Send, Building } from 'lucide-react';
+import { MapPin, Clock, CheckCircle2 } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
 import { toast } from 'sonner';
 
 export default function CareersPage() {
+  const { t, language } = useTranslation();
   const [selectedJob, setSelectedJob] = useState<CareerOpening | null>(null);
   const [applicantName, setApplicantName] = useState('');
   const [applicantPhone, setApplicantPhone] = useState('');
@@ -16,11 +19,11 @@ export default function CareersPage() {
   const handleApply = (e: React.FormEvent) => {
     e.preventDefault();
     if (!applicantName || !applicantPhone) {
-      toast.error('Please enter name and phone');
+      toast.error(t('Please enter name and phone'));
       return;
     }
     setIsApplied(true);
-    toast.success('Application Submitted Successfully!');
+    toast.success(t('Application Submitted Successfully!'));
     setTimeout(() => {
       setIsApplied(false);
       setSelectedJob(null);
@@ -34,13 +37,13 @@ export default function CareersPage() {
         {/* Banner */}
         <div className="text-center max-w-3xl mx-auto">
           <span className="text-xs font-bold text-brand-600 uppercase tracking-widest bg-brand-100/80 px-3.5 py-1.5 rounded-full">
-            JOIN OUR TEAM
+            {t('JOIN OUR TEAM')}
           </span>
           <h1 className="text-3xl sm:text-5xl font-black font-heading text-navy-900 mt-3">
-            Careers at Apni Padhai
+            {t('Careers at Apni Padhai')}
           </h1>
           <p className="text-slate-600 text-sm sm:text-base mt-2">
-            Build the future of EdTech with us. We are looking for passionate subject experts, content writers, video editors, and layout designers.
+            {t('Build the future of EdTech with us. We are looking for passionate subject experts, content writers, video editors, and layout designers.')}
           </p>
         </div>
 
@@ -54,15 +57,17 @@ export default function CareersPage() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <span className="px-3 py-1 bg-brand-50 text-brand-700 text-xs font-bold rounded-full">
-                    {job.department}
+                    {language === 'hi' ? CAREER_HI[job.id]?.department ?? job.department : job.department}
                   </span>
-                  <h3 className="text-xl font-bold font-heading text-navy-900 mt-2">{job.title}</h3>
+                  <h3 className="text-xl font-bold font-heading text-navy-900 mt-2">
+                    {language === 'hi' ? CAREER_HI[job.id]?.title ?? job.title : job.title}
+                  </h3>
                   <div className="flex items-center gap-4 text-xs text-slate-500 mt-1">
                     <span className="flex items-center gap-1">
                       <MapPin className="w-3.5 h-3.5 text-brand-500" /> {job.location}
                     </span>
                     <span className="flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5 text-blue-500" /> {job.type} • {job.experience} Exp
+                      <Clock className="w-3.5 h-3.5 text-blue-500" /> {t(job.type)} • {job.experience} {t('Exp')}
                     </span>
                   </div>
                 </div>
@@ -71,17 +76,19 @@ export default function CareersPage() {
                   onClick={() => setSelectedJob(job)}
                   className="px-6 py-3 bg-navy-900 hover:bg-brand-600 text-white font-bold text-xs rounded-xl transition-colors shrink-0 shadow-sm"
                 >
-                  Apply Now
+                  {t('Apply Now')}
                 </button>
               </div>
 
-              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">{job.description}</p>
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                {language === 'hi' ? CAREER_HI[job.id]?.description ?? job.description : job.description}
+              </p>
 
               <div className="pt-3 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-700">
                 {job.responsibilities.map((resp, idx) => (
                   <div key={idx} className="flex items-start gap-2">
                     <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
-                    <span>{resp}</span>
+                    <span>{language === 'hi' ? CAREER_HI[job.id]?.responsibilities?.[idx] ?? resp : resp}</span>
                   </div>
                 ))}
               </div>
@@ -96,20 +103,24 @@ export default function CareersPage() {
         isOpen={!!selectedJob}
         onClose={() => setSelectedJob(null)}
         maxWidth="md"
-        title={selectedJob ? `Apply: ${selectedJob.title}` : ''}
+        title={
+          selectedJob
+            ? `${t('Apply:')} ${language === 'hi' ? CAREER_HI[selectedJob.id]?.title ?? selectedJob.title : selectedJob.title}`
+            : ''
+        }
       >
         {isApplied ? (
           <div className="py-8 text-center space-y-3">
             <div className="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
               <CheckCircle2 className="w-8 h-8" />
             </div>
-            <h4 className="text-lg font-bold text-navy-900">Application Submitted!</h4>
-            <p className="text-xs text-slate-500">Our HR team will contact you shortly.</p>
+            <h4 className="text-lg font-bold text-navy-900">{t('Application Submitted!')}</h4>
+            <p className="text-xs text-slate-500">{t('Our HR team will contact you shortly.')}</p>
           </div>
         ) : (
           <form onSubmit={handleApply} className="space-y-4">
             <div>
-              <label className="block text-xs font-bold text-navy-900 mb-1">Full Name *</label>
+              <label className="block text-xs font-bold text-navy-900 mb-1">{t('Full Name *')}</label>
               <input
                 type="text"
                 required
@@ -120,7 +131,7 @@ export default function CareersPage() {
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-navy-900 mb-1">Phone Number *</label>
+              <label className="block text-xs font-bold text-navy-900 mb-1">{t('Phone Number *')}</label>
               <input
                 type="tel"
                 required
@@ -134,7 +145,7 @@ export default function CareersPage() {
               type="submit"
               className="w-full py-3.5 bg-brand-500 hover:bg-brand-600 text-white font-bold rounded-xl text-xs shadow-button-glow transition-all"
             >
-              Submit Application
+              {t('Submit Application')}
             </button>
           </form>
         )}

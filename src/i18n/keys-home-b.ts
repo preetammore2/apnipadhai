@@ -1,0 +1,71 @@
+export const KEYS_HOME_B: Record<string, string> = {
+  'All Live Batches': 'सभी लाइव बैच',
+  'Rajasthan GK': 'राजस्थान जीके',
+  'Rajasthan CET': 'राजस्थान CET',
+  'SSC GD': 'SSC GD',
+  'RAS Pre + Mains': 'RAS प्री + मेंस',
+  'Science Brahmastra': 'विज्ञान ब्रह्मास्त्र',
+  'POPULAR BATCHES 2026': 'लोकप्रिय बैच 2026',
+  'Explore Live & Target Online Courses': 'लाइव एवं टारगेट ऑनलाइन कोर्स देखें',
+  'Structured batch curriculum, live interaction, daily DPPs, and comprehensive test series.':
+    'स्ट्रक्चर्ड बैच पाठ्यक्रम, लाइव इंटरैक्शन, दैनिक DPP और व्यापक टेस्ट सीरीज़।',
+  'View All Batches': 'सभी बैच देखें',
+  'Loading Live Batches via RTK Query...': 'RTK क्वेरी के माध्यम से लाइव बैच लोड हो रहे हैं...',
+  'Failed to load live batches': 'लाइव बैच लोड करने में विफल',
+  'Something went wrong while fetching the latest batches. Please try again.':
+    'नवीनतम बैच लाने में कुछ गड़बड़ हुई। कृपया पुनः प्रयास करें।',
+  'Retry Now': 'अभी पुनः प्रयास करें',
+  'No batches found in this category': 'इस श्रेणी में कोई बैच नहीं मिला',
+  'We are adding new batches regularly. Explore all batches to see everything we offer.':
+    'हम नियमित रूप से नए बैच जोड़ रहे हैं। सभी बैच देखने के लिए सभी बैच विकल्प खोलें।',
+  'BESTSELLER': 'बेस्टसेलर',
+  'Removed from wishlist': 'विशलिस्ट से हटाया गया',
+  'Added to wishlist!': 'विशलिस्ट में जोड़ा गया!',
+  'Save to wishlist': 'विशलिस्ट में सेव करें',
+  'Months Access': 'महीने एक्सेस',
+  'Live HD Video Classes': 'लाइव HD वीडियो क्लासेज',
+  'Mock Tests & Topic PYQs': 'मॉक टेस्ट और टॉपिक PYQs',
+  'OFF TODAY': 'आज ऑफ',
+  'Enroll Now': 'अभी एनरोल करें',
+  'View Course Details': 'कोर्स विवरण देखें',
+  'added to cart!': 'कार्ट में जोड़ा गया!',
+  'APNI PADHAI PUBLICATION': 'अपनी पढ़ाई प्रकाशन',
+  'Bestselling Brahmastra Book Series': 'बेस्टसेलिंग ब्रह्मास्त्र बुक सीरीज़',
+  'Authentic study guides, question banks, and model papers trusted by over 2.5 Lakh+ students.':
+    '2.5 लाख+ छात्रों द्वारा विश्वसनीय प्रामाणिक स्टडी गाइड, प्रश्न बैंक और मॉडल पेपर।',
+  'Browse All Books': 'सभी किताबें देखें',
+  'Loading Publication Store via RTK Query...': 'RTK क्वेरी के माध्यम से प्रकाशन स्टोर लोड हो रहा है...',
+  'Failed to load books': 'किताबें लोड करने में विफल',
+  'Something went wrong while fetching the Brahmastra book series. Please try again.':
+    'ब्रह्मास्त्र बुक सीरीज़ लाने में कुछ गड़बड़ हुई। कृपया पुनः प्रयास करें।',
+  'No books available right now': 'अभी कोई किताब उपलब्ध नहीं है',
+  'New editions of the Brahmastra series are being printed. Check back soon.':
+    'ब्रह्मास्त्र सीरीज़ के नए संस्करण प्रिंट हो रहे हैं। जल्द ही पुनः देखें।',
+  'OFF': 'ऑफ',
+  'Preview Sample PDF': 'सैंपल PDF देखें',
+  'Add to Cart': 'कार्ट में डालें',
+  'Pages': 'पेज',
+  'Doorstep Delivery': 'घर तक डिलीवरी',
+  'Buy Now': 'अभी खरीदें',
+  'STUDENTS': 'छात्र',
+  'Join The Apni Padhai Family Today!': 'आज ही अपनी पढ़ाई परिवार से जुड़ें!',
+  'Real success stories from aspirants who cracked Sub Inspector, CET, RAS, and LDC exams.':
+    'उन उम्मीदवारों की वास्तविक सफलता की कहानियां जिन्होंने सब इंस्पेक्टर, CET, RAS और LDC परीक्षाएं पास कीं।',
+  'HALL OF FAME 2022-2026': 'हॉल ऑफ फेम 2022-2026',
+  'Apni Padhai Selection Champions': 'अपनी पढ़ाई चयन चैंपियंस',
+  'Celebrating top rankers who transformed their dedication into official government officer roles.':
+    'उन शीर्ष रैंकर्स का जश्न जिन्होंने अपने समर्पण को आधिकारिक सरकारी अधिकारी पदों में बदला।',
+  'View Full Ranker Gallery': 'पूरी रैंकर गैलरी देखें',
+  'Roll No:': 'रोल नं.:',
+  'FREE STUDY RESOURCES': 'फ्री स्टडी रिसोर्स',
+  'Previous Year Question Papers (PYQs)': 'पिछले वर्ष के प्रश्न पत्र (PYQs)',
+  'Free solved question papers for RAS, SI, CET, SSC GD & LDC with detailed explanations.':
+    'RAS, SI, CET, SSC GD और LDC के लिए विस्तृत व्याख्या के साथ फ्री हल किए गए प्रश्न पत्र।',
+  'Search All PYQs Hub': 'सभी PYQs हब खोजें',
+  'Includes Detailed Solution Key': 'विस्तृत सॉल्यूशन की शामिल',
+  'Questions': 'प्रश्न',
+  'Downloading official solved PDF for': 'आधिकारिक हल किया गया PDF डाउनलोड हो रहा है',
+  'Download PDF': 'PDF डाउनलोड करें',
+};
+
+export default KEYS_HOME_B;

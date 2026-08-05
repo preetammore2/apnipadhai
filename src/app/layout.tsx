@@ -2,9 +2,11 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
-import { CartProvider } from '@/context/CartContext';
 import { ReduxProvider } from '@/providers/ReduxProvider';
 import { CartDrawer } from '@/components/layout/CartDrawer';
+import { CartPersistence } from '@/components/layout/CartPersistence';
+import { WishlistPersistence } from '@/components/layout/WishlistPersistence';
+import { LanguagePersistence } from '@/components/layout/LanguagePersistence';
 import { Toaster } from 'sonner';
 
 export const metadata: Metadata = {
@@ -31,15 +33,16 @@ export default function RootLayout({
     <html lang="en" className="scroll-smooth">
       <body className="antialiased bg-slate-50 text-navy-900 selection:bg-yellow-200 selection:text-amber-900">
         <ReduxProvider>
-          <CartProvider>
-            <div className="flex flex-col min-h-screen">
-              <Navbar />
-              <main className="flex-grow">{children}</main>
-              <Footer />
-              <CartDrawer />
-              <Toaster position="top-right" richColors />
-            </div>
-          </CartProvider>
+          <CartPersistence />
+          <WishlistPersistence />
+          <LanguagePersistence />
+          <div className="flex flex-col min-h-screen">
+            <Navbar />
+            <main className="flex-grow pb-16 sm:pb-0">{children}</main>
+            <Footer />
+            <CartDrawer />
+            <Toaster position="top-right" richColors />
+          </div>
         </ReduxProvider>
       </body>
     </html>

@@ -79,6 +79,9 @@ export const cartSlice = createSlice({
         state.discountAmount = 100;
       }
     },
+    hydrateCart: (state, action: PayloadAction<CartItem[]>) => {
+      state.items = action.payload;
+    },
   },
 });
 
@@ -89,6 +92,7 @@ export const {
   clearCart,
   setCartOpen,
   applyCoupon,
+  hydrateCart,
 } = cartSlice.actions;
 
 export default cartSlice.reducer;

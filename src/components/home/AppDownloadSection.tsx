@@ -1,11 +1,13 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { Download, Star, Smartphone, CheckCircle, QrCode } from 'lucide-react';
+import { Smartphone, CheckCircle, QrCode } from 'lucide-react';
+import { useTranslation } from '@/i18n/useTranslation';
 
 export const AppDownloadSection: React.FC = () => {
+  const { t } = useTranslation();
   return (
     <section className="py-20 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 text-navy-950 relative overflow-hidden shadow-2xl">
       {/* Mesh Overlay */}
@@ -17,34 +19,34 @@ export const AppDownloadSection: React.FC = () => {
           {/* Left Text & Badges */}
           <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
             <span className="text-xs font-black text-navy-950 uppercase tracking-widest bg-white/40 px-3.5 py-1.5 rounded-full border border-navy-950/20">
-              LEARN ON THE GO
+              {t('LEARN ON THE GO')}
             </span>
 
             <h2 className="text-3xl sm:text-5xl font-black font-heading leading-tight text-navy-950">
-              Download The Apni Padhai Mobile App
+              {t('Download The Apni Padhai Mobile App')}
             </h2>
 
             <p className="text-navy-900 text-sm sm:text-base font-medium leading-relaxed max-w-xl mx-auto lg:mx-0">
-              Access offline video downloads, daily live test series, e-books PDF reader, and instant doubt chat support right on your smartphone.
+              {t('Access offline video downloads, daily live test series, e-books PDF reader, and instant doubt chat support right on your smartphone.')}
             </p>
 
             {/* Features Checklist */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm font-bold text-navy-950 max-w-lg mx-auto lg:mx-0 pt-2">
               <div className="flex items-center gap-2">
-                <CheckCircle className="w-4.5 h-4.5 text-navy-950 shrink-0" />
-                <span>Offline Video Download Mode</span>
+                <CheckCircle className="w-5 h-5 text-navy-950 shrink-0" />
+                <span>{t('Offline Video Download Mode')}</span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle className="w-4.5 h-4.5 text-navy-950 shrink-0" />
-                <span>Live Test Series with Rank</span>
+                <CheckCircle className="w-5 h-5 text-navy-950 shrink-0" />
+                <span>{t('Live Test Series with Rank')}</span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle className="w-4.5 h-4.5 text-navy-950 shrink-0" />
-                <span>Free Daily Current Affairs PDF</span>
+                <CheckCircle className="w-5 h-5 text-navy-950 shrink-0" />
+                <span>{t('Free Daily Current Affairs PDF')}</span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle className="w-4.5 h-4.5 text-navy-950 shrink-0" />
-                <span>24/7 Teacher Doubt Chat</span>
+                <CheckCircle className="w-5 h-5 text-navy-950 shrink-0" />
+                <span>{t('24/7 Teacher Doubt Chat')}</span>
               </div>
             </div>
 
@@ -58,8 +60,8 @@ export const AppDownloadSection: React.FC = () => {
               >
                 <Smartphone className="w-6 h-6 text-yellow-400" />
                 <div className="text-left">
-                  <span className="block text-[10px] text-slate-300 uppercase font-medium">Install Now From</span>
-                  <span className="text-sm font-black">Google Play Store</span>
+                  <span className="block text-[10px] text-slate-300 uppercase font-medium">{t('Install Now From')}</span>
+                  <span className="text-sm font-black">{t('Google Play Store')}</span>
                 </div>
               </a>
 
@@ -68,8 +70,8 @@ export const AppDownloadSection: React.FC = () => {
                   <QrCode className="w-6 h-6" />
                 </div>
                 <div className="text-left text-xs">
-                  <p className="font-extrabold text-navy-950">Scan QR Code</p>
-                  <p className="text-[10px] font-bold text-navy-900">To Install Directly</p>
+                  <p className="font-extrabold text-navy-950">{t('Scan QR Code')}</p>
+                  <p className="text-[10px] font-bold text-navy-900">{t('To Install Directly')}</p>
                 </div>
               </div>
             </div>
@@ -85,7 +87,7 @@ export const AppDownloadSection: React.FC = () => {
             >
               <Image
                 src="/images/Frame 1165043252 (1).png"
-                alt="Apni Padhai Mobile App Screens"
+                alt={t('Apni Padhai Mobile App Screens')}
                 fill
                 className="object-cover"
               />

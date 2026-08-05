@@ -2,10 +2,12 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Youtube, Send, Instagram, ArrowRight, Users, Sparkles } from 'lucide-react';
+import { Youtube, Send, Instagram, ArrowRight, Users } from 'lucide-react';
 import Link from 'next/link';
+import { useTranslation } from '@/i18n/useTranslation';
 
 export const CommunitySection: React.FC = () => {
+  const { t } = useTranslation();
   const communityCards = [
     {
       id: 'youtube',
@@ -49,15 +51,15 @@ export const CommunitySection: React.FC = () => {
         {/* Section Header */}
         <div className="max-w-3xl mx-auto space-y-3">
           <span className="text-xs font-black text-amber-800 uppercase tracking-widest bg-yellow-100 px-3.5 py-1.5 rounded-full border border-yellow-300">
-            OUR LEARNING COMMUNITY
+            {t('OUR LEARNING COMMUNITY')}
           </span>
 
           <h2 className="text-3xl sm:text-5xl font-black font-heading text-navy-900 tracking-tight">
-            Join The Apni Padhai Family, Today!
+            {t('Join The Apni Padhai Family, Today!')}
           </h2>
 
           <p className="text-slate-600 text-sm sm:text-base max-w-2xl mx-auto font-medium">
-            Explore our YouTube channels, Telegram community, and social handles to get access to free live lectures, daily PYQ PDFs, and exam updates.
+            {t('Explore our YouTube channels, Telegram community, and social handles to get access to free live lectures, daily PYQ PDFs, and exam updates.')}
           </p>
         </div>
 
@@ -74,7 +76,7 @@ export const CommunitySection: React.FC = () => {
             >
               <div className="space-y-4 w-full">
                 <span className="inline-block px-3 py-1 bg-white text-navy-900 text-[10px] font-black uppercase rounded-full shadow-sm border border-slate-200/80">
-                  {card.badge}
+                  {t(card.badge)}
                 </span>
 
                 {/* Channel Icon Frame */}
@@ -85,10 +87,10 @@ export const CommunitySection: React.FC = () => {
                 {/* Channel Name & Metrics */}
                 <div className="space-y-1">
                   <h3 className="text-xl font-bold font-heading text-navy-900 group-hover:text-amber-700 transition-colors">
-                    {card.name}
+                    {t(card.name)}
                   </h3>
                   <p className="text-base font-extrabold font-heading text-navy-950">
-                    {card.count}
+                    {t(card.count)}
                   </p>
                 </div>
               </div>
@@ -96,7 +98,7 @@ export const CommunitySection: React.FC = () => {
               {/* Action Link */}
               <div className="pt-6 mt-4 w-full border-t border-slate-200/60">
                 <span className="inline-flex items-center gap-1.5 text-xs font-black text-navy-900 group-hover:text-amber-800 transition-colors">
-                  <span>{card.btnText}</span>
+                  <span>{t(card.btnText)}</span>
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </span>
               </div>
@@ -111,7 +113,7 @@ export const CommunitySection: React.FC = () => {
             className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 hover:from-yellow-400 hover:to-amber-500 text-navy-950 font-black text-base rounded-2xl shadow-button-glow transition-all transform hover:-translate-y-1"
           >
             <Users className="w-5 h-5" />
-            <span>Get Started with Apni Padhai</span>
+            <span>{t('Get Started with Apni Padhai')}</span>
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>

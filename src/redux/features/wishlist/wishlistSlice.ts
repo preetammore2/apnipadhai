@@ -1,7 +1,12 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
+export interface WishlistItem {
+  id: string;
+  type: 'course' | 'book';
+}
+
 interface WishlistState {
-  items: string[];
+  items: WishlistItem[];
 }
 
 const initialState: WishlistState = {
@@ -12,19 +17,25 @@ export const wishlistSlice = createSlice({
   name: 'wishlist',
   initialState,
   reducers: {
-    toggleWishlist: (state, action: PayloadAction<string>) => {
-      const id = action.payload;
-      if (state.items.includes(id)) {
-        state.items = state.items.filter((item) => item !== id);
+    toggleWishlist: (state, action: PayloadAction<WishlistItem>) => {
+      const target = action.payload;
+      const existing = state.items.find(
+        (item) => item.id === target.id && item.type === target.type
+      );
+      if (existing) {
+        state.items = state.items.filter((item) => item !== existing);
       } else {
-        state.items.push(id);
+        state.items.push(target);
       }
     },
     clearWishlist: (state) => {
       state.items = [];
     },
+    hydrateWishlist: (state, action: PayloadAction<WishlistItem[]>) => {
+      state.items = action.payload;
+    },
   },
 });
 
-export const { toggleWishlist, clearWishlist } = wishlistSlice.actions;
+export const { toggleWishlist, clearWishlist, hydrateWishlist } = wishlistSlice.actions;
 export default wishlistSlice.reducer;

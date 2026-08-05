@@ -15,15 +15,18 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from '@/i18n/useTranslation';
 
 export const Footer: React.FC = () => {
+  const { t } = useTranslation();
+
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success('Subscribed successfully! You will receive daily exam updates & study material.');
+    toast.success(t('Subscribed successfully! You will receive daily exam updates & study material.'));
   };
 
   return (
@@ -48,12 +51,12 @@ export const Footer: React.FC = () => {
                 <span className="font-heading font-extrabold text-2xl text-white tracking-tight">
                   Apni <span className="text-yellow-400">Padhai</span>
                 </span>
-                <p className="text-xs text-yellow-200 font-medium">India's Smart Learning Platform</p>
+                <p className="text-xs text-yellow-200 font-medium">{t("India's Smart Learning Platform")}</p>
               </div>
             </div>
 
             <p className="text-slate-300 text-xs sm:text-sm leading-relaxed max-w-sm">
-              Empowering students across India with affordable high-quality live courses, bestselling Brahmastra books, updated previous year question papers, and expert mentorship.
+              {t('Empowering students across India with affordable high-quality live courses, bestselling Brahmastra books, updated previous year question papers, and expert mentorship.')}
             </p>
 
             {/* Address & Direct Contact */}
@@ -79,31 +82,31 @@ export const Footer: React.FC = () => {
 
           {/* Column 2: Quick Links */}
           <div>
-            <h4 className="text-sm font-bold font-heading uppercase tracking-wider text-yellow-400 mb-4">Explore Platform</h4>
+            <h4 className="text-sm font-bold font-heading uppercase tracking-wider text-yellow-400 mb-4">{t('Explore Platform')}</h4>
             <ul className="space-y-2.5 text-xs text-slate-300">
               <li>
                 <Link href="/courses" className="hover:text-yellow-400 transition-colors flex items-center gap-2">
-                  <span>›</span> All Online Courses
+                  <span>›</span> {t('All Online Courses')}
                 </Link>
               </li>
               <li>
                 <Link href="/books" className="hover:text-yellow-400 transition-colors flex items-center gap-2">
-                  <span>›</span> Brahmastra Books Store
+                  <span>›</span> {t('Brahmastra Books Store')}
                 </Link>
               </li>
               <li>
                 <Link href="/pyqs" className="hover:text-yellow-400 transition-colors flex items-center gap-2">
-                  <span>›</span> Previous Years Papers (PYQs)
+                  <span>›</span> {t('Previous Years Papers (PYQs)')}
                 </Link>
               </li>
               <li>
                 <Link href="/results" className="hover:text-yellow-400 transition-colors flex items-center gap-2">
-                  <span>›</span> Selections & Top Rankers
+                  <span>›</span> {t('Selections & Top Rankers')}
                 </Link>
               </li>
               <li>
                 <Link href="/download-app" className="hover:text-yellow-400 transition-colors flex items-center gap-2">
-                  <span>›</span> Download Android App
+                  <span>›</span> {t('Download Android App')}
                 </Link>
               </li>
             </ul>
@@ -111,26 +114,26 @@ export const Footer: React.FC = () => {
 
           {/* Column 3: Legal & Student Help */}
           <div>
-            <h4 className="text-sm font-bold font-heading uppercase tracking-wider text-yellow-400 mb-4">Policies & Support</h4>
+            <h4 className="text-sm font-bold font-heading uppercase tracking-wider text-yellow-400 mb-4">{t('Policies & Support')}</h4>
             <ul className="space-y-2.5 text-xs text-slate-300">
               <li>
                 <Link href="/contact" className="hover:text-yellow-400 transition-colors flex items-center gap-2">
-                  <span>›</span> Contact & Help Center
+                  <span>›</span> {t('Contact & Help Center')}
                 </Link>
               </li>
               <li>
                 <Link href="/privacy-policy" className="hover:text-yellow-400 transition-colors flex items-center gap-2">
-                  <span>›</span> Privacy Policy
+                  <span>›</span> {t('Privacy Policy')}
                 </Link>
               </li>
               <li>
                 <Link href="/terms-conditions" className="hover:text-yellow-400 transition-colors flex items-center gap-2">
-                  <span>›</span> Terms & Conditions
+                  <span>›</span> {t('Terms & Conditions')}
                 </Link>
               </li>
               <li>
                 <Link href="/refund-policy" className="hover:text-yellow-400 transition-colors flex items-center gap-2">
-                  <span>›</span> Return & Refund Policy
+                  <span>›</span> {t('Return & Refund Policy')}
                 </Link>
               </li>
             </ul>
@@ -138,23 +141,23 @@ export const Footer: React.FC = () => {
 
           {/* Column 4: Newsletter & Social */}
           <div>
-            <h4 className="text-sm font-bold font-heading uppercase tracking-wider text-yellow-400 mb-4">Connect With Us</h4>
+            <h4 className="text-sm font-bold font-heading uppercase tracking-wider text-yellow-400 mb-4">{t('Connect With Us')}</h4>
             <p className="text-xs text-slate-300 mb-3">
-              Subscribe to get free test series PDFs, syllabus notes & exam alerts.
+              {t('Subscribe to get free test series PDFs, syllabus notes & exam alerts.')}
             </p>
 
             <form onSubmit={handleSubscribe} className="space-y-2 mb-5">
               <input
                 type="email"
                 required
-                placeholder="Enter your email address"
+                placeholder={t('Enter your email address')}
                 className="w-full px-3.5 py-2.5 bg-white/10 border border-white/20 rounded-xl text-xs text-white placeholder-slate-400 focus:outline-none focus:border-yellow-400 transition-colors"
               />
               <button
                 type="submit"
                 className="w-full py-2.5 bg-yellow-500 hover:bg-yellow-600 text-navy-900 font-extrabold text-xs rounded-xl shadow-button-glow transition-all"
               >
-                Subscribe Free
+                {t('Subscribe Free')}
               </button>
             </form>
 
@@ -202,17 +205,17 @@ export const Footer: React.FC = () => {
 
         {/* Bottom Copyright Bar */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
-          <p>© {new Date().getFullYear()} Apni Padhai Publication. All Rights Reserved.</p>
+          <p>© {new Date().getFullYear()} Apni Padhai Publication. {t('All Rights Reserved.')}</p>
 
           <div className="flex items-center gap-6">
             <span className="flex items-center gap-1.5 text-emerald-400">
-              <ShieldCheck className="w-4 h-4" /> 100% Verified EdTech Platform
+              <ShieldCheck className="w-4 h-4" /> {t('100% Verified EdTech Platform')}
             </span>
             <button
               onClick={scrollToTop}
               className="flex items-center gap-1 text-white hover:text-yellow-400 font-bold transition-colors"
             >
-              <span>Back to top</span>
+              <span>{t('Back to top')}</span>
               <ArrowUp className="w-4 h-4" />
             </button>
           </div>
