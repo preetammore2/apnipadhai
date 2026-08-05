@@ -29,7 +29,7 @@ export default function AboutPage() {
         <div className="bg-white p-8 sm:p-12 rounded-3xl border border-slate-200 shadow-card grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
           <div className="lg:col-span-5">
             <div className="relative h-[420px] w-full rounded-2xl overflow-hidden border-2 border-brand-200 shadow-xl">
-              <Image src="/images/rohit sir QHD Photo.png" alt="Rohit Sir Founder" fill className="object-cover" />
+              <Image src="/images/rohit sir QHD Photo.png" alt="Rohit Choudhary Founder" fill className="object-cover" />
             </div>
           </div>
 
@@ -37,7 +37,7 @@ export default function AboutPage() {
             <span className="px-3 py-1 bg-brand-50 text-brand-700 text-xs font-bold rounded-full">
               {t('FOUNDER & LEAD EDUCATOR')}
             </span>
-            <h2 className="text-3xl font-extrabold font-heading text-navy-900">Rohit Sir (Gurjar)</h2>
+            <h2 className="text-3xl font-extrabold font-heading text-navy-900">Rohit Choudhary</h2>
             <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">
               {t('10+ Years Teaching Experience • Author of Brahmastra Book Series')}
             </p>

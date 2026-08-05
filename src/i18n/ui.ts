@@ -283,6 +283,8 @@ export const HI_UI: Record<string, string> = {
   'Author of Bestselling Brahmastra Book Series': 'बेस्टसेलिंग ब्रह्मास्त्र बुक सीरीज़ के लेखक',
   '10+ Years Experience': '10+ वर्षों का अनुभव',
   'Selections Guided': 'छात्र चयन में मार्गदर्शन',
+  'Years Experience': 'वर्षों का अनुभव',
+  'Lecture Views': 'लेक्चर व्यूज़',
   "FOUNDER'S VISION": "संस्थापक का विज़न",
   '"Education Should Not Be a Luxury. Every Aspirant Deserves Premium Guidance."':
     '"शिक्षा कोई विलासिता नहीं होनी चाहिए। हर उम्मीदवार प्रीमियम मार्गदर्शन का हकदार है।"',

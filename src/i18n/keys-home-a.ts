@@ -66,7 +66,7 @@ export const KEYS_HOME_A: Record<string, string> = {
     'परीक्षा तिथियों तक चलने वाली वैधता के साथ असीमित लेक्चर रीप्ले एक्सेस।',
 
   // ---- Founder ----
-  'Rohit Sir Founder Apni Padhai': 'रोहित सर, अपनी पढ़ाई के संस्थापक',
+  'Rohit Choudhary Founder Apni Padhai': 'रोहित चौधरी, अपनी पढ़ाई के संस्थापक',
   'FOUNDER & LEAD EDUCATOR': 'संस्थापक एवं मुख्य शिक्षक',
   'Author of Bestselling Brahmastra Book Series': 'बेस्टसेलिंग ब्रह्मास्त्र बुक सीरीज़ के लेखक',
   '10+ Years Experience': '10+ वर्षों का अनुभव',

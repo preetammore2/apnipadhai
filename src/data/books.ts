@@ -141,7 +141,7 @@ export const BOOKS_DATA: Book[] = [
     discountPercentage: 20,
     rating: 4.95,
     reviewsCount: 1120,
-    author: 'Rohit Sir (Gurjar)',
+    author: 'Rohit Choudhary',
     pages: 350,
     edition: '2026 Edition',
     inStock: true,

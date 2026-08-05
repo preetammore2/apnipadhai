@@ -3,7 +3,7 @@ import { Faculty } from '@/types';
 export const FACULTY_DATA: Faculty[] = [
   {
     id: 'rohit-sir-founder',
-    name: 'Rohit Sir (Gurjar)',
+    name: 'Rohit Choudhary',
     role: 'Founder & Lead EdTech Mentor',
     subject: 'Rajasthan GK, History & Art & Culture',
     experienceYears: 10,

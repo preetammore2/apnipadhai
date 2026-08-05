@@ -20,7 +20,7 @@ export const COURSES_DATA: Course[] = [
     language: 'Hindi',
     level: 'Foundation',
     instructor: {
-      name: 'Rohit Sir (Gurjar)',
+      name: 'Rohit Choudhary',
       role: 'Founder & Lead GK Specialist',
       image: '/images/rohit sir QHD Photo.png',
       experience: '10+ Years Teaching Experience',
