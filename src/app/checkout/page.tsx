@@ -1,17 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useAppDispatch, useAppSelector } from '@/redux/hooks';
-import { clearCart } from '@/redux/features/cart/cartSlice';
-import { ArrowRight, CheckCircle2, Tag } from 'lucide-react';
-import Link from 'next/link';
+import { useAppSelector } from '@/redux/hooks';
+import { ArrowRight, Loader2, Tag } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from '@/i18n/useTranslation';
 import { COURSE_HI, BOOK_HI } from '@/i18n/data';
 
 export default function CheckoutPage() {
   const { t, language } = useTranslation();
-  const dispatch = useAppDispatch();
   const cart = useAppSelector((state) => state.cart.items);
   const couponCode = useAppSelector((state) => state.cart.couponCode);
   const discountAmount = useAppSelector((state) => state.cart.discountAmount);
@@ -21,38 +18,53 @@ export default function CheckoutPage() {
     (sum, item) => sum + (item.originalPrice - item.price) * item.quantity,
     0
   );
-  const [formData, setFormData] = useState({ name: '', phone: '', email: '', address: '', city: '', pincode: '', paymentMethod: 'upi' });
-  const [isOrdered, setIsOrdered] = useState(false);
+  const [formData, setFormData] = useState({ name: '', phone: '', email: '', address: '', city: '', pincode: '' });
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  const handlePlaceOrder = (e: React.FormEvent) => {
+  const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.phone || !formData.address) {
       toast.error(t('Please complete shipping details'));
       return;
     }
-    setIsOrdered(true);
-    toast.success(t('Order Placed Successfully! Order ID: AP-') + Math.floor(100000 + Math.random() * 900000));
-    dispatch(clearCart());
-  };
+    if (!formData.phone.trim().match(/^[0-9]{10}$/)) {
+      toast.error(t('Please enter a valid 10-digit phone number'));
+      return;
+    }
+    if (cart.length === 0) {
+      toast.error(t('Your cart is empty'));
+      return;
+    }
 
-  if (isOrdered) {
-    return (
-      <div className="py-20 bg-slate-50 min-h-screen flex items-center justify-center">
-        <div className="bg-white p-10 rounded-3xl border border-slate-200 shadow-card text-center max-w-md mx-auto space-y-4">
-          <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
-            <CheckCircle2 className="w-10 h-10" />
-          </div>
-          <h2 className="text-2xl font-bold font-heading text-navy-900">{t('Order Confirmed!')}</h2>
-          <p className="text-xs text-slate-500">
-            {t('Thank you for ordering with Apni Padhai Publication. Tracking updates will be sent to your phone number')} <span className="font-bold text-navy-900">{formData.phone}</span>.
-          </p>
-          <Link href="/dashboard" className="inline-block px-6 py-3 bg-brand-500 text-white rounded-xl text-xs font-bold shadow-button-glow">
-            {t('Go to Student Dashboard')}
-          </Link>
-        </div>
-      </div>
-    );
-  }
+    setIsProcessing(true);
+    try {
+      const res = await fetch('/api/payments/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: cart.map((item) => ({ id: item.id, type: item.type, quantity: item.quantity })),
+          couponCode,
+          customer: {
+            name: formData.name,
+            phone: formData.phone,
+            email: formData.email,
+            address: formData.address,
+            city: formData.city,
+            pincode: formData.pincode,
+          },
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.redirectUrl) {
+        throw new Error(data.message || 'Payment initiation failed');
+      }
+      window.location.href = data.redirectUrl;
+    } catch (error) {
+      console.error('[checkout] payment initiation error', error);
+      toast.error(t('Could not start payment. Please try again.'));
+      setIsProcessing(false);
+    }
+  };
 
   return (
     <div className="py-12 bg-slate-50 min-h-screen">
@@ -91,6 +103,17 @@ export default function CheckoutPage() {
                       className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-500 text-navy-900"
                     />
                   </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-navy-900 mb-1">{t('Email (optional)')}</label>
+                  <input
+                    type="email"
+                    placeholder="rahul@example.com"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-500 text-navy-900"
+                  />
                 </div>
 
                 <div>
@@ -173,10 +196,20 @@ export default function CheckoutPage() {
               <button
                 type="submit"
                 form="checkout-form"
-                className="w-full py-4 bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white font-bold text-sm rounded-2xl shadow-button-glow transition-all flex items-center justify-center gap-2"
+                disabled={isProcessing}
+                className="w-full py-4 bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold text-sm rounded-2xl shadow-button-glow transition-all flex items-center justify-center gap-2"
               >
-                <span>{t('Place Order Now')}</span>
-                <ArrowRight className="w-4 h-4" />
+                {isProcessing ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>{t('Redirecting to Payment...')}</span>
+                  </>
+                ) : (
+                  <>
+                    <span>{t('Place Order Now')}</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
               </button>
             </div>
           </div>

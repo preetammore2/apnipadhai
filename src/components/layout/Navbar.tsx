@@ -221,11 +221,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center justify-between gap-2 sm:gap-3">
             
             {/* Brand Logo */}
-            <Link href="/" className="flex items-center gap-2 sm:gap-2.5 shrink-0 group">
-              <div className="relative w-9 h-9 sm:w-11 sm:h-11 rounded-2xl overflow-hidden shadow-md group-hover:scale-105 transition-transform p-0.5 bg-white">
+            <Link href="/" className="flex items-center gap-2 sm:gap-2.5 min-w-0 group">
+              <div className="relative w-9 h-9 sm:w-11 sm:h-11 rounded-2xl overflow-hidden shadow-md group-hover:scale-105 transition-transform p-0.5 bg-white shrink-0">
                 <Image
                   src="/logo.jpg"
                   alt="Apni Padhai Logo"
@@ -233,11 +233,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
                   className="object-cover rounded-xl"
                 />
               </div>
-              <div className="flex flex-col">
-                <span className="font-heading font-extrabold text-lg sm:text-2xl tracking-tight text-navy-900 leading-none">
+              <div className="flex flex-col min-w-0">
+                <span className="font-heading font-extrabold text-lg sm:text-2xl tracking-tight text-navy-900 leading-none truncate">
                   Apni <span className="text-gradient">Padhai</span>
                 </span>
-                <span className="text-[9px] sm:text-[10px] font-extrabold text-amber-600 tracking-widest uppercase mt-0.5">
+                <span className="text-[8px] sm:text-[10px] font-extrabold text-amber-600 tracking-wider sm:tracking-widest uppercase mt-0.5 truncate">
                   {t('Publication & EdTech')}
                 </span>
               </div>
@@ -330,7 +330,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
             </nav>
 
             {/* Right Action Icons & Buttons */}
-            <div className="flex items-center gap-1.5 sm:gap-3">
+            <div className="flex items-center gap-1 sm:gap-3">
               <div className="hidden sm:block">
                 <LanguageSwitcher />
               </div>
@@ -561,16 +561,16 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
                 <Link
                   href="/"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center gap-2 shrink-0 group"
+                  className="flex items-center gap-2 min-w-0 group"
                 >
-                  <div className="relative w-9 h-9 rounded-2xl overflow-hidden p-0.5 bg-white shadow-md">
+                  <div className="relative w-9 h-9 rounded-2xl overflow-hidden p-0.5 bg-white shadow-md shrink-0">
                     <Image src="/logo.jpg" alt="Apni Padhai Logo" fill className="object-cover rounded-xl" />
                   </div>
-                  <div className="flex flex-col">
-                    <span className="font-heading font-extrabold text-lg tracking-tight text-navy-900 leading-none">
+                  <div className="flex flex-col min-w-0">
+                    <span className="font-heading font-extrabold text-lg tracking-tight text-navy-900 leading-none truncate">
                       Apni <span className="text-gradient">Padhai</span>
                     </span>
-                    <span className="text-[9px] font-extrabold text-amber-600 tracking-widest uppercase mt-0.5">
+                    <span className="text-[8px] font-extrabold text-amber-600 tracking-wider uppercase mt-0.5 truncate">
                       {t('Publication & EdTech')}
                     </span>
                   </div>
@@ -658,10 +658,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
       </AnimatePresence>
 
       {/* Mobile Floating Quick Action Bottom Bar (Small Devices Only) */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-amber-200 shadow-2xl py-2 px-4 flex items-center justify-around sm:hidden">
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-amber-200 shadow-2xl pt-2 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] flex items-center justify-around sm:hidden">
         <Link
           href="/"
-          className={`flex flex-col items-center gap-0.5 text-[10px] font-bold ${
+          className={`flex flex-col items-center gap-0.5 text-[10px] font-bold whitespace-nowrap min-w-0 ${
             pathname === '/' ? 'text-amber-700 font-black' : 'text-slate-500'
           }`}
         >
@@ -670,7 +670,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
         </Link>
         <Link
           href="/courses"
-          className={`flex flex-col items-center gap-0.5 text-[10px] font-bold ${
+          className={`flex flex-col items-center gap-0.5 text-[10px] font-bold whitespace-nowrap min-w-0 ${
             pathname.startsWith('/courses') ? 'text-amber-700 font-black' : 'text-slate-500'
           }`}
         >
@@ -679,7 +679,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
         </Link>
         <Link
           href="/books"
-          className={`flex flex-col items-center gap-0.5 text-[10px] font-bold ${
+          className={`flex flex-col items-center gap-0.5 text-[10px] font-bold whitespace-nowrap min-w-0 ${
             pathname.startsWith('/books') ? 'text-amber-700 font-black' : 'text-slate-500'
           }`}
         >
@@ -688,7 +688,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
         </Link>
         <Link
           href="/pyqs"
-          className={`flex flex-col items-center gap-0.5 text-[10px] font-bold ${
+          className={`flex flex-col items-center gap-0.5 text-[10px] font-bold whitespace-nowrap min-w-0 ${
             pathname === '/pyqs' ? 'text-amber-700 font-black' : 'text-slate-500'
           }`}
         >
@@ -697,7 +697,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
         </Link>
         <button
           onClick={() => dispatch(setCartOpen(true))}
-          className="relative flex flex-col items-center gap-0.5 text-[10px] font-bold text-slate-500"
+          className="relative flex flex-col items-center gap-0.5 text-[10px] font-bold text-slate-500 whitespace-nowrap min-w-0"
         >
           <ShoppingBag className="w-5 h-5 text-amber-600" />
           <span>{t('Cart')} ({itemCount})</span>

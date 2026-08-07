@@ -37,6 +37,23 @@ export const KEYS_ACCOUNT: Record<string, string> = {
   'FREE': 'मुफ्त',
   'Total Payable': 'कुल देय राशि',
   'Place Order Now': 'अभी ऑर्डर करें',
+  'Email (optional)': 'ईमेल (वैकल्पिक)',
+  'Please enter a valid 10-digit phone number': 'कृपया मान्य 10 अंकों का फोन नंबर दर्ज करें',
+  'Your cart is empty': 'आपका कार्ट खाली है',
+  'Redirecting to Payment...': 'भुगतान पर रीडायरेक्ट हो रहा है...',
+  'Could not start payment. Please try again.': 'भुगतान शुरू नहीं हो सका। कृपया पुनः प्रयास करें।',
+
+  // ---- Payment status ----
+  'Verifying your payment...': 'आपके भुगतान की पुष्टि हो रही है...',
+  'Payment Successful!': 'भुगतान सफल!',
+  'Your payment has been verified securely.': 'आपका भुगतान सुरक्षित रूप से सत्यापित हो गया है।',
+  'Payment Reference': 'भुगतान संदर्भ',
+  'Amount Paid': 'भुगतान की गई राशि',
+  'Payment Failed': 'भुगतान विफल',
+  'Payment could not be verified': 'भुगतान सत्यापित नहीं हो सका',
+  'Network error while verifying payment': 'भुगतान सत्यापित करते समय नेटवर्क त्रुटि',
+  'Missing payment reference': 'भुगतान संदर्भ गायब है',
+  'Try Again': 'पुनः प्रयास करें',
 
   // ---- Wishlist ----
   'Removed from wishlist': 'विशलिस्ट से हटाया गया',
