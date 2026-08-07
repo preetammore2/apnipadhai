@@ -257,10 +257,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
                   >
                     <Link
                       href={link.href}
-                      className={`relative flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-colors ${
+                      className={`group relative flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-colors ${
                         isActive ? 'text-navy-900' : 'text-slate-700 hover:text-navy-900'
                       }`}
                     >
+                      <span className="absolute inset-0 rounded-full bg-slate-200/70 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
                       {isActive && (
                         <motion.span
                           layoutId="nav-pill"
