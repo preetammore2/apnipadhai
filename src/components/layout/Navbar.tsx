@@ -96,13 +96,34 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  useEffect(() => {
+    if (!isMobileMenuOpen) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [isMobileMenuOpen]);
+
+  const megaMenuCloseTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const openMegaMenu = () => {
+    if (megaMenuCloseTimer.current) clearTimeout(megaMenuCloseTimer.current);
+    setIsCoursesMegaMenuOpen(true);
+  };
+
+  const closeMegaMenu = () => {
+    if (megaMenuCloseTimer.current) clearTimeout(megaMenuCloseTimer.current);
+    megaMenuCloseTimer.current = setTimeout(() => setIsCoursesMegaMenuOpen(false), 150);
+  };
+
   const navLinks = [
-    { name: t('Home'), href: '/' },
-    { name: t('All Courses'), href: '/courses', hasDropdown: true },
-    { name: t('Books'), href: '/books' },
-    { name: t('PYQs'), href: '/pyqs' },
-    { name: t('Results'), href: '/results' },
-    { name: t('Contact'), href: '/contact' },
+    { name: t('Home'), href: '/', icon: <Home className="w-4 h-4" /> },
+    { name: t('All Courses'), href: '/courses', hasDropdown: true, icon: <GraduationCap className="w-4 h-4" /> },
+    { name: t('Books'), href: '/books', icon: <BookMarked className="w-4 h-4" /> },
+    { name: t('PYQs'), href: '/pyqs', icon: <FileText className="w-4 h-4" /> },
+    { name: t('Results'), href: '/results', icon: <Award className="w-4 h-4" /> },
+    { name: t('Contact'), href: '/contact', icon: <Phone className="w-4 h-4" /> },
   ];
 
   const courseCategories = [
@@ -210,8 +231,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
                     <div
                       key={link.name}
                       className="relative"
-                      onMouseEnter={() => setIsCoursesMegaMenuOpen(true)}
-                      onMouseLeave={() => setIsCoursesMegaMenuOpen(false)}
+                      onMouseEnter={openMegaMenu}
+                      onMouseLeave={closeMegaMenu}
                     >
                       <button
                         className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-all ${
@@ -358,8 +379,21 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className="p-2 sm:p-2.5 text-slate-700 hover:text-navy-900 rounded-xl lg:hidden"
+                aria-label={isMobileMenuOpen ? t('Close menu') : t('Open menu')}
+                aria-expanded={isMobileMenuOpen}
               >
-                {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.span
+                    key={isMobileMenuOpen ? 'close' : 'menu'}
+                    initial={{ rotate: -90, opacity: 0, scale: 0.7 }}
+                    animate={{ rotate: 0, opacity: 1, scale: 1 }}
+                    exit={{ rotate: 90, opacity: 0, scale: 0.7 }}
+                    transition={{ duration: 0.2 }}
+                    className="flex items-center justify-center"
+                  >
+                    {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                  </motion.span>
+                </AnimatePresence>
               </button>
             </div>
           </div>
@@ -474,56 +508,73 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
         {/* Mobile Navigation Drawer */}
         <AnimatePresence>
           {isMobileMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="lg:hidden bg-white border-b border-amber-100 px-5 py-5 space-y-4 shadow-xl overflow-hidden"
-            >
-              <div className="flex justify-center">
-                <LanguageSwitcher />
-              </div>
+            <>
+              {/* Backdrop */}
+              <motion.div
+                key="mobile-menu-backdrop"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="lg:hidden fixed inset-0 z-30 bg-navy-950/50 backdrop-blur-sm"
+              />
 
-              <div className="grid grid-cols-2 gap-2">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.name}
-                    href={link.href}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className={`px-4 py-3 rounded-xl text-xs font-bold text-center transition-colors ${
-                      pathname === link.href
-                        ? 'bg-yellow-400 text-navy-950 font-black'
-                        : 'bg-slate-50 text-navy-900 hover:bg-yellow-100'
-                    }`}
+              {/* Panel */}
+              <motion.div
+                key="mobile-menu-panel"
+                initial={{ opacity: 0, y: -16, scale: 0.99 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -16, scale: 0.99 }}
+                transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+                className="lg:hidden absolute top-full left-0 right-0 z-50 bg-white rounded-b-3xl border-b-2 border-amber-100 shadow-2xl px-5 py-5 space-y-4 overflow-y-auto overscroll-contain max-h-[calc(100dvh-120px)]"
+              >
+                <div className="flex justify-center">
+                  <LanguageSwitcher />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  {navLinks.map((link) => (
+                    <Link
+                      key={link.name}
+                      href={link.href}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={`flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-xs font-bold text-center transition-all ${
+                        pathname === link.href
+                          ? 'bg-yellow-400 text-navy-950 font-black shadow-sm scale-[1.02]'
+                          : 'bg-slate-50 text-navy-900 hover:bg-yellow-100'
+                      }`}
+                    >
+                      {link.icon}
+                      <span>{link.name}</span>
+                    </Link>
+                  ))}
+                </div>
+
+                <div className="pt-2 border-t border-slate-100 space-y-2">
+                  <button
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      handleCounselorModal();
+                    }}
+                    className="w-full flex items-center justify-center gap-2 py-3 bg-slate-100 hover:bg-slate-200 text-navy-900 rounded-xl text-xs font-bold transition-colors"
                   >
-                    {link.name}
-                  </Link>
-                ))}
-              </div>
-
-              <div className="pt-2 border-t border-slate-100 space-y-2">
-                <button
-                  onClick={() => {
-                    setIsMobileMenuOpen(false);
-                    handleCounselorModal();
-                  }}
-                  className="w-full flex items-center justify-center gap-2 py-3 bg-slate-100 text-navy-900 rounded-xl text-xs font-bold"
-                >
-                  <Phone className="w-4 h-4 text-amber-600" />
-                  <span>{t('Talk to Academic Counselor')}</span>
-                </button>
-                <a
-                  href="https://play.google.com/store/search?q=apni+padhai&c=apps"
-                  target="_blank"
-                  rel="noreferrer"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="w-full flex items-center justify-center gap-2 py-3 bg-yellow-400 text-navy-950 rounded-xl text-xs font-black shadow-button-glow"
-                >
-                  <Download className="w-4 h-4" />
-                  <span>{t('Install App from Play Store')}</span>
-                </a>
-              </div>
-            </motion.div>
+                    <Phone className="w-4 h-4 text-amber-600" />
+                    <span>{t('Talk to Academic Counselor')}</span>
+                  </button>
+                  <a
+                    href="https://play.google.com/store/search?q=apni+padhai&c=apps"
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-navy-950 rounded-xl text-xs font-black shadow-button-glow transition-all"
+                  >
+                    <Download className="w-4 h-4" />
+                    <span>{t('Install App from Play Store')}</span>
+                  </a>
+                </div>
+              </motion.div>
+            </>
           )}
         </AnimatePresence>
       </header>
