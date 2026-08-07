@@ -51,6 +51,7 @@ export const HI_UI: Record<string, string> = {
   'Download App': 'ऐप डाउनलोड करें',
   'Open menu': 'मेनू खोलें',
   'Close menu': 'मेनू बंद करें',
+  'Mobile navigation': 'मोबाइल नेविगेशन',
   'Search for Rajasthan GK, Brahmastra Books, CET, Science, PYQs...':
     'राजस्थान जीके, ब्रह्मास्त्र किताबें, CET, विज्ञान, PYQs खोजें...',
   'No results found for': 'के लिए कोई परिणाम नहीं मिला',
