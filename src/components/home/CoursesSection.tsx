@@ -219,7 +219,7 @@ export const CoursesSection: React.FC = () => {
                 </div>
 
                 {/* Price & Enrollment Footer */}
-                <div className="px-6 pb-6 pt-4 border-t border-slate-100 flex items-center justify-between gap-4 bg-slate-50/50">
+                <div className="px-6 pb-6 pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-4 bg-slate-50/50">
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="text-2xl font-black font-heading text-navy-900">₹{course.price}</span>

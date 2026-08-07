@@ -293,12 +293,14 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
 
             {/* Right Action Icons & Buttons */}
             <div className="flex items-center gap-1.5 sm:gap-3">
-              <LanguageSwitcher />
+              <div className="hidden sm:block">
+                <LanguageSwitcher />
+              </div>
 
               {/* Search Toggle */}
               <button
                 onClick={() => dispatch(setSearchOpen(!isSearchOpen))}
-                className="p-2.5 text-slate-600 hover:text-amber-600 hover:bg-amber-50 rounded-full transition-colors"
+                className="p-2 sm:p-2.5 text-slate-600 hover:text-amber-600 hover:bg-amber-50 rounded-full transition-colors"
                 title={t('Search courses & books')}
               >
                 <Search className="w-5 h-5" />
@@ -307,7 +309,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
               {/* Wishlist */}
               <Link
                 href="/wishlist"
-                className="relative p-2.5 text-slate-600 hover:text-amber-600 hover:bg-amber-50 rounded-full transition-colors"
+                className="relative p-2 sm:p-2.5 text-slate-600 hover:text-amber-600 hover:bg-amber-50 rounded-full transition-colors"
                 title={t('View Wishlist')}
               >
                 <Heart className="w-5 h-5" />
@@ -318,10 +320,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
                 )}
               </Link>
 
-              {/* Cart Drawer Button */}
+              {/* Cart Drawer Button (hidden on mobile — Cart is in the fixed bottom bar) */}
               <button
                 onClick={() => dispatch(setCartOpen(true))}
-                className="relative p-2.5 text-slate-600 hover:text-amber-600 hover:bg-amber-50 rounded-full transition-colors"
+                className="hidden sm:inline-flex relative p-2 sm:p-2.5 text-slate-600 hover:text-amber-600 hover:bg-amber-50 rounded-full transition-colors"
                 title={t('View Shopping Cart')}
               >
                 <ShoppingBag className="w-5 h-5" />
@@ -355,7 +357,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
               {/* Mobile Menu Toggle */}
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="p-2.5 text-slate-700 hover:text-navy-900 rounded-xl lg:hidden"
+                className="p-2 sm:p-2.5 text-slate-700 hover:text-navy-900 rounded-xl lg:hidden"
               >
                 {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </button>
@@ -478,6 +480,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
               exit={{ opacity: 0, height: 0 }}
               className="lg:hidden bg-white border-b border-amber-100 px-5 py-5 space-y-4 shadow-xl overflow-hidden"
             >
+              <div className="flex justify-center">
+                <LanguageSwitcher />
+              </div>
+
               <div className="grid grid-cols-2 gap-2">
                 {navLinks.map((link) => (
                   <Link

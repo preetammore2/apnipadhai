@@ -38,7 +38,7 @@ export default function ArticleDetailsPage({ params }: { params: Promise<{ slug:
             {language === 'hi' ? UPDATE_HI[article.slug]?.title ?? article.title : article.title}
           </h1>
 
-          <div className="flex items-center gap-4 text-xs text-slate-500 border-y border-slate-100 py-3">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-slate-500 border-y border-slate-100 py-3">
             <span className="flex items-center gap-1 font-bold text-navy-900">
               <User className="w-3.5 h-3.5 text-brand-500" /> {article.author}
             </span>

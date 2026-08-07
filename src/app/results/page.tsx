@@ -32,24 +32,24 @@ export default function ResultsPage() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
           <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-card text-center">
             <Trophy className="w-8 h-8 text-amber-500 mx-auto mb-2" />
-            <div className="text-3xl font-black font-heading text-navy-900">
+            <div className="text-2xl sm:text-3xl font-black font-heading text-navy-900">
               <AnimatedCounter end={12500} suffix="+" />
             </div>
             <p className="text-xs font-bold text-slate-500 mt-1">{t('Total Officer Selections')}</p>
           </div>
           <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-card text-center">
             <Award className="w-8 h-8 text-brand-500 mx-auto mb-2" />
-            <div className="text-3xl font-black font-heading text-navy-900">AIR 4</div>
+            <div className="text-2xl sm:text-3xl font-black font-heading text-navy-900">AIR 4</div>
             <p className="text-xs font-bold text-slate-500 mt-1">{t('Top SI Exam Rank')}</p>
           </div>
           <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-card text-center">
             <Star className="w-8 h-8 text-emerald-500 mx-auto mb-2" />
-            <div className="text-3xl font-black font-heading text-navy-900">Rank 12</div>
+            <div className="text-2xl sm:text-3xl font-black font-heading text-navy-900">Rank 12</div>
             <p className="text-xs font-bold text-slate-500 mt-1">{t('CET Top State Ranker')}</p>
           </div>
           <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-card text-center">
             <CheckCircle className="w-8 h-8 text-blue-500 mx-auto mb-2" />
-            <div className="text-3xl font-black font-heading text-navy-900">98%</div>
+            <div className="text-2xl sm:text-3xl font-black font-heading text-navy-900">98%</div>
             <p className="text-xs font-bold text-slate-500 mt-1">{t('Direct Book Match Rate')}</p>
           </div>
         </div>

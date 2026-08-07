@@ -94,7 +94,7 @@ export default function BookDetailsPage({ params }: { params: Promise<{ id: stri
               <p className="text-slate-600 text-sm leading-relaxed">{subtitle}</p>
 
               {/* Rating & Author */}
-              <div className="flex items-center gap-4 text-xs text-slate-500 border-y border-slate-100 py-3">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-slate-500 border-y border-slate-100 py-3">
                 <span className="flex items-center gap-1 font-bold text-navy-900">
                   <Star className="w-4 h-4 fill-amber-400 text-amber-400" /> {book.rating} ({book.reviewsCount} {t('Ratings')})
                 </span>
@@ -106,7 +106,7 @@ export default function BookDetailsPage({ params }: { params: Promise<{ id: stri
 
               {/* Price & Cart Action */}
               <div className="space-y-4 pt-2">
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
                   <span className="text-3xl font-black font-heading text-brand-600">₹{book.price}</span>
                   <span className="text-base text-slate-400 line-through">₹{book.originalPrice}</span>
                   <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">

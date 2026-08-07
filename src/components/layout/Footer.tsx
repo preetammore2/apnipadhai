@@ -30,7 +30,7 @@ export const Footer: React.FC = () => {
   };
 
   return (
-    <footer className="bg-gradient-to-b from-[#713F12] via-[#451A03] to-[#0F172A] text-white pt-16 pb-8 relative overflow-hidden">
+    <footer className="bg-gradient-to-b from-[#713F12] via-[#451A03] to-[#0F172A] text-white pt-16 pb-24 sm:pb-8 relative overflow-hidden">
       {/* Background Subtle Mesh */}
       <div className="absolute inset-0 opacity-10 bg-grid-pattern pointer-events-none" />
 

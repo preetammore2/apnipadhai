@@ -110,7 +110,7 @@ export const CommunitySection: React.FC = () => {
         <div className="pt-4">
           <Link
             href="/courses"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 hover:from-yellow-400 hover:to-amber-500 text-navy-950 font-black text-base rounded-2xl shadow-button-glow transition-all transform hover:-translate-y-1"
+            className="inline-flex max-w-full items-center justify-center gap-2 px-5 sm:px-8 py-3.5 sm:py-4 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 hover:from-yellow-400 hover:to-amber-500 text-navy-950 font-black text-sm sm:text-base rounded-2xl shadow-button-glow transition-all transform hover:-translate-y-1 whitespace-normal text-center"
           >
             <Users className="w-5 h-5" />
             <span>{t('Get Started with Apni Padhai')}</span>

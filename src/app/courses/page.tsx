@@ -150,7 +150,7 @@ function CoursesPageContent() {
                 </div>
               </div>
 
-              <div className="px-6 pb-6 pt-4 border-t border-slate-100 flex items-center justify-between gap-4 bg-slate-50/50">
+              <div className="px-6 pb-6 pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-4 bg-slate-50/50">
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="text-2xl font-black font-heading text-brand-600">₹{course.price}</span>

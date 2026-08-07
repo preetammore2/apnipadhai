@@ -10,22 +10,22 @@ export const TrustSection: React.FC = () => {
   const stats = [
     {
       label: 'Active Students',
-      value: 100000,
-      suffix: '+',
+      value: 100,
+      suffix: 'K+',
       icon: <Users className="w-6 h-6 text-brand-500" />,
       bg: 'bg-brand-50',
     },
     {
       label: 'Brahmastra Books Sold',
-      value: 250000,
-      suffix: '+',
+      value: 250,
+      suffix: 'K+',
       icon: <BookOpen className="w-6 h-6 text-blue-500" />,
       bg: 'bg-blue-50',
     },
     {
       label: 'App Downloads',
-      value: 150000,
-      suffix: '+',
+      value: 150,
+      suffix: 'K+',
       icon: <Download className="w-6 h-6 text-emerald-500" />,
       bg: 'bg-emerald-50',
     },
@@ -66,7 +66,7 @@ export const TrustSection: React.FC = () => {
               <div className={`w-12 h-12 ${stat.bg} rounded-2xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform`}>
                 {stat.icon}
               </div>
-              <div className="text-2xl sm:text-3xl font-black font-heading text-navy-900 tracking-tight">
+              <div className="text-xl sm:text-3xl font-black font-heading text-navy-900 tracking-tight">
                 <AnimatedCounter end={stat.value} suffix={stat.suffix} />
               </div>
               <p className="text-xs font-bold text-slate-500 mt-1">{t(stat.label)}</p>

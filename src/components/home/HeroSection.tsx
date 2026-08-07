@@ -66,12 +66,12 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenCounselorModal }
         >
           {/* Top Pill Badge */}
           <motion.div variants={itemVariants} className="inline-block">
-            <div className="inline-flex items-center gap-2.5 px-4 sm:px-5 py-1.5 sm:py-2 bg-white/[0.04] backdrop-blur-md border border-brand-400/30 rounded-full text-[11px] sm:text-xs font-semibold uppercase tracking-[0.18em] text-brand-300 mx-auto">
-              <span className="flex h-1.5 w-1.5 relative">
+            <div className="inline-flex items-center gap-2.5 px-4 sm:px-5 py-1.5 sm:py-2 bg-white/[0.04] backdrop-blur-md border border-brand-400/30 rounded-full text-[11px] sm:text-xs font-semibold uppercase tracking-[0.18em] text-brand-300 mx-auto max-w-full">
+              <span className="flex h-1.5 w-1.5 relative shrink-0">
                 <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-brand-400" />
               </span>
               <Sparkles className="w-3.5 h-3.5 text-brand-400 shrink-0" />
-              <span className="truncate">{t("India's Smart Educational Platform & Publication")}</span>
+              <span className="truncate min-w-0">{t("India's Smart Educational Platform & Publication")}</span>
             </div>
           </motion.div>
 
@@ -101,7 +101,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenCounselorModal }
           >
             <Link
               href="/courses"
-              className="group inline-flex items-center justify-center gap-2.5 px-7 sm:px-8 py-3.5 sm:py-4 bg-gradient-to-b from-brand-400 to-brand-600 text-navy-950 font-bold text-sm sm:text-base rounded-xl shadow-[0_8px_30px_-6px_rgba(234,179,8,0.55)] transition-all duration-300 hover:shadow-[0_14px_40px_-6px_rgba(234,179,8,0.7)] hover:-translate-y-0.5"
+              className="group inline-flex items-center justify-center gap-2.5 px-7 sm:px-8 py-3.5 sm:py-4 bg-gradient-to-b from-brand-400 to-brand-600 text-navy-950 font-bold text-sm sm:text-base rounded-xl shadow-[0_8px_30px_-6px_rgba(234,179,8,0.55)] transition-all duration-300 hover:shadow-[0_14px_40px_-6px_rgba(234,179,8,0.7)] hover:-translate-y-0.5 active:scale-[0.97]"
             >
               <BookOpen className="w-5 h-5" />
               <span>{t('Explore Live Batches')}</span>
@@ -112,7 +112,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenCounselorModal }
               href="https://play.google.com/store/search?q=apni+padhai&c=apps"
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center justify-center gap-2.5 px-7 sm:px-8 py-3.5 sm:py-4 bg-white/[0.06] backdrop-blur border border-white/15 text-white text-sm sm:text-base font-semibold rounded-xl transition-all duration-300 hover:bg-white/[0.12] hover:border-white/25 hover:-translate-y-0.5"
+              className="inline-flex items-center justify-center gap-2.5 px-7 sm:px-8 py-3.5 sm:py-4 bg-white/[0.06] backdrop-blur border border-white/15 text-white text-sm sm:text-base font-semibold rounded-xl transition-all duration-300 hover:bg-white/[0.12] hover:border-white/25 hover:-translate-y-0.5 active:scale-[0.97]"
             >
               <Download className="w-5 h-5 text-brand-400" />
               <span>{t('Download App')}</span>
@@ -120,7 +120,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenCounselorModal }
 
             <button
               onClick={handleCounselorModal}
-              className="inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-3.5 sm:py-4 text-slate-300 text-sm sm:text-base font-semibold rounded-xl transition-colors hover:text-white"
+              className="inline-flex items-center justify-center gap-2.5 px-7 sm:px-8 py-3.5 sm:py-4 bg-white/[0.06] backdrop-blur border border-white/15 text-white text-sm sm:text-base font-semibold rounded-xl transition-all duration-300 hover:bg-white/[0.12] hover:border-white/25 hover:-translate-y-0.5 active:scale-[0.97] cursor-pointer"
             >
               <Phone className="w-5 h-5 text-brand-400" />
               <span>{t('Talk to Counselor')}</span>

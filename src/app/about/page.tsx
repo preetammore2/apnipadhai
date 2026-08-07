@@ -61,7 +61,7 @@ export default function AboutPage() {
               </div>
             </div>
 
-            <div className="flex items-center gap-4 pt-4">
+            <div className="flex flex-wrap items-center gap-4 pt-4">
               <a
                 href="https://www.youtube.com/@AapniPadhai"
                 target="_blank"

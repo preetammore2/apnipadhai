@@ -38,14 +38,6 @@ export const BooksSection: React.FC = () => {
               {t('Authentic study guides, question banks, and model papers trusted by over 2.5 Lakh+ students.')}
             </p>
           </div>
-
-          <Link
-            href="/books"
-            className="inline-flex items-center gap-2 text-sm font-bold text-amber-700 hover:text-amber-800 transition-colors shrink-0"
-          >
-            <span>{t('Browse All Books')}</span>
-            <ArrowRight className="w-4 h-4" />
-          </Link>
         </div>
 
         {/* Loading Spinner */}
@@ -89,7 +81,8 @@ export const BooksSection: React.FC = () => {
             </Link>
           </div>
         ) : (
-          /* Books Grid */
+          <>
+          {/* Books Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {books.slice(0, 4).map((book) => {
               const hi = BOOK_HI[book.id];
@@ -207,6 +200,18 @@ export const BooksSection: React.FC = () => {
               );
             })}
           </div>
+
+          {/* Browse All Books Button */}
+          <div className="mt-12 text-center">
+            <Link
+              href="/books"
+              className="group inline-flex items-center gap-2 px-8 py-3.5 bg-yellow-400 hover:bg-yellow-500 text-navy-950 text-sm font-black rounded-xl shadow-sm transition-all hover:-translate-y-0.5 active:scale-[0.97]"
+            >
+              <span>{t('Browse All Books')}</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </div>
+          </>
         )}
       </div>
 

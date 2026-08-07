@@ -42,18 +42,18 @@ export const FounderSpotlight: React.FC = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-3 mt-5">
-                <div className="bg-white/[0.04] border border-white/10 rounded-xl p-3 text-center">
-                  <p className="text-xl font-black font-heading text-brand-300">10+</p>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">{t('Years Experience')}</p>
+              <div className="grid grid-cols-3 gap-2 sm:gap-3 mt-5">
+                <div className="bg-white/[0.04] border border-white/10 rounded-xl p-2.5 sm:p-3 text-center">
+                  <p className="text-base sm:text-xl font-black font-heading text-brand-300 leading-none">10+</p>
+                  <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">{t('Years Experience')}</p>
                 </div>
-                <div className="bg-white/[0.04] border border-white/10 rounded-xl p-3 text-center">
-                  <p className="text-xl font-black font-heading text-brand-300">12,500+</p>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">{t('Selections Guided')}</p>
+                <div className="bg-white/[0.04] border border-white/10 rounded-xl p-2.5 sm:p-3 text-center">
+                  <p className="text-base sm:text-xl font-black font-heading text-brand-300 leading-none">12,500+</p>
+                  <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">{t('Selections Guided')}</p>
                 </div>
-                <div className="bg-white/[0.04] border border-white/10 rounded-xl p-3 text-center">
-                  <p className="text-xl font-black font-heading text-brand-300">50M+</p>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">{t('Lecture Views')}</p>
+                <div className="bg-white/[0.04] border border-white/10 rounded-xl p-2.5 sm:p-3 text-center">
+                  <p className="text-base sm:text-xl font-black font-heading text-brand-300 leading-none">50M+</p>
+                  <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">{t('Lecture Views')}</p>
                 </div>
               </div>
             </motion.div>
