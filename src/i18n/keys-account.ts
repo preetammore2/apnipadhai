@@ -55,6 +55,13 @@ export const KEYS_ACCOUNT: Record<string, string> = {
   'Missing payment reference': 'भुगतान संदर्भ गायब है',
   'Try Again': 'पुनः प्रयास करें',
 
+  // ---- Student dashboard (WordPress embed) ----
+  'Student Dashboard': 'छात्र डैशबोर्ड',
+  'Your courses, progress and orders are managed through your Apni Padhai account.': 'आपके कोर्स, प्रगति और ऑर्डर आपके अपनी पढ़ाई खाते से प्रबंधित होते हैं।',
+  'Secure embedded dashboard': 'सुरक्षित एम्बेडेड डैशबोर्ड',
+  'Open full screen': 'फुल स्क्रीन में खोलें',
+  'Loading your dashboard...': 'आपका डैशबोर्ड लोड हो रहा है...',
+
   // ---- Wishlist ----
   'Removed from wishlist': 'विशलिस्ट से हटाया गया',
   'added to cart!': 'कार्ट में जोड़ा गया!',
