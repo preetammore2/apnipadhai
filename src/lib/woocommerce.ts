@@ -6,6 +6,8 @@ const WOO_CONSUMER_SECRET = process.env.WOO_CONSUMER_SECRET ?? '';
 
 const WOO_API = `${WOO_URL}/wp-json/wc/v3`;
 
+const BOOKS_REVALIDATE_SECONDS = Number(process.env.BOOKS_REVALIDATE_SECONDS ?? '60');
+
 const authHeader =
   'Basic ' +
   Buffer.from(`${WOO_CONSUMER_KEY}:${WOO_CONSUMER_SECRET}`).toString('base64');
@@ -23,17 +25,24 @@ export class WooCommerceError extends Error {
 async function request<T>(
   path: string,
   options: RequestInit = {},
-  cache: RequestCache | undefined = 'no-store',
+  opts: { cache?: RequestCache; revalidate?: number } = {},
 ): Promise<T> {
-  const res = await fetch(`${WOO_API}${path}`, {
+  const init: RequestInit = {
     ...options,
-    cache,
     headers: {
       Authorization: authHeader,
       'Content-Type': 'application/json',
       ...(options.headers ?? {}),
     },
-  });
+  };
+
+  if (opts.revalidate !== undefined) {
+    init.next = { revalidate: opts.revalidate };
+  } else if (opts.cache !== undefined) {
+    init.cache = opts.cache;
+  }
+
+  const res = await fetch(`${WOO_API}${path}`, init);
 
   if (!res.ok) {
     let message = `WooCommerce request failed (${res.status})`;
@@ -57,6 +66,51 @@ function stripHtml(html: string | undefined): string {
 interface WoocommerceCategory {
   id: number;
   name: string;
+  slug?: string;
+}
+
+export interface BookPayload {
+  title?: string;
+  subtitle?: string;
+  description?: string;
+  category?: string;
+  categories?: string[];
+  price?: number;
+  regularPrice?: number;
+  salePrice?: number;
+  inStock?: boolean;
+  sku?: string;
+  coverImage?: string;
+}
+
+export function parseBookPayload(body: unknown): BookPayload {
+  if (typeof body !== 'object' || body === null) return {};
+  const b = body as Record<string, unknown>;
+  const asNum = (v: unknown): number | undefined => {
+    if (typeof v === 'number') return Number.isFinite(v) ? v : undefined;
+    if (typeof v === 'string' && v.trim() !== '') {
+      const n = Number(v);
+      return Number.isFinite(n) ? n : undefined;
+    }
+    return undefined;
+  };
+  return {
+    title: typeof b.title === 'string' ? b.title.trim() : undefined,
+    subtitle: typeof b.subtitle === 'string' ? b.subtitle.trim() : undefined,
+    description: typeof b.description === 'string' ? b.description.trim() : undefined,
+    category: typeof b.category === 'string' ? b.category.trim() : undefined,
+    categories: Array.isArray(b.categories)
+      ? b.categories.filter((c): c is string => typeof c === 'string').map((c) => c.trim()).filter(Boolean)
+      : undefined,
+    price: asNum(b.price),
+    regularPrice: asNum(b.regularPrice) ?? asNum(b.regular_price),
+    salePrice: asNum(b.salePrice) ?? asNum(b.sale_price),
+    inStock: typeof b.inStock === 'boolean' ? b.inStock : undefined,
+    sku: typeof b.sku === 'string' ? b.sku.trim() : undefined,
+    coverImage:
+      (typeof b.coverImage === 'string' ? b.coverImage.trim() : undefined) ??
+      (typeof b.image === 'string' ? b.image.trim() : undefined),
+  };
 }
 
 interface WoocommerceProduct {
@@ -153,14 +207,116 @@ export async function getBooks(): Promise<Book[]> {
   const products = await request<WoocommerceProduct[]>(
     `/products?${params.toString()}`,
     {},
-    'force-cache',
+    { revalidate: BOOKS_REVALIDATE_SECONDS },
   );
   return products.map(mapProduct);
 }
 
 export async function getBookById(id: string): Promise<Book | undefined> {
-  const books = await getBooks();
-  return books.find((b) => b.id === id);
+  if (!/^\d+$/.test(id)) return undefined;
+  try {
+    const product = await request<WoocommerceProduct>(`/products/${id}`, {}, { cache: 'no-store' });
+    return mapProduct(product);
+  } catch (error) {
+    if (error instanceof WooCommerceError && error.status === 404) {
+      return undefined;
+    }
+    throw error;
+  }
+}
+
+async function resolveCategories(names: string[]): Promise<{ id: number }[]> {
+  const unique = [...new Set(names.filter(Boolean))];
+  const resolved: { id: number }[] = [];
+  for (const name of unique) {
+    const existing = await request<WoocommerceCategory[]>(
+      `/products/categories?search=${encodeURIComponent(name)}&per_page=10`,
+      {},
+      { cache: 'no-store' },
+    );
+    const match = existing.find((c) => c.name.toLowerCase() === name.toLowerCase());
+    if (match) {
+      resolved.push({ id: match.id });
+    } else {
+      const created = await request<WoocommerceCategory>('/products/categories', {
+        method: 'POST',
+        body: JSON.stringify({ name }),
+      });
+      resolved.push({ id: created.id });
+    }
+  }
+  return resolved;
+}
+
+function buildProductBody(
+  input: BookPayload,
+): { body: Record<string, unknown>; categoryNames: string[] } {
+  const body: Record<string, unknown> = { type: 'simple', status: 'publish' };
+  if (input.title) body.name = input.title;
+  if (input.subtitle) body.short_description = input.subtitle;
+  if (input.description) body.description = input.description;
+
+  const regularPrice = input.regularPrice ?? input.price;
+  if (typeof regularPrice === 'number' && regularPrice >= 0) {
+    body.regular_price = String(regularPrice);
+  }
+  if (typeof input.salePrice === 'number' && input.salePrice >= 0) {
+    if (typeof regularPrice === 'number' && input.salePrice >= regularPrice) {
+      body.sale_price = String(regularPrice);
+    } else {
+      body.sale_price = String(input.salePrice);
+    }
+  }
+  if (input.inStock === false) {
+    body.stock_status = 'outofstock';
+  } else if (input.inStock === true) {
+    body.stock_status = 'instock';
+  }
+  if (input.sku) body.sku = input.sku;
+  if (input.coverImage) body.images = [{ src: input.coverImage }];
+
+  const categoryNames = [...(input.categories ?? [])];
+  if (input.category && !categoryNames.includes(input.category)) {
+    categoryNames.push(input.category);
+  }
+  return { body, categoryNames };
+}
+
+export async function createBook(input: BookPayload): Promise<Book> {
+  const { body, categoryNames } = buildProductBody(input);
+  if (!body.name) {
+    throw new WooCommerceError(400, 'Title is required');
+  }
+  if (categoryNames.length > 0) {
+    body.categories = await resolveCategories(categoryNames);
+  }
+  const product = await request<WoocommerceProduct>('/products', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+  return mapProduct(product);
+}
+
+export async function updateBook(id: string, input: BookPayload): Promise<Book> {
+  if (!/^\d+$/.test(id)) {
+    throw new WooCommerceError(400, 'Invalid book ID');
+  }
+  const { body, categoryNames } = buildProductBody(input);
+  if (categoryNames.length > 0) {
+    body.categories = await resolveCategories(categoryNames);
+  }
+  const product = await request<WoocommerceProduct>(`/products/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(body),
+  });
+  return mapProduct(product);
+}
+
+export async function deleteBook(id: string): Promise<void> {
+  if (!/^\d+$/.test(id)) {
+    throw new WooCommerceError(400, 'Invalid book ID');
+  }
+  await request<unknown>(`/products/${id}?force=true`, { method: 'DELETE' }, { cache: 'no-store' });
 }
 
 export type PaymentMethod = 'phonepe';
@@ -254,7 +410,7 @@ export async function getOrderById(orderId: number): Promise<TrackedOrder | unde
     const order = await request<WoocommerceOrderDetails>(
       `/orders/${orderId}?_fields=id,status,total,currency,date_created,billing`,
       {},
-      'no-store',
+      { cache: 'no-store' },
     );
     return {
       id: order.id,
