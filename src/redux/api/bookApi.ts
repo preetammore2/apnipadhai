@@ -1,18 +1,36 @@
 import { baseApi } from './baseApi';
 import { Book } from '@/types';
-import { BOOKS_DATA } from '@/data/books';
 
 export const bookApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getBooks: builder.query<Book[], void>({
-      queryFn: () => {
-        return { data: BOOKS_DATA };
+      async queryFn() {
+        try {
+          const res = await fetch('/api/books');
+          if (!res.ok) throw new Error('Failed to fetch books');
+          const data = (await res.json()) as Book[];
+          return { data };
+        } catch (error) {
+          return {
+            error: { status: 'FETCH_ERROR', error: String(error) },
+          };
+        }
       },
       providesTags: ['Book'],
     }),
     getBookById: builder.query<Book | undefined, string>({
-      queryFn: (id) => {
-        return { data: BOOKS_DATA.find((b) => b.id === id) };
+      async queryFn(id) {
+        try {
+          const res = await fetch(`/api/books/${encodeURIComponent(id)}`);
+          if (res.status === 404) return { data: undefined };
+          if (!res.ok) throw new Error('Failed to fetch book');
+          const data = (await res.json()) as Book;
+          return { data };
+        } catch (error) {
+          return {
+            error: { status: 'FETCH_ERROR', error: String(error) },
+          };
+        }
       },
       providesTags: (result, error, id) => [{ type: 'Book', id }],
     }),

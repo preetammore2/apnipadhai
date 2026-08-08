@@ -1,29 +1,30 @@
 'use client';
 
 import React, { useState } from 'react';
-import { BOOKS_DATA } from '@/data/books';
 import { Book } from '@/types';
 import { Badge } from '@/components/ui/Badge';
 import { SamplePdfModal } from '@/components/layout/SamplePdfModal';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Star, ShoppingCart, Eye, Search, Truck, ArrowRight } from 'lucide-react';
+import { Star, ShoppingCart, Eye, Search, Truck, ArrowRight, Loader2, RefreshCw, WifiOff } from 'lucide-react';
 import { useAppDispatch } from '@/redux/hooks';
 import { addToCart } from '@/redux/features/cart/cartSlice';
 import { toast } from 'sonner';
 import { useTranslation } from '@/i18n/useTranslation';
 import { BOOK_HI } from '@/i18n/data';
+import { useGetBooksQuery } from '@/redux/api/bookApi';
 
 export default function BooksPage() {
   const [selectedBookForPdf, setSelectedBookForPdf] = useState<Book | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const dispatch = useAppDispatch();
   const { t, language } = useTranslation();
+  const { data: books = [], isLoading, isError, refetch } = useGetBooksQuery();
 
-  const filteredBooks = BOOKS_DATA.filter((book) =>
+  const filteredBooks = books.filter((book) =>
     book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     book.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    book.examTarget.toLowerCase().includes(searchQuery.toLowerCase())
+    (book.subtitle ?? '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -55,109 +56,158 @@ export default function BooksPage() {
           </div>
         </div>
 
-        {/* Books Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {filteredBooks.map((book) => {
-            const hi = language === 'hi' ? BOOK_HI[book.id] : undefined;
-            const title = hi?.title ?? book.title;
-            const subtitle = hi?.subtitle ?? book.subtitle;
+        {/* Loading / Error / Empty states */}
+        {isLoading ? (
+          <div className="py-16 text-center">
+            <Loader2 className="w-8 h-8 text-brand-600 animate-spin mx-auto" />
+            <p className="text-xs text-slate-500 mt-2">{t('Loading Publication Store...')}</p>
+          </div>
+        ) : isError ? (
+          <div className="py-16 text-center">
+            <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <WifiOff className="w-8 h-8" />
+            </div>
+            <h3 className="text-lg font-bold font-heading text-navy-900">{t('Failed to load books')}</h3>
+            <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+              {t('Something went wrong while fetching the book series. Please try again.')}
+            </p>
+            <button
+              onClick={() => refetch()}
+              className="mt-5 px-6 py-3 bg-navy-900 hover:bg-brand-600 text-white text-xs font-bold rounded-xl transition-colors inline-flex items-center gap-2"
+            >
+              <RefreshCw className="w-4 h-4" />
+              <span>{t('Retry Now')}</span>
+            </button>
+          </div>
+        ) : filteredBooks.length === 0 ? (
+          <div className="py-16 text-center">
+            <div className="w-16 h-16 bg-yellow-100 text-amber-700 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Search className="w-8 h-8" />
+            </div>
+            <h3 className="text-lg font-bold font-heading text-navy-900">{t('No books found')}</h3>
+            <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+              {t('No books match your search. Try a different keyword.')}
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {filteredBooks.map((book) => {
+              const hi = language === 'hi' ? BOOK_HI[book.id] : undefined;
+              const title = hi?.title ?? book.title;
+              const subtitle = hi?.subtitle ?? book.subtitle;
 
-            return (
-              <div
-                key={book.id}
-                className="bg-white rounded-3xl border border-slate-200 p-5 shadow-card hover:shadow-card-hover transition-all flex flex-col justify-between group"
-              >
-                <div>
-                  {/* Book Cover Frame */}
-                  <div className="relative h-64 w-full bg-slate-100 rounded-2xl overflow-hidden mb-4 border border-slate-200/80 flex items-center justify-center p-4">
-                    <Badge variant="primary" size="sm" className="absolute top-3 left-3 z-10">
-                      -{book.discountPercentage}% {t('OFF')}
-                    </Badge>
+              return (
+                <div
+                  key={book.id}
+                  className="bg-white rounded-3xl border border-slate-200 p-5 shadow-card hover:shadow-card-hover transition-all flex flex-col justify-between group"
+                >
+                  <div>
+                    {/* Book Cover Frame */}
+                    <div className="relative h-64 w-full bg-slate-100 rounded-2xl overflow-hidden mb-4 border border-slate-200/80 flex items-center justify-center p-4">
+                      {book.discountPercentage > 0 && (
+                        <Badge variant="primary" size="sm" className="absolute top-3 left-3 z-10">
+                          -{book.discountPercentage}% {t('OFF')}
+                        </Badge>
+                      )}
 
-                    <div className="relative w-full h-full transform group-hover:scale-105 transition-transform duration-300">
-                      <Image
-                        src={book.coverImage}
-                        alt={title}
-                        fill
-                        className="object-contain drop-shadow-md"
-                      />
+                      {book.coverImage ? (
+                        <div className="relative w-full h-full transform group-hover:scale-105 transition-transform duration-300">
+                          <Image
+                            src={book.coverImage}
+                            alt={title}
+                            fill
+                            className="object-contain drop-shadow-md"
+                          />
+                        </div>
+                      ) : (
+                        <span className="text-2xl font-black font-heading text-slate-300 text-center px-4">
+                          {title}
+                        </span>
+                      )}
+
+                      {/* Hover Quick Actions */}
+                      <div className="absolute inset-0 bg-navy-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3 p-4">
+                        {book.samplePdfUrl && (
+                          <button
+                            onClick={() => setSelectedBookForPdf(book)}
+                            className="p-3 bg-white text-navy-900 rounded-full shadow-lg hover:bg-brand-500 hover:text-white transition-colors"
+                            title={t('Preview Sample PDF')}
+                          >
+                            <Eye className="w-5 h-5" />
+                          </button>
+                        )}
+                        <button
+                          onClick={() => {
+                            dispatch(addToCart({ item: book, type: 'book' }));
+                            toast.success(`${title} ${t('added to cart!')}`);
+                          }}
+                          className="p-3 bg-brand-500 text-white rounded-full shadow-lg hover:bg-brand-600 transition-colors"
+                          title={t('Add to Cart')}
+                        >
+                          <ShoppingCart className="w-5 h-5" />
+                        </button>
+                      </div>
                     </div>
 
-                    {/* Hover Quick Actions */}
-                    <div className="absolute inset-0 bg-navy-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3 p-4">
-                      <button
-                        onClick={() => setSelectedBookForPdf(book)}
-                        className="p-3 bg-white text-navy-900 rounded-full shadow-lg hover:bg-brand-500 hover:text-white transition-colors"
-                        title={t('Preview Sample PDF')}
-                      >
-                        <Eye className="w-5 h-5" />
-                      </button>
+                    <div className="space-y-1.5">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t(book.category)}</span>
+                      <Link href={`/books/${book.id}`}>
+                        <h3 className="text-base font-bold font-heading text-navy-900 line-clamp-1 group-hover:text-brand-600 transition-colors">
+                          {title}
+                        </h3>
+                      </Link>
+                      {subtitle && (
+                        <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                          {subtitle}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs text-slate-500 mt-3 pt-3 border-t border-slate-100">
+                      <span className="flex items-center gap-1 font-bold text-navy-900">
+                        <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" /> {book.rating ?? t('Best Seller')}
+                        {book.reviewsCount ? ` (${book.reviewsCount})` : ''}
+                      </span>
+                      <span>{book.pages ? `${book.pages} ${t('Pages')}` : t('Paperback')}</span>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl font-black font-heading text-navy-900">₹{book.price}</span>
+                        {book.originalPrice > book.price && (
+                          <span className="text-xs text-slate-400 line-through">₹{book.originalPrice}</span>
+                        )}
+                      </div>
+                      <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-1">
+                        <Truck className="w-3 h-3" /> {t('Doorstep Delivery')}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
                       <button
                         onClick={() => {
                           dispatch(addToCart({ item: book, type: 'book' }));
                           toast.success(`${title} ${t('added to cart!')}`);
                         }}
-                        className="p-3 bg-brand-500 text-white rounded-full shadow-lg hover:bg-brand-600 transition-colors"
-                        title={t('Add to Cart')}
+                        className="px-4 py-2 bg-navy-900 hover:bg-brand-600 text-white text-xs font-bold rounded-xl transition-colors shadow-sm"
                       >
-                        <ShoppingCart className="w-5 h-5" />
+                        {t('Buy Now')}
                       </button>
+                      <Link
+                        href={`/books/${book.id}`}
+                        className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors"
+                      >
+                        <ArrowRight className="w-4 h-4" />
+                      </Link>
                     </div>
                   </div>
-
-                  <div className="space-y-1.5">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t(book.category)}</span>
-                    <Link href={`/books/${book.id}`}>
-                      <h3 className="text-base font-bold font-heading text-navy-900 line-clamp-1 group-hover:text-brand-600 transition-colors">
-                        {title}
-                      </h3>
-                    </Link>
-                    <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
-                      {subtitle}
-                    </p>
-                  </div>
-
-                  <div className="flex items-center justify-between text-xs text-slate-500 mt-3 pt-3 border-t border-slate-100">
-                    <span className="flex items-center gap-1 font-bold text-navy-900">
-                      <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" /> {book.rating} ({book.reviewsCount})
-                    </span>
-                    <span>{book.pages} {t('Pages')}</span>
-                  </div>
                 </div>
-
-                <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xl font-black font-heading text-navy-900">₹{book.price}</span>
-                      <span className="text-xs text-slate-400 line-through">₹{book.originalPrice}</span>
-                    </div>
-                    <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-1">
-                      <Truck className="w-3 h-3" /> {t('Doorstep Delivery')}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => {
-                        dispatch(addToCart({ item: book, type: 'book' }));
-                        toast.success(`${title} ${t('added to cart!')}`);
-                      }}
-                      className="px-4 py-2 bg-navy-900 hover:bg-brand-600 text-white text-xs font-bold rounded-xl transition-colors shadow-sm"
-                    >
-                      {t('Buy Now')}
-                    </button>
-                    <Link
-                      href={`/books/${book.id}`}
-                      className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors"
-                    >
-                      <ArrowRight className="w-4 h-4" />
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       <SamplePdfModal

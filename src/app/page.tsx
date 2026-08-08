@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { HeroSection } from '@/components/home/HeroSection';
 import { TrustSection } from '@/components/home/TrustSection';
 import { FeaturesSection } from '@/components/home/FeaturesSection';
-import { CoursesSection } from '@/components/home/CoursesSection';
 import { BooksSection } from '@/components/home/BooksSection';
 import { FounderSpotlight } from '@/components/home/FounderSpotlight';
 import { PyqQuickSection } from '@/components/home/PyqQuickSection';
@@ -12,6 +11,13 @@ import { ResultsSection } from '@/components/home/ResultsSection';
 import { TestimonialsSection } from '@/components/home/TestimonialsSection';
 import { AppDownloadSection } from '@/components/home/AppDownloadSection';
 import { CommunitySection } from '@/components/home/CommunitySection';
+import { YouTubeSection } from '@/components/home/YouTubeSection';
+import { CoursesSection } from '@/components/home/CoursesSection';
+import { UpdatesSection } from '@/components/home/UpdatesSection';
+import { NewsletterSection } from '@/components/home/NewsletterSection';
+import { FaqSection } from '@/components/home/FaqSection';
+import { TrackOrderSection } from '@/components/home/TrackOrderSection';
+import { BookDealsSection } from '@/components/home/BookDealsSection';
 import { CounselorModal } from '@/components/layout/CounselorModal';
 import { ArrowRight, Phone, Download, Sparkles } from 'lucide-react';
 import Link from 'next/link';
@@ -32,11 +38,11 @@ export default function HomePage() {
       {/* 3. Why Students Choose Apni Padhai */}
       <FeaturesSection />
 
-      {/* 4. Live & Target Courses */}
-      <CoursesSection />
-
-      {/* 5. Brahmastra Books Store */}
+      {/* 4. Brahmastra Books Store */}
       <BooksSection />
+
+      {/* 4b. Books with Discount (from WordPress books-with-discount page) */}
+      <BookDealsSection />
 
       {/* 6. Founder Spotlight (Rohit Sir) */}
       <FounderSpotlight />
@@ -50,11 +56,29 @@ export default function HomePage() {
       {/* 9. Student Love & Testimonials */}
       <TestimonialsSection />
 
-      {/* 10. Community Section (600K+ YouTube Subscribers & 200K+ Telegram Followers) */}
+      {/* 10. Free Lectures / YouTube Section */}
+      <YouTubeSection />
+
+      {/* 11. Community Section (600K+ YouTube Subscribers & 200K+ Telegram Followers) */}
       <CommunitySection />
 
-      {/* 11. App Download Banner */}
+      {/* 12. App Download Banner */}
       <AppDownloadSection />
+
+      {/* 13. Courses / Test Series (from WordPress) */}
+      <CoursesSection />
+
+      {/* 14. Blog & Updates (from WordPress) */}
+      <UpdatesSection />
+
+      {/* 14b. FAQs (from WordPress FAQ page) */}
+      <FaqSection />
+
+      {/* 14c. Track Your Order (from WordPress track-your-order page) */}
+      <TrackOrderSection />
+
+      {/* 15. Newsletter Signup */}
+      <NewsletterSection />
 
       {/* 12. Final CTA Banner */}
       <section className="py-20 bg-navy-950 text-white text-center relative overflow-hidden border-t border-amber-500/20">
@@ -76,10 +100,10 @@ export default function HomePage() {
 
           <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
             <Link
-              href="/courses"
+              href="/books"
               className="px-8 py-4 bg-yellow-400 hover:bg-yellow-500 text-navy-950 font-black text-sm sm:text-base rounded-2xl shadow-button-glow transition-all flex items-center gap-2 transform hover:-translate-y-1"
             >
-              <span>{t('Explore All Batches')}</span>
+              <span>{t('Explore All Books')}</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
 

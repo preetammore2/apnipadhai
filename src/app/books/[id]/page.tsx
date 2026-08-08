@@ -1,7 +1,6 @@
 'use client';
 
 import React, { use, useState } from 'react';
-import { BOOKS_DATA } from '@/data/books';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -16,19 +15,30 @@ import {
   Eye,
   CheckCircle2,
   ArrowLeft,
+  Loader2,
 } from 'lucide-react';
 import { useAppDispatch } from '@/redux/hooks';
 import { addToCart } from '@/redux/features/cart/cartSlice';
 import { toast } from 'sonner';
 import { useTranslation } from '@/i18n/useTranslation';
 import { BOOK_HI } from '@/i18n/data';
+import { useGetBookByIdQuery } from '@/redux/api/bookApi';
 
 export default function BookDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const book = BOOKS_DATA.find((b) => b.id === id);
+  const { data: book, isLoading } = useGetBookByIdQuery(id);
   const [isSampleOpen, setIsSampleOpen] = useState(false);
   const dispatch = useAppDispatch();
   const { t, language } = useTranslation();
+
+  if (isLoading) {
+    return (
+      <div className="py-24 bg-slate-50 min-h-screen text-center">
+        <Loader2 className="w-8 h-8 text-brand-600 animate-spin mx-auto" />
+        <p className="text-xs text-slate-500 mt-2">{t('Loading Book Details...')}</p>
+      </div>
+    );
+  }
 
   if (!book) {
     notFound();
@@ -37,6 +47,7 @@ export default function BookDetailsPage({ params }: { params: Promise<{ id: stri
   const hi = language === 'hi' ? BOOK_HI[book.id] : undefined;
   const title = hi?.title ?? book.title;
   const subtitle = hi?.subtitle ?? book.subtitle;
+  const hasSample = !!book.samplePdfUrl;
 
   return (
     <div className="py-12 bg-slate-50 min-h-screen">
@@ -53,28 +64,40 @@ export default function BookDetailsPage({ params }: { params: Promise<{ id: stri
           {/* Book Image Showcase */}
           <div className="lg:col-span-5">
             <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-card flex flex-col items-center justify-center relative">
-              <Badge variant="primary" size="lg" className="absolute top-4 left-4">
-                -{book.discountPercentage}% {t('OFF')}
-              </Badge>
+              {book.discountPercentage > 0 && (
+                <Badge variant="primary" size="lg" className="absolute top-4 left-4">
+                  -{book.discountPercentage}% {t('OFF')}
+                </Badge>
+              )}
 
               <div className="relative w-full h-80 sm:h-96 my-4">
-                <Image
-                  src={book.coverImage}
-                  alt={title}
-                  fill
-                  className="object-contain drop-shadow-xl"
-                />
+                {book.coverImage ? (
+                  <Image
+                    src={book.coverImage}
+                    alt={title}
+                    fill
+                    className="object-contain drop-shadow-xl"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <span className="text-2xl font-black font-heading text-slate-300 text-center px-6">
+                      {title}
+                    </span>
+                  </div>
+                )}
               </div>
 
-              <div className="w-full flex items-center justify-center gap-3 pt-4 border-t border-slate-100">
-                <button
-                  onClick={() => setIsSampleOpen(true)}
-                  className="w-full py-3 bg-brand-50 hover:bg-brand-100 text-brand-700 font-bold text-xs rounded-2xl flex items-center justify-center gap-2 transition-colors"
-                >
-                  <Eye className="w-4 h-4" />
-                  <span>{t('Preview Sample PDF')}</span>
-                </button>
-              </div>
+              {hasSample && (
+                <div className="w-full flex items-center justify-center gap-3 pt-4 border-t border-slate-100">
+                  <button
+                    onClick={() => setIsSampleOpen(true)}
+                    className="w-full py-3 bg-brand-50 hover:bg-brand-100 text-brand-700 font-bold text-xs rounded-2xl flex items-center justify-center gap-2 transition-colors"
+                  >
+                    <Eye className="w-4 h-4" />
+                    <span>{t('Preview Sample PDF')}</span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
@@ -83,35 +106,56 @@ export default function BookDetailsPage({ params }: { params: Promise<{ id: stri
             <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-card space-y-4">
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant="accent">{t(book.category)}</Badge>
-                <Badge variant="outline">{language === 'hi' ? hi?.edition ?? book.edition : book.edition}</Badge>
-                <span className="text-xs font-bold text-slate-500">{t('SKU:')} {book.sku}</span>
+                {book.edition && (
+                  <Badge variant="outline">{language === 'hi' ? hi?.edition ?? book.edition : book.edition}</Badge>
+                )}
+                {book.sku && (
+                  <span className="text-xs font-bold text-slate-500">{t('SKU:')} {book.sku}</span>
+                )}
               </div>
 
               <h1 className="text-3xl font-extrabold font-heading text-navy-900 leading-tight">
                 {title}
               </h1>
 
-              <p className="text-slate-600 text-sm leading-relaxed">{subtitle}</p>
+              {subtitle && <p className="text-slate-600 text-sm leading-relaxed">{subtitle}</p>}
 
               {/* Rating & Author */}
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-slate-500 border-y border-slate-100 py-3">
-                <span className="flex items-center gap-1 font-bold text-navy-900">
-                  <Star className="w-4 h-4 fill-amber-400 text-amber-400" /> {book.rating} ({book.reviewsCount} {t('Ratings')})
-                </span>
-                <span>•</span>
-                <span>{t('Author:')} <strong className="text-navy-900">{book.author}</strong></span>
-                <span>•</span>
-                <span>{book.pages} {t('Pages')}</span>
-              </div>
+              {(book.rating || book.author || book.pages) && (
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-slate-500 border-y border-slate-100 py-3">
+                  {book.rating && (
+                    <span className="flex items-center gap-1 font-bold text-navy-900">
+                      <Star className="w-4 h-4 fill-amber-400 text-amber-400" /> {book.rating}
+                      {book.reviewsCount ? ` (${book.reviewsCount} ${t('Ratings')})` : ''}
+                    </span>
+                  )}
+                  {book.author && (
+                    <>
+                      <span>•</span>
+                      <span>{t('Author:')} <strong className="text-navy-900">{book.author}</strong></span>
+                    </>
+                  )}
+                  {book.pages && (
+                    <>
+                      <span>•</span>
+                      <span>{book.pages} {t('Pages')}</span>
+                    </>
+                  )}
+                </div>
+              )}
 
               {/* Price & Cart Action */}
               <div className="space-y-4 pt-2">
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
                   <span className="text-3xl font-black font-heading text-brand-600">₹{book.price}</span>
-                  <span className="text-base text-slate-400 line-through">₹{book.originalPrice}</span>
-                  <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-                    {t('You Save ₹')}{book.originalPrice - book.price}
-                  </span>
+                  {book.originalPrice > book.price && (
+                    <span className="text-base text-slate-400 line-through">₹{book.originalPrice}</span>
+                  )}
+                  {book.originalPrice > book.price && (
+                    <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                      {t('You Save ₹')}{book.originalPrice - book.price}
+                    </span>
+                  )}
                 </div>
 
                 <div className="flex flex-wrap gap-3">
@@ -126,13 +170,15 @@ export default function BookDetailsPage({ params }: { params: Promise<{ id: stri
                     <span>{t('Buy Now / Add to Cart')}</span>
                   </button>
 
-                  <button
-                    onClick={() => setIsSampleOpen(true)}
-                    className="px-6 py-4 bg-slate-100 hover:bg-slate-200 text-navy-900 font-bold text-xs rounded-2xl transition-colors flex items-center gap-2"
-                  >
-                    <FileText className="w-4 h-4 text-brand-600" />
-                    <span>{t('Read Sample')}</span>
-                  </button>
+                  {hasSample && (
+                    <button
+                      onClick={() => setIsSampleOpen(true)}
+                      className="px-6 py-4 bg-slate-100 hover:bg-slate-200 text-navy-900 font-bold text-xs rounded-2xl transition-colors flex items-center gap-2"
+                    >
+                      <FileText className="w-4 h-4 text-brand-600" />
+                      <span>{t('Read Sample')}</span>
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -151,22 +197,26 @@ export default function BookDetailsPage({ params }: { params: Promise<{ id: stri
 
             {/* Description & Table of Contents */}
             <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-card space-y-6">
-              <div>
-                <h3 className="text-xl font-bold font-heading text-navy-900 mb-2">{t('Book Description')}</h3>
-                <p className="text-sm text-slate-600 leading-relaxed">{language === 'hi' ? hi?.description ?? book.description : book.description}</p>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-bold font-heading text-navy-900 mb-3">{t('Table of Contents Highlights')}</h3>
-                <div className="space-y-2">
-                  {book.tableOfContents.map((chap, idx) => (
-                    <div key={idx} className="flex items-center gap-2.5 text-xs text-navy-900 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                      <CheckCircle2 className="w-4 h-4 text-brand-500 shrink-0" />
-                      <span>{hi?.tableOfContents?.[idx] ?? chap}</span>
-                    </div>
-                  ))}
+              {book.description && (
+                <div>
+                  <h3 className="text-xl font-bold font-heading text-navy-900 mb-2">{t('Book Description')}</h3>
+                  <p className="text-sm text-slate-600 leading-relaxed">{language === 'hi' ? hi?.description ?? book.description : book.description}</p>
                 </div>
-              </div>
+              )}
+
+              {book.tableOfContents && book.tableOfContents.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-bold font-heading text-navy-900 mb-3">{t('Table of Contents Highlights')}</h3>
+                  <div className="space-y-2">
+                    {book.tableOfContents.map((chap, idx) => (
+                      <div key={idx} className="flex items-center gap-2.5 text-xs text-navy-900 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                        <CheckCircle2 className="w-4 h-4 text-brand-500 shrink-0" />
+                        <span>{hi?.tableOfContents?.[idx] ?? chap}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
           </div>

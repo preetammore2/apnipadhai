@@ -29,30 +29,41 @@ function PaymentStatusContent() {
 
     let cancelled = false;
 
-    (async () => {
+    const verify = async (): Promise<void> => {
+      let res: Response;
       try {
-        const res = await fetch('/api/payments/verify', {
+        res = await fetch('/api/payments/verify', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ merchantTransactionId }),
         });
-        const data = await res.json();
-        if (cancelled) return;
-
-        if (res.ok && data.success) {
-          setStatus('success');
-          dispatch(clearCart());
-        } else {
-          setStatus('failed');
-          setMessage(data.message || t('Payment could not be verified'));
-        }
       } catch {
-        if (!cancelled) {
-          setStatus('failed');
-          setMessage(t('Network error while verifying payment'));
-        }
+        if (!cancelled) setMessage(t('Network error while verifying payment'));
+        return;
       }
-    })();
+
+      const data = await res.json().catch(() => null);
+      if (cancelled) return;
+
+      if (res.ok && data?.success) {
+        setStatus('success');
+        dispatch(clearCart());
+        return;
+      }
+
+      const state = data?.data?.state;
+      if (!cancelled && state === 'PENDING') {
+        window.setTimeout(() => {
+          if (!cancelled) void verify();
+        }, 3000);
+        return;
+      }
+
+      setStatus('failed');
+      setMessage(data?.message || t('Payment could not be verified'));
+    };
+
+    void verify();
 
     return () => {
       cancelled = true;
@@ -91,7 +102,9 @@ function PaymentStatusContent() {
                 {amountPaise > 0 && (
                   <div className="flex justify-between text-xs text-slate-500">
                     <span>{t('Amount Paid')}</span>
-                    <span className="font-bold text-navy-900">₹{(amountPaise / 100).toLocaleString('en-IN')}</span>
+                    <span className="font-bold text-navy-900">
+                      ₹{(amountPaise / 100).toLocaleString('en-IN')}
+                    </span>
                   </div>
                 )}
               </div>

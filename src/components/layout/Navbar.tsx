@@ -11,14 +11,9 @@ import {
   Phone,
   Menu,
   X,
-  ChevronDown,
   BookOpen,
-  GraduationCap,
-  Sparkles,
   Download,
-  FileCheck,
   Award,
-  Layers,
   Home,
   BookMarked,
   FileText,
@@ -33,9 +28,8 @@ import {
 } from '@/redux/features/ui/uiSlice';
 import { useTranslation } from '@/i18n/useTranslation';
 import { LanguageSwitcher } from './LanguageSwitcher';
-import { COURSES_DATA } from '@/data/courses';
-import { BOOKS_DATA } from '@/data/books';
-import { COURSE_HI, BOOK_HI } from '@/i18n/data';
+import { BOOK_HI } from '@/i18n/data';
+import { useGetBooksQuery } from '@/redux/api/bookApi';
 
 interface NavbarProps {
   onOpenCounselorModal?: () => void;
@@ -44,7 +38,6 @@ interface NavbarProps {
 export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isCoursesMegaMenuOpen, setIsCoursesMegaMenuOpen] = useState(false);
 
   const pathname = usePathname();
   const dispatch = useAppDispatch();
@@ -54,25 +47,18 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
   const wishlistCount = useAppSelector((state) => state.wishlist.items.length);
   const isSearchOpen = useAppSelector((state) => state.ui.isSearchOpen);
   const searchQuery = useAppSelector((state) => state.ui.searchQuery);
+  const { data: allBooks = [] } = useGetBooksQuery();
 
   const normalizedQuery = searchQuery.trim().toLowerCase();
-  const searchResults = normalizedQuery
-    ? {
-        courses: COURSES_DATA.filter((course) => {
-          const hi = COURSE_HI[course.id];
-          return `${course.title} ${course.subtitle} ${course.targetExam} ${course.category} ${hi ? `${hi.title} ${hi.subtitle} ${hi.targetExam}` : ''}`
-            .toLowerCase()
-            .includes(normalizedQuery);
-        }),
-        books: BOOKS_DATA.filter((book) => {
-          const hi = BOOK_HI[book.id];
-          return `${book.title} ${book.subtitle} ${book.category} ${book.examTarget} ${hi ? `${hi.title} ${hi.subtitle} ${hi.examTarget}` : ''}`
-            .toLowerCase()
-            .includes(normalizedQuery);
-        }),
-      }
-    : null;
-  const totalResults = searchResults ? searchResults.courses.length + searchResults.books.length : 0;
+  const searchBooks = normalizedQuery
+    ? allBooks.filter((book) => {
+        const hi = BOOK_HI[book.id];
+        return `${book.title} ${book.subtitle ?? ''} ${book.category} ${hi ? `${hi.title} ${hi.subtitle}` : ''}`
+          .toLowerCase()
+          .includes(normalizedQuery);
+      })
+    : [];
+  const totalResults = searchBooks.length;
 
   const closeSearch = () => {
     dispatch(setSearchOpen(false));
@@ -107,7 +93,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
 
   useEffect(() => {
     setIsMobileMenuOpen(false);
-    setIsCoursesMegaMenuOpen(false);
     dispatch(setSearchOpen(false));
     dispatch(setSearchQuery(''));
   }, [pathname, dispatch]);
@@ -116,7 +101,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setIsMobileMenuOpen(false);
-        setIsCoursesMegaMenuOpen(false);
         dispatch(setSearchOpen(false));
       }
     };
@@ -124,21 +108,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
     return () => window.removeEventListener('keydown', handleKey);
   }, [dispatch]);
 
-  const megaMenuCloseTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const openMegaMenu = () => {
-    if (megaMenuCloseTimer.current) clearTimeout(megaMenuCloseTimer.current);
-    setIsCoursesMegaMenuOpen(true);
-  };
-
-  const closeMegaMenu = () => {
-    if (megaMenuCloseTimer.current) clearTimeout(megaMenuCloseTimer.current);
-    megaMenuCloseTimer.current = setTimeout(() => setIsCoursesMegaMenuOpen(false), 150);
-  };
-
   const navLinks = [
     { name: t('Home'), href: '/', icon: <Home className="w-4 h-4" /> },
-    { name: t('All Courses'), href: '/courses', hasDropdown: true, icon: <GraduationCap className="w-4 h-4" /> },
     { name: t('Books'), href: '/books', icon: <BookMarked className="w-4 h-4" /> },
     { name: t('PYQs'), href: '/pyqs', icon: <FileText className="w-4 h-4" /> },
     { name: t('Results'), href: '/results', icon: <Award className="w-4 h-4" /> },
@@ -148,45 +119,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
   const isLinkActive = (href: string) =>
     href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`);
 
-  const courseCategories = [
-    {
-      name: t('Rajasthan GK Master Batches'),
-      desc: t('Complete History, Art & Culture, Geography & Polity'),
-      href: '/courses?category=rajasthan-gk',
-      icon: <BookOpen className="w-5 h-5 text-amber-600" />,
-    },
-    {
-      name: t('Rajasthan CET 2026'),
-      desc: t('Senior Secondary (12th Pass) & Graduate Level Prep'),
-      href: '/courses?category=cet',
-      icon: <GraduationCap className="w-5 h-5 text-blue-600" />,
-    },
-    {
-      name: t('SSC GD Target Foundation'),
-      desc: t('Mass recruitment preparation for Constable posts'),
-      href: '/courses?category=ssc-gd',
-      icon: <Award className="w-5 h-5 text-amber-500" />,
-    },
-    {
-      name: t('RAS Pre + Mains Integrated'),
-      desc: t('Comprehensive Civil Services Guidance & Answer Writing'),
-      href: '/courses?category=ras',
-      icon: <Sparkles className="w-5 h-5 text-emerald-600" />,
-    },
-    {
-      name: t('High Court LDC & Group D'),
-      desc: t('Special Language & Aptitude Mastery Crash Courses'),
-      href: '/courses?category=ldc',
-      icon: <Layers className="w-5 h-5 text-purple-600" />,
-    },
-    {
-      name: t('General Science Brahmastra'),
-      desc: t('NCERT based Physics, Chemistry & Biology'),
-      href: '/courses?category=science',
-      icon: <FileCheck className="w-5 h-5 text-rose-600" />,
-    },
-  ];
-
   return (
     <>
       {/* Top Notification Banner */}
@@ -194,9 +126,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="px-2.5 py-0.5 bg-yellow-400 text-navy-950 text-[10px] font-black uppercase rounded-full animate-pulse shadow-button-glow">
-              {t('NEW BATCHES LIVE')}
+              {t('PUBLICATION STORE')}
             </span>
-            <span className="text-slate-200">{t('🔥 Rajasthan CET 2026 & SSC GD Special Brahmastra Batches are live!')}</span>
+            <span className="text-slate-200">{t('🔥 New editions of the Brahmastra book series are now available!')}</span>
           </div>
           <div className="flex items-center gap-4 text-slate-300 text-[11px]">
             <span>{t('Helpline:')} <strong className="text-yellow-400 font-bold">+91 7568716768</strong></span>
@@ -249,82 +181,23 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
                 const isActive = isLinkActive(link.href);
 
                 return (
-                  <div
+                  <Link
                     key={link.name}
-                    className="relative"
-                    onMouseEnter={link.hasDropdown ? openMegaMenu : undefined}
-                    onMouseLeave={link.hasDropdown ? closeMegaMenu : undefined}
+                    href={link.href}
+                    className={`group relative flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-colors ${
+                      isActive ? 'text-navy-900' : 'text-slate-700 hover:text-navy-900'
+                    }`}
                   >
-                    <Link
-                      href={link.href}
-                      className={`group relative flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-colors ${
-                        isActive ? 'text-navy-900' : 'text-slate-700 hover:text-navy-900'
-                      }`}
-                    >
-                      <span className="absolute inset-0 rounded-full bg-slate-200/70 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-                      {isActive && (
-                        <motion.span
-                          layoutId="nav-pill"
-                          className="absolute inset-0 bg-yellow-400 shadow-sm rounded-full"
-                          transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                        />
-                      )}
-                      <span className="relative z-10">{link.name}</span>
-                      {link.hasDropdown && (
-                        <ChevronDown
-                          className={`relative z-10 w-3.5 h-3.5 transition-transform ${
-                            isCoursesMegaMenuOpen ? 'rotate-180 text-navy-900' : 'text-slate-500'
-                          }`}
-                        />
-                      )}
-                    </Link>
-
-                    {/* Mega Dropdown Menu */}
-                    {link.hasDropdown && (
-                      <AnimatePresence>
-                        {isCoursesMegaMenuOpen && (
-                          <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 10 }}
-                            transition={{ duration: 0.2 }}
-                            className="absolute top-full left-0 w-[540px] bg-white rounded-3xl shadow-2xl border border-amber-200 p-6 grid grid-cols-2 gap-3 mt-1 z-50"
-                          >
-                            {courseCategories.map((cat, idx) => (
-                              <Link
-                                key={idx}
-                                href={cat.href}
-                                onClick={() => setIsCoursesMegaMenuOpen(false)}
-                                className="flex items-start gap-3 p-3 rounded-2xl hover:bg-amber-50/60 transition-colors group"
-                              >
-                                <div className="p-2.5 bg-slate-100 rounded-xl group-hover:bg-yellow-400 group-hover:shadow-sm transition-all shrink-0">
-                                  {cat.icon}
-                                </div>
-                                <div>
-                                  <h4 className="text-xs font-bold text-navy-900 group-hover:text-amber-700 transition-colors">
-                                    {cat.name}
-                                  </h4>
-                                  <p className="text-[11px] text-slate-500 line-clamp-2 mt-0.5">
-                                    {cat.desc}
-                                  </p>
-                                </div>
-                              </Link>
-                            ))}
-                            <div className="col-span-2 mt-2 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                              <span className="text-slate-500">{t('Looking for custom exam strategy?')}</span>
-                              <Link
-                                href="/courses"
-                                onClick={() => setIsCoursesMegaMenuOpen(false)}
-                                className="font-bold text-amber-600 hover:underline"
-                              >
-                                {t('View All Batches →')}
-                              </Link>
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
+                    <span className="absolute inset-0 rounded-full bg-slate-200/70 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                    {isActive && (
+                      <motion.span
+                        layoutId="nav-pill"
+                        className="absolute inset-0 bg-yellow-400 shadow-sm rounded-full"
+                        transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                      />
                     )}
-                  </div>
+                    <span className="relative z-10">{link.name}</span>
+                  </Link>
                 );
               })}
             </nav>
@@ -339,7 +212,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
               <button
                 onClick={() => dispatch(setSearchOpen(!isSearchOpen))}
                 className="p-2 sm:p-2.5 text-slate-600 hover:text-amber-600 hover:bg-amber-50 rounded-full transition-colors"
-                title={t('Search courses & books')}
+                title={t('Search books')}
               >
                 <Search className="w-5 h-5" />
               </button>
@@ -430,7 +303,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
                 <Search className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
-                  placeholder={t('Search for Rajasthan GK, Brahmastra Books, CET, Science, PYQs...')}
+                  placeholder={t('Search for Brahmastra Books, Science, Hindi, English, PYQs...')}
                   value={searchQuery}
                   onChange={(e) => dispatch(setSearchQuery(e.target.value))}
                   className="w-full pl-12 pr-10 py-3 bg-white border border-amber-200 rounded-2xl text-sm focus:outline-none focus:border-yellow-500 shadow-sm text-navy-900"
@@ -447,74 +320,43 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
               </div>
 
               {/* Search Results Dropdown */}
-              {searchResults && (
+              {searchQuery.trim() && (
                 <div className="max-w-3xl mx-auto mt-3 bg-white rounded-2xl border border-amber-100 shadow-lg overflow-hidden">
                   {totalResults === 0 ? (
                     <div className="p-6 text-center">
                       <p className="text-xs font-bold text-slate-600">{t('No results found for')} &quot;{searchQuery}&quot;</p>
                       <p className="text-[11px] text-slate-400 mt-1">
-                        {t('Try searching for')} &quot;{t('Science')}&quot;, &quot;CET&quot;, &quot;Rajasthan GK&quot; {t('or')} &quot;History&quot;.
+                        {t('Try searching for')} &quot;{t('Science')}&quot;, &quot;CET&quot;, &quot;Rajasthan GK&quot; {t('or')} &quot;English&quot;.
                       </p>
                     </div>
                   ) : (
                     <div className="max-h-[420px] overflow-y-auto">
-                      {searchResults.courses.length > 0 && (
-                        <div className="py-2">
-                          <p className="px-4 pb-1.5 text-[10px] font-black uppercase tracking-wider text-amber-700">
-                            {t('Live Batches')}
-                          </p>
-                          {searchResults.courses.slice(0, 4).map((course) => (
-                            <Link
-                              key={course.id}
-                              href={`/courses/${course.id}`}
-                              onClick={closeSearch}
-                              className="flex items-center gap-3 px-4 py-2.5 hover:bg-amber-50/70 transition-colors"
-                            >
-                              <div className="p-2 bg-slate-100 rounded-xl shrink-0">
-                                <GraduationCap className="w-4 h-4 text-amber-600" />
-                              </div>
-                              <div className="min-w-0 flex-1">
-                                <p className="text-xs font-bold text-navy-900 truncate">
-                                  {language === 'hi' ? COURSE_HI[course.id]?.title ?? course.title : course.title}
-                                </p>
-                                <p className="text-[10px] text-slate-500 truncate">
-                                  {language === 'hi' ? COURSE_HI[course.id]?.targetExam ?? course.targetExam : course.targetExam}
-                                </p>
-                              </div>
-                              <span className="text-xs font-black text-navy-900 shrink-0">₹{course.price}</span>
-                            </Link>
-                          ))}
-                        </div>
-                      )}
-
-                      {searchResults.books.length > 0 && (
-                        <div className="py-2 border-t border-slate-100">
-                          <p className="px-4 pb-1.5 text-[10px] font-black uppercase tracking-wider text-amber-700">
-                            {t('Brahmastra Books')}
-                          </p>
-                          {searchResults.books.slice(0, 4).map((book) => (
-                            <Link
-                              key={book.id}
-                              href={`/books/${book.id}`}
-                              onClick={closeSearch}
-                              className="flex items-center gap-3 px-4 py-2.5 hover:bg-amber-50/70 transition-colors"
-                            >
-                              <div className="p-2 bg-slate-100 rounded-xl shrink-0">
-                                <BookOpen className="w-4 h-4 text-blue-600" />
-                              </div>
-                              <div className="min-w-0 flex-1">
-                                <p className="text-xs font-bold text-navy-900 truncate">
-                                  {language === 'hi' ? BOOK_HI[book.id]?.title ?? book.title : book.title}
-                                </p>
-                                <p className="text-[10px] text-slate-500 truncate">
-                                  {language === 'hi' ? BOOK_HI[book.id]?.examTarget ?? book.category : book.category}
-                                </p>
-                              </div>
-                              <span className="text-xs font-black text-navy-900 shrink-0">₹{book.price}</span>
-                            </Link>
-                          ))}
-                        </div>
-                      )}
+                      <div className="py-2">
+                        <p className="px-4 pb-1.5 text-[10px] font-black uppercase tracking-wider text-amber-700">
+                          {t('Brahmastra Books')}
+                        </p>
+                        {searchBooks.slice(0, 6).map((book) => (
+                          <Link
+                            key={book.id}
+                            href={`/books/${book.id}`}
+                            onClick={closeSearch}
+                            className="flex items-center gap-3 px-4 py-2.5 hover:bg-amber-50/70 transition-colors"
+                          >
+                            <div className="p-2 bg-slate-100 rounded-xl shrink-0">
+                              <BookOpen className="w-4 h-4 text-blue-600" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="text-xs font-bold text-navy-900 truncate">
+                                {language === 'hi' ? BOOK_HI[book.id]?.title ?? book.title : book.title}
+                              </p>
+                              <p className="text-[10px] text-slate-500 truncate">
+                                {book.category}
+                              </p>
+                            </div>
+                            <span className="text-xs font-black text-navy-900 shrink-0">₹{book.price}</span>
+                          </Link>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -667,15 +509,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
         >
           <Home className="w-5 h-5" />
           <span>{t('Home')}</span>
-        </Link>
-        <Link
-          href="/courses"
-          className={`flex flex-col items-center gap-0.5 text-[10px] font-bold whitespace-nowrap min-w-0 ${
-            pathname.startsWith('/courses') ? 'text-amber-700 font-black' : 'text-slate-500'
-          }`}
-        >
-          <BookOpen className="w-5 h-5" />
-          <span>{t('Courses')}</span>
         </Link>
         <Link
           href="/books"

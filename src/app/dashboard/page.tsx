@@ -2,15 +2,12 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { COURSES_DATA } from '@/data/courses';
-import { BOOKS_DATA } from '@/data/books';
-import { BookOpen, ShoppingBag, PlayCircle, CheckCircle } from 'lucide-react';
+import { ShoppingBag, CheckCircle } from 'lucide-react';
 import { useTranslation } from '@/i18n/useTranslation';
 
 export default function DashboardPage() {
   const { t } = useTranslation();
-  const enrolledCourse = COURSES_DATA[0];
-  const orderedBook = BOOKS_DATA[0];
+  const orderedBook = { title: 'Science Brahmastra [CET / LDC Edition]', price: 125 };
 
   return (
     <div className="py-12 bg-slate-50 min-h-screen">
@@ -29,8 +26,8 @@ export default function DashboardPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <Link href="/courses" className="px-4 py-2.5 bg-brand-500 hover:bg-brand-600 text-white rounded-xl text-xs font-bold transition-all shadow-button-glow">
-              {t('Explore New Batches')}
+            <Link href="/books" className="px-4 py-2.5 bg-brand-500 hover:bg-brand-600 text-white rounded-xl text-xs font-bold transition-all shadow-button-glow">
+              {t('Explore New Books')}
             </Link>
           </div>
         </div>
@@ -41,30 +38,6 @@ export default function DashboardPage() {
           {/* Main Enrolled Content */}
           <div className="lg:col-span-8 space-y-6">
             
-            <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-card space-y-4">
-              <h3 className="text-lg font-bold font-heading text-navy-900">{t('My Enrolled Courses')}</h3>
-              
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-brand-100 text-brand-700 rounded-xl">
-                    <BookOpen className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-bold text-navy-900">{enrolledCourse.title}</h4>
-                    <p className="text-xs text-slate-500">{enrolledCourse.totalLectures} {t('Lectures • Progress:')} 42% {t('Completed')}</p>
-                  </div>
-                </div>
-
-                <Link
-                  href={`/courses/${enrolledCourse.id}`}
-                  className="px-4 py-2 bg-navy-900 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shrink-0"
-                >
-                  <PlayCircle className="w-4 h-4" />
-                  <span>{t('Resume Learning')}</span>
-                </Link>
-              </div>
-            </div>
-
             <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-card space-y-4">
               <h3 className="text-lg font-bold font-heading text-navy-900">{t('My Book Orders')}</h3>
 

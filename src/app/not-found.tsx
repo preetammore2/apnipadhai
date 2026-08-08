@@ -33,10 +33,10 @@ export default function NotFound() {
             <span>{t('Go to Home')}</span>
           </Link>
           <Link
-            href="/courses"
+            href="/books"
             className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-navy-900 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2"
           >
-            <span>{t('Browse Courses')}</span>
+            <span>{t('Browse Books')}</span>
           </Link>
         </div>
       </div>

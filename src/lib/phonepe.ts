@@ -4,10 +4,11 @@ export type PhonePeMode = 'mock' | 'test' | 'live';
 
 export interface PhonePeConfig {
   mode: PhonePeMode;
-  merchantId: string;
-  saltKey: string;
-  saltIndex: number;
-  baseUrl: string;
+  clientId: string;
+  clientSecret: string;
+  clientVersion: string;
+  authBaseUrl: string;
+  apiBaseUrl: string;
   signingSecret: string;
 }
 
@@ -18,79 +19,121 @@ export interface PhonePePaymentResponse {
 }
 
 export interface PhonePePaymentData {
-  success?: boolean;
+  orderId?: string;
+  merchantOrderId?: string;
+  state?: string;
+  amount?: number;
+  redirectUrl?: string;
+  expireAt?: number;
+  errorCode?: string;
+  detailedErrorCode?: string;
+  paymentDetails?: {
+    transactionId?: string;
+    paymentMode?: string;
+    amount?: number;
+    state?: string;
+    timestamp?: number;
+    utr?: string;
+    errorCode?: string;
+    detailedErrorCode?: string;
+  }[];
   code?: string;
   message?: string;
-  data?: {
-    merchantTransactionId?: string;
-    transactionId?: string;
-    redirectUrl?: string;
-    state?: string;
-    amount?: number;
-    providerReferenceId?: string;
-  };
 }
 
-const DEFAULT_BASE_URLS: Record<Exclude<PhonePeMode, 'mock'>, string> = {
+const DEFAULT_AUTH_BASE_URLS: Record<Exclude<PhonePeMode, 'mock'>, string> = {
   test: 'https://api-preprod.phonepe.com/apis/pg-sandbox',
-  live: 'https://api.phonepe.com/apis/hermes',
+  live: 'https://api.phonepe.com/apis/identity-manager',
+};
+
+const DEFAULT_API_BASE_URLS: Record<Exclude<PhonePeMode, 'mock'>, string> = {
+  test: 'https://api-preprod.phonepe.com/apis/pg-sandbox',
+  live: 'https://api.phonepe.com/apis/pg',
 };
 
 const MOCK_SIGNING_SECRET = 'dev-only-mock-signing-secret';
 
 export function getPhonePeConfig(): PhonePeConfig {
   const mode = (process.env.PHONEPE_ENV || 'mock').trim().toLowerCase() as PhonePeMode;
-  const merchantId = process.env.PHONEPE_MERCHANT_ID || '';
-  const saltKey = process.env.PHONEPE_SALT_KEY || '';
-  const saltIndex = Number(process.env.PHONEPE_SALT_INDEX || 1);
+  const clientId = process.env.PHONEPE_CLIENT_ID || '';
+  const clientSecret = process.env.PHONEPE_CLIENT_SECRET || '';
+  const clientVersion = process.env.PHONEPE_CLIENT_VERSION || '1';
   const signingSecret = process.env.PAYMENT_SIGNING_SECRET || '';
 
   if (mode === 'mock') {
     return {
       mode,
-      merchantId: merchantId || 'MOCKMERCHANT',
-      saltKey: saltKey || 'mock-salt-key',
-      saltIndex,
-      baseUrl: process.env.PHONEPE_API_BASE_URL || DEFAULT_BASE_URLS.test,
+      clientId: clientId || 'mock-client-id',
+      clientSecret: clientSecret || 'mock-client-secret',
+      clientVersion,
+      authBaseUrl: process.env.PHONEPE_AUTH_BASE_URL || DEFAULT_AUTH_BASE_URLS.test,
+      apiBaseUrl: process.env.PHONEPE_API_BASE_URL || DEFAULT_API_BASE_URLS.test,
       signingSecret: signingSecret || MOCK_SIGNING_SECRET,
     };
   }
 
-  if (!merchantId || !saltKey || !signingSecret) {
+  if (!clientId || !clientSecret || !signingSecret) {
     throw new Error(
-      'PhonePe is not configured. Set PHONEPE_ENV=test/live, PHONEPE_MERCHANT_ID, PHONEPE_SALT_KEY and PAYMENT_SIGNING_SECRET.',
+      'PhonePe is not configured. Set PHONEPE_ENV=test/live, PHONEPE_CLIENT_ID, PHONEPE_CLIENT_SECRET and PAYMENT_SIGNING_SECRET.',
     );
   }
 
   return {
     mode,
-    merchantId,
-    saltKey,
-    saltIndex,
-    baseUrl: process.env.PHONEPE_API_BASE_URL || DEFAULT_BASE_URLS[mode === 'live' ? 'live' : 'test'],
+    clientId,
+    clientSecret,
+    clientVersion,
+    authBaseUrl: process.env.PHONEPE_AUTH_BASE_URL || DEFAULT_AUTH_BASE_URLS[mode === 'live' ? 'live' : 'test'],
+    apiBaseUrl: process.env.PHONEPE_API_BASE_URL || DEFAULT_API_BASE_URLS[mode === 'live' ? 'live' : 'test'],
     signingSecret,
   };
 }
 
-export function generateChecksum(
-  base64Payload: string,
-  apiEndpoint: string,
-  saltKey: string,
-  saltIndex: number,
-): string {
-  const hash = crypto
-    .createHash('sha256')
-    .update(`${base64Payload}${apiEndpoint}${saltKey}`)
-    .digest('hex');
-  return `${hash}###${saltIndex}`;
+let cachedToken: { accessToken: string; expiresAt: number } | null = null;
+
+async function getAccessToken(): Promise<string> {
+  if (cachedToken && cachedToken.expiresAt - 60_000 > Date.now()) {
+    return cachedToken.accessToken;
+  }
+
+  const config = getPhonePeConfig();
+  const body = new URLSearchParams({
+    client_id: config.clientId,
+    client_version: config.clientVersion,
+    client_secret: config.clientSecret,
+    grant_type: 'client_credentials',
+  });
+
+  const res = await fetch(`${config.authBaseUrl}/v1/oauth/token`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: body.toString(),
+    cache: 'no-store',
+  });
+
+  const data = (await res.json().catch(() => null)) as {
+    access_token?: string;
+    expires_at?: number;
+    message?: string;
+  } | null;
+
+  if (!res.ok || !data?.access_token) {
+    throw new Error(data?.message || 'Failed to obtain PhonePe access token');
+  }
+
+  const expiresAtRaw = Number(data.expires_at ?? 0);
+  const expiresAt =
+    expiresAtRaw > 1_000_000_000_000 ? expiresAtRaw : expiresAtRaw * 1000;
+
+  cachedToken = {
+    accessToken: data.access_token,
+    expiresAt: Math.max(expiresAt, Date.now() + 60_000),
+  };
+  return cachedToken.accessToken;
 }
 
 export function generateMerchantTransactionId(): string {
   return `AP${Date.now()}${Math.floor(Math.random() * 90000 + 10000)}`;
-}
-
-export function generateMerchantUserId(): string {
-  return `MUID${Date.now()}${Math.floor(Math.random() * 9000 + 1000)}`;
 }
 
 export function getRequestBaseUrl(headers: Headers): string {
@@ -99,45 +142,52 @@ export function getRequestBaseUrl(headers: Headers): string {
   return `${proto}://${host}`;
 }
 
+export function getRedirectBaseUrl(headers: Headers): string {
+  const override = (process.env.PHONEPE_REDIRECT_BASE_URL ?? '').trim().replace(/\/+$/, '');
+  if (override) return override;
+  return getRequestBaseUrl(headers);
+}
+
 export interface CreatePaymentParams {
-  merchantId: string;
-  merchantTransactionId: string;
-  merchantUserId: string;
+  merchantOrderId: string;
   amountPaise: number;
   mobileNumber: string;
   redirectUrl: string;
-  callbackUrl: string;
-  baseUrl: string;
-  saltKey: string;
-  saltIndex: number;
+  config: PhonePeConfig;
 }
 
 export async function createPhonePePayment(
   params: CreatePaymentParams,
 ): Promise<PhonePePaymentResponse> {
+  const accessToken = await getAccessToken();
+
+  const phoneNumber = /^\d{10}$/.test(params.mobileNumber)
+    ? `+91 ${params.mobileNumber}`
+    : params.mobileNumber;
+
   const payload = {
-    merchantId: params.merchantId,
-    merchantTransactionId: params.merchantTransactionId,
-    merchantUserId: params.merchantUserId,
+    merchantOrderId: params.merchantOrderId,
     amount: params.amountPaise,
-    mobileNumber: params.mobileNumber,
-    redirectUrl: params.redirectUrl,
-    redirectMode: 'REDIRECT',
-    callbackUrl: params.callbackUrl,
-    paymentInstrument: { type: 'PAY_PAGE' },
+    expireAfter: ORDER_TOKEN_TTL_MS / 1000,
+    paymentFlow: {
+      type: 'PG_CHECKOUT',
+      merchantUrls: {
+        redirectUrl: params.redirectUrl,
+      },
+    },
+    prefillUserLoginDetails: {
+      phoneNumber,
+    },
+    disablePaymentRetry: true,
   };
 
-  const base64Payload = Buffer.from(JSON.stringify(payload)).toString('base64');
-  const endpoint = '/pg/v1/pay';
-  const xVerify = generateChecksum(base64Payload, endpoint, params.saltKey, params.saltIndex);
-
-  const res = await fetch(`${params.baseUrl}${endpoint}`, {
+  const res = await fetch(`${params.config.apiBaseUrl}/checkout/v2/pay`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'X-VERIFY': xVerify,
+      Authorization: `O-Bearer ${accessToken}`,
     },
-    body: JSON.stringify({ request: base64Payload }),
+    body: JSON.stringify(payload),
     cache: 'no-store',
   });
 
@@ -146,29 +196,38 @@ export async function createPhonePePayment(
 }
 
 export interface PaymentStatusParams {
-  merchantId: string;
-  merchantTransactionId: string;
-  baseUrl: string;
-  saltKey: string;
-  saltIndex: number;
+  merchantOrderId: string;
+  config: PhonePeConfig;
 }
 
 export async function getPhonePePaymentStatus(
   params: PaymentStatusParams,
 ): Promise<PhonePePaymentResponse> {
-  const endpoint = `/pg/v1/status/${params.merchantId}/${params.merchantTransactionId}`;
-  const xVerify = generateChecksum('', endpoint, params.saltKey, params.saltIndex);
+  const accessToken = await getAccessToken();
 
-  const res = await fetch(`${params.baseUrl}${endpoint}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-VERIFY': xVerify,
+  const res = await fetch(
+    `${params.config.apiBaseUrl}/checkout/v2/order/${encodeURIComponent(params.merchantOrderId)}/status?details=false`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `O-Bearer ${accessToken}`,
+      },
+      cache: 'no-store',
     },
-    cache: 'no-store',
-  });
+  );
 
   const data = (await res.json().catch(() => null)) as PhonePePaymentData | null;
+  if (!res.ok || data?.state === 'FAILED') {
+    console.error('[phonepe] order status', {
+      status: res.status,
+      merchantOrderId: params.merchantOrderId,
+      state: data?.state,
+      errorCode: data?.errorCode,
+      detailedErrorCode: data?.detailedErrorCode,
+      data,
+    });
+  }
   return { ok: res.ok, status: res.status, data };
 }
 
@@ -176,7 +235,10 @@ export const ORDER_TOKEN_TTL_MS = 30 * 60 * 1000;
 
 export interface OrderTokenPayload {
   merchantTransactionId: string;
+  woocommerceOrderId: number;
   amountPaise: number;
+  redirectUrl?: string;
+  items?: { productId: number; quantity: number }[];
   customer: {
     name: string;
     phone: string;
@@ -205,7 +267,7 @@ export function verifyOrderToken(token: string, secret: string): OrderTokenPaylo
 
   try {
     const parsed = JSON.parse(Buffer.from(body, 'base64url').toString('utf8')) as OrderTokenPayload;
-    if (!parsed.merchantTransactionId || typeof parsed.amountPaise !== 'number') return null;
+    if (!parsed.merchantTransactionId || typeof parsed.woocommerceOrderId !== 'number') return null;
     return parsed;
   } catch {
     return null;

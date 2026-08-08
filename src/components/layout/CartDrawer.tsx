@@ -14,7 +14,7 @@ import {
 } from '@/redux/features/cart/cartSlice';
 import { toast } from 'sonner';
 import { useTranslation } from '@/i18n/useTranslation';
-import { COURSE_HI, BOOK_HI } from '@/i18n/data';
+import { BOOK_HI } from '@/i18n/data';
 
 export const CartDrawer: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -31,11 +31,11 @@ export const CartDrawer: React.FC = () => {
 
   const handleApplyCoupon = (e: React.FormEvent) => {
     e.preventDefault();
-    if (couponInput.toUpperCase() === 'APNI10') {
-      dispatch(applyCoupon('APNI10'));
-      toast.success('Coupon APNI10 applied! ₹100 Extra Discount');
+    if (couponInput.toUpperCase() === 'SGS7J8VT') {
+      dispatch(applyCoupon('SGS7J8VT'));
+      toast.success('Coupon SGS7J8VT applied! ₹20 Extra Discount');
     } else {
-      toast.error(t('Invalid Coupon Code. Try "APNI10"'));
+      toast.error(t('Invalid Coupon Code. Try "SGS7J8VT"'));
     }
   };
 
@@ -89,14 +89,14 @@ export const CartDrawer: React.FC = () => {
                   </div>
                   <h4 className="text-base font-bold text-navy-900">{t('Your cart is empty')}</h4>
                   <p className="text-xs text-slate-500 max-w-xs mx-auto">
-                    {t('Explore our live target batches and bestselling Brahmastra books to add them to your cart.')}
+                    {t('Explore our bestselling Brahmastra books to add them to your cart.')}
                   </p>
                   <Link
-                    href="/courses"
+                    href="/books"
                     onClick={() => dispatch(setCartOpen(false))}
                     className="px-6 py-2.5 bg-yellow-400 hover:bg-yellow-500 text-navy-950 font-black rounded-xl text-xs shadow-sm transition-all inline-block"
                   >
-                    {t('Browse Courses & Books')}
+                    {t('Browse Books')}
                   </Link>
                 </div>
               ) : (
@@ -111,14 +111,10 @@ export const CartDrawer: React.FC = () => {
 
                     <div className="flex-1 min-w-0 space-y-1">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 bg-yellow-100 px-2 py-0.5 rounded-md">
-                        {t(item.type === 'course' ? 'Course' : 'Book')}
+                        {t('Book')}
                       </span>
                       <h4 className="text-xs font-bold text-navy-900 line-clamp-1">
-                        {language === 'hi'
-                          ? item.type === 'course'
-                            ? COURSE_HI[item.id]?.title ?? item.title
-                            : BOOK_HI[item.id]?.title ?? item.title
-                          : item.title}
+                        {language === 'hi' ? BOOK_HI[item.id]?.title ?? item.title : item.title}
                       </h4>
                       
                       <div className="flex items-center gap-2">
@@ -167,7 +163,7 @@ export const CartDrawer: React.FC = () => {
                     <Tag className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                     <input
                       type="text"
-                      placeholder={t('Coupon Code (Try APNI10)')}
+                      placeholder={t('Coupon Code (Try SGS7J8VT)')}
                       value={couponInput}
                       onChange={(e) => setCouponInput(e.target.value)}
                       className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-yellow-500 uppercase font-bold text-navy-900"

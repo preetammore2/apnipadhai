@@ -85,11 +85,6 @@ export const Footer: React.FC = () => {
             <h4 className="text-sm font-bold font-heading uppercase tracking-wider text-yellow-400 mb-4">{t('Explore Platform')}</h4>
             <ul className="space-y-2.5 text-xs text-slate-300">
               <li>
-                <Link href="/courses" className="hover:text-yellow-400 transition-colors flex items-center gap-2">
-                  <span>›</span> {t('All Online Courses')}
-                </Link>
-              </li>
-              <li>
                 <Link href="/books" className="hover:text-yellow-400 transition-colors flex items-center gap-2">
                   <span>›</span> {t('Brahmastra Books Store')}
                 </Link>
@@ -109,6 +104,16 @@ export const Footer: React.FC = () => {
                   <span>›</span> {t('Download Android App')}
                 </Link>
               </li>
+              <li>
+                <Link href="/updates" className="hover:text-yellow-400 transition-colors flex items-center gap-2">
+                  <span>›</span> {t('Blog & Latest Updates')}
+                </Link>
+              </li>
+              <li>
+                <Link href="/faq" className="hover:text-yellow-400 transition-colors flex items-center gap-2">
+                  <span>›</span> {t('FAQs')}
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -119,6 +124,16 @@ export const Footer: React.FC = () => {
               <li>
                 <Link href="/contact" className="hover:text-yellow-400 transition-colors flex items-center gap-2">
                   <span>›</span> {t('Contact & Help Center')}
+                </Link>
+              </li>
+              <li>
+                <Link href="/track-order" className="hover:text-yellow-400 transition-colors flex items-center gap-2">
+                  <span>›</span> {t('Track Your Order')}
+                </Link>
+              </li>
+              <li>
+                <Link href="/shipping-policy" className="hover:text-yellow-400 transition-colors flex items-center gap-2">
+                  <span>›</span> {t('Shipping & Delivery Policy')}
                 </Link>
               </li>
               <li>

@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -15,30 +15,98 @@ import { setSelectedPdfBook } from '@/redux/features/ui/uiSlice';
 import { toggleWishlist } from '@/redux/features/wishlist/wishlistSlice';
 import { toast } from 'sonner';
 
+const BOOK_TABS = [
+  'All books',
+  'Apni Padhai',
+  'General English',
+  'Science Book',
+  'Math Book',
+  'Hindi Book',
+  'Rajasthan Art & Culture',
+  'Rajasthan Geography',
+  'Rajasthan History',
+  'Rajasthan Politics',
+  'Rajasthan Computer',
+  'Rajasthan Sample Papers',
+  'Combo',
+];
+
 export const BooksSection: React.FC = () => {
   const { t, language } = useTranslation();
   const dispatch = useAppDispatch();
   const wishlistItems = useAppSelector((state) => state.wishlist.items);
   const { data: books = [], isLoading, isError, refetch } = useGetBooksQuery();
+  const [activeTab, setActiveTab] = useState('All books');
+
+  const tabCounts = useMemo(() => {
+    const counts = new Map<string, number>([['All books', books.length]]);
+    for (const tab of BOOK_TABS) {
+      if (tab === 'All books') continue;
+      counts.set(
+        tab,
+        books.filter(
+          (book) => book.categories?.includes(tab) ?? book.category === tab,
+        ).length,
+      );
+    }
+    return counts;
+  }, [books]);
+
+  const filteredBooks = useMemo(() => {
+    if (activeTab === 'All books') return books;
+    return books.filter(
+      (book) => book.categories?.includes(activeTab) ?? book.category === activeTab,
+    );
+  }, [books, activeTab]);
 
   return (
     <section className="py-20 bg-slate-50/80 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-6">
           <div>
             <span className="text-xs font-black text-amber-800 uppercase tracking-widest bg-yellow-100 px-3.5 py-1.5 rounded-full border border-yellow-300">
               {t('APNI PADHAI PUBLICATION')}
             </span>
             <h2 className="text-3xl sm:text-4xl font-extrabold font-heading text-navy-900 mt-3">
-              {t('Bestselling Brahmastra Book Series')}
+              {t('On Apni Padhai Books')}
             </h2>
             <p className="text-slate-600 text-sm sm:text-base mt-2">
               {t('Authentic study guides, question banks, and model papers trusted by over 2.5 Lakh+ students.')}
             </p>
           </div>
         </div>
+
+        {/* Category Tabs */}
+        {!isLoading && !isError && books.length > 0 && (
+          <div className="flex gap-2 overflow-x-auto pb-2 mb-10 -mx-4 px-4 sm:mx-0 sm:px-0">
+            {BOOK_TABS.map((tab) => {
+              const count = tabCounts.get(tab) ?? 0;
+              const isActive = activeTab === tab;
+              return (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`flex-shrink-0 px-4 py-2 rounded-full text-xs font-bold transition-all border ${
+                    isActive
+                      ? 'bg-navy-900 text-white border-navy-900 shadow-md'
+                      : 'bg-white text-slate-600 border-slate-200 hover:border-amber-300 hover:text-amber-800'
+                  }`}
+                >
+                  {t(tab)}
+                  <span
+                    className={`ml-1.5 text-[10px] font-black rounded-full px-1.5 py-0.5 ${
+                      isActive ? 'bg-yellow-400 text-navy-950' : 'bg-slate-100 text-slate-500'
+                    }`}
+                  >
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         {/* Loading Spinner */}
         {isLoading ? (
@@ -80,11 +148,21 @@ export const BooksSection: React.FC = () => {
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
+        ) : filteredBooks.length === 0 ? (
+          <div className="py-16 text-center">
+            <div className="w-16 h-16 bg-slate-100 text-slate-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Search className="w-8 h-8" />
+            </div>
+            <h3 className="text-lg font-bold font-heading text-navy-900">{t('No books in this category yet')}</h3>
+            <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+              {t('New editions in this category are being printed. Explore other categories instead.')}
+            </p>
+          </div>
         ) : (
           <>
           {/* Books Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {books.slice(0, 4).map((book) => {
+            {filteredBooks.slice(0, 8).map((book) => {
               const hi = BOOK_HI[book.id];
               return (
               <motion.div
@@ -95,9 +173,11 @@ export const BooksSection: React.FC = () => {
                 <div>
                   {/* Book Cover Image 3D Frame */}
                   <div className="relative h-64 w-full bg-slate-50 rounded-2xl overflow-hidden mb-4 border border-slate-200/80 flex items-center justify-center p-4 group-hover:shadow-md transition-all">
-                    <span className="absolute top-3 left-3 z-10 px-2.5 py-1 bg-yellow-400 text-navy-950 text-[10px] font-black rounded-full shadow-sm">
-                      -{book.discountPercentage}% {t('OFF')}
-                    </span>
+                    {book.discountPercentage > 0 && (
+                      <span className="absolute top-3 left-3 z-10 px-2.5 py-1 bg-yellow-400 text-navy-950 text-[10px] font-black rounded-full shadow-sm">
+                        -{book.discountPercentage}% {t('OFF')}
+                      </span>
+                    )}
 
                     <button
                       onClick={() => {
@@ -123,24 +203,32 @@ export const BooksSection: React.FC = () => {
                       />
                     </button>
 
-                    <div className="relative w-full h-full transform group-hover:scale-105 transition-transform duration-300">
-                      <Image
-                        src={book.coverImage}
-                        alt={language === 'hi' ? hi?.title ?? book.title : book.title}
-                        fill
-                        className="object-contain drop-shadow-lg"
-                      />
-                    </div>
+                    {book.coverImage ? (
+                      <div className="relative w-full h-full transform group-hover:scale-105 transition-transform duration-300">
+                        <Image
+                          src={book.coverImage}
+                          alt={language === 'hi' ? hi?.title ?? book.title : book.title}
+                          fill
+                          className="object-contain drop-shadow-lg"
+                        />
+                      </div>
+                    ) : (
+                      <span className="text-xl font-black font-heading text-slate-300 text-center px-4">
+                        {language === 'hi' ? hi?.title ?? book.title : book.title}
+                      </span>
+                    )}
 
                     {/* Hover Quick Action Buttons */}
                     <div className="absolute inset-0 bg-navy-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3 p-4">
-                      <button
-                        onClick={() => dispatch(setSelectedPdfBook(book))}
-                        className="p-3 bg-white text-navy-900 rounded-full shadow-lg hover:bg-yellow-400 hover:text-navy-950 transition-colors"
-                        title={t('Preview Sample PDF')}
-                      >
-                        <Eye className="w-5 h-5" />
-                      </button>
+                      {book.samplePdfUrl && (
+                        <button
+                          onClick={() => dispatch(setSelectedPdfBook(book))}
+                          className="p-3 bg-white text-navy-900 rounded-full shadow-lg hover:bg-yellow-400 hover:text-navy-950 transition-colors"
+                          title={t('Preview Sample PDF')}
+                        >
+                          <Eye className="w-5 h-5" />
+                        </button>
+                      )}
                       <button
                         onClick={() => {
                           dispatch(addToCart({ item: book, type: 'book' }));
@@ -160,17 +248,19 @@ export const BooksSection: React.FC = () => {
                     <h3 className="text-base font-bold font-heading text-navy-900 line-clamp-1 group-hover:text-amber-700 transition-colors">
                       {language === 'hi' ? hi?.title ?? book.title : book.title}
                     </h3>
-                    <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
-                      {language === 'hi' ? hi?.subtitle ?? book.subtitle : book.subtitle}
-                    </p>
+                    {book.subtitle && (
+                      <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                        {language === 'hi' ? hi?.subtitle ?? book.subtitle : book.subtitle}
+                      </p>
+                    )}
                   </div>
 
                   {/* Rating & Details */}
                   <div className="flex items-center justify-between text-xs text-slate-500 mt-3 pt-3 border-t border-slate-100">
                     <span className="flex items-center gap-1 font-bold text-navy-900">
-                      <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-500" /> {book.rating}
+                      <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-500" /> {book.rating ?? t('Best Seller')}
                     </span>
-                    <span>{book.pages} {t('Pages')}</span>
+                    <span>{book.pages ? `${book.pages} ${t('Pages')}` : t('Paperback')}</span>
                   </div>
                 </div>
 
@@ -179,7 +269,9 @@ export const BooksSection: React.FC = () => {
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="text-xl font-black font-heading text-navy-900">₹{book.price}</span>
-                      <span className="text-xs text-slate-400 line-through">₹{book.originalPrice}</span>
+                      {book.originalPrice > book.price && (
+                        <span className="text-xs text-slate-400 line-through">₹{book.originalPrice}</span>
+                      )}
                     </div>
                     <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-1">
                       <Truck className="w-3 h-3" /> {t('Doorstep Delivery')}

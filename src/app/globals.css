@@ -123,6 +123,30 @@
     transform: translateY(-8px) scale(1.01);
     box-shadow: 0 20px 40px -12px rgba(202, 138, 4, 0.3);
   }
+
+  .marquee-track {
+    animation: marquee-scroll var(--marquee-duration, 60s) linear infinite;
+    will-change: transform;
+  }
+
+  .marquee-scroller:hover .marquee-track {
+    animation-play-state: paused;
+  }
+
+  @keyframes marquee-scroll {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .marquee-track {
+      animation: none;
+    }
+  }
 }
 
 /* Custom Scrollbar */
@@ -149,3 +173,104 @@
   background: #FEF08A;
   color: #713F12;
 }
+
+/* Blog reader article typography (renders WordPress HTML content) */
+.blog-prose {
+  color: #334155;
+  line-height: 1.75;
+  font-size: 0.9375rem;
+}
+
+.blog-prose p {
+  margin-bottom: 1.1rem;
+}
+
+.blog-prose h1,
+.blog-prose h2,
+.blog-prose h3,
+.blog-prose h4 {
+  font-family: 'Sora', sans-serif;
+  color: #0F172A;
+  font-weight: 800;
+  line-height: 1.3;
+  margin-top: 1.75rem;
+  margin-bottom: 0.6rem;
+}
+
+.blog-prose h1 { font-size: 1.6rem; }
+.blog-prose h2 { font-size: 1.35rem; }
+.blog-prose h3 { font-size: 1.15rem; }
+.blog-prose h4 { font-size: 1rem; }
+
+.blog-prose ul,
+.blog-prose ol {
+  margin-bottom: 1.1rem;
+  padding-left: 1.4rem;
+}
+
+.blog-prose ul { list-style: disc; }
+.blog-prose ol { list-style: decimal; }
+
+.blog-prose li {
+  margin-bottom: 0.4rem;
+}
+
+.blog-prose strong {
+  color: #0F172A;
+  font-weight: 700;
+}
+
+.blog-prose img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 1rem;
+  margin: 1.25rem 0;
+}
+
+.blog-prose figure {
+  margin: 1.25rem 0;
+}
+
+.blog-prose blockquote {
+  border-left: 4px solid #FACC15;
+  background: #FEFCE8;
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+  color: #713F12;
+  font-style: italic;
+}
+
+.blog-prose hr {
+  border: none;
+  border-top: 1px solid #E2E8F0;
+  margin: 1.5rem 0;
+}
+
+.blog-prose a {
+  color: #B45309;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.blog-prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.25rem 0;
+  font-size: 0.8125rem;
+}
+
+.blog-prose th,
+.blog-prose td {
+  border: 1px solid #E2E8F0;
+  padding: 0.6rem 0.75rem;
+  text-align: left;
+}
+
+.blog-prose th {
+  background: #FEFCE8;
+  font-weight: 700;
+  color: #0F172A;
+}
+

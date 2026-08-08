@@ -1,14 +1,17 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useAppSelector } from '@/redux/hooks';
-import { ArrowRight, Loader2, Tag } from 'lucide-react';
+import { ArrowRight, Loader2, Tag, ShoppingBag, Smartphone } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from '@/i18n/useTranslation';
-import { COURSE_HI, BOOK_HI } from '@/i18n/data';
+import { BOOK_HI } from '@/i18n/data';
 
 export default function CheckoutPage() {
   const { t, language } = useTranslation();
+  const router = useRouter();
   const cart = useAppSelector((state) => state.cart.items);
   const couponCode = useAppSelector((state) => state.cart.couponCode);
   const discountAmount = useAppSelector((state) => state.cart.discountAmount);
@@ -20,6 +23,35 @@ export default function CheckoutPage() {
   );
   const [formData, setFormData] = useState({ name: '', phone: '', email: '', address: '', city: '', pincode: '' });
   const [isProcessing, setIsProcessing] = useState(false);
+
+  const reminderSent = useRef(false);
+
+  useEffect(() => {
+    return () => {
+      if (reminderSent.current) return;
+      if (cart.length === 0) return;
+
+      const phone = formData.phone.trim();
+      const email = formData.email.trim();
+      if (!phone && !email) return;
+
+      reminderSent.current = true;
+      fetch('/api/notifications/cart-reminder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customer: { name: formData.name.trim(), phone, email },
+          items: cart.map((item) => ({
+            title: language === 'hi' ? BOOK_HI[item.id]?.title ?? item.title : item.title,
+            quantity: item.quantity,
+            price: item.price,
+          })),
+        }),
+      }).catch((error) => {
+        console.error('[checkout] cart reminder failed', error);
+      });
+    };
+  }, [cart, formData, language]);
 
   const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,33 +70,59 @@ export default function CheckoutPage() {
 
     setIsProcessing(true);
     try {
+      const payload = {
+        items: cart.map((item) => ({ productId: Number(item.id), quantity: item.quantity })),
+        couponCode,
+        customer: {
+          name: formData.name,
+          firstName: formData.name,
+          phone: formData.phone,
+          email: formData.email,
+          address: formData.address,
+          city: formData.city,
+          postcode: formData.pincode,
+        },
+      };
+
       const res = await fetch('/api/payments/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          items: cart.map((item) => ({ id: item.id, type: item.type, quantity: item.quantity })),
-          couponCode,
-          customer: {
-            name: formData.name,
-            phone: formData.phone,
-            email: formData.email,
-            address: formData.address,
-            city: formData.city,
-            pincode: formData.pincode,
-          },
-        }),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
+
       if (!res.ok || !data.redirectUrl) {
-        throw new Error(data.message || 'Payment initiation failed');
+        throw new Error(data.message || 'Could not start payment');
       }
-      window.location.href = data.redirectUrl;
+      router.push('/payment');
     } catch (error) {
-      console.error('[checkout] payment initiation error', error);
-      toast.error(t('Could not start payment. Please try again.'));
+      console.error('[checkout] order creation error', error);
+      toast.error(error instanceof Error ? error.message : t('Could not create order. Please try again.'));
       setIsProcessing(false);
     }
   };
+
+  if (cart.length === 0) {
+    return (
+      <div className="py-20 bg-slate-50 min-h-screen flex items-center justify-center">
+        <div className="bg-white p-10 rounded-3xl border border-slate-200 shadow-card max-w-md w-full text-center space-y-4">
+          <div className="w-16 h-16 bg-yellow-100 text-amber-700 rounded-full flex items-center justify-center mx-auto">
+            <ShoppingBag className="w-8 h-8" />
+          </div>
+          <h1 className="text-xl font-bold font-heading text-navy-900">{t('Your cart is empty')}</h1>
+          <p className="text-xs text-slate-500">
+            {t('Add books from the publication store to proceed with checkout.')}
+          </p>
+          <Link
+            href="/books"
+            className="inline-block px-6 py-3 bg-navy-900 hover:bg-brand-600 text-white text-xs font-bold rounded-xl transition-colors"
+          >
+            {t('Browse Books')}
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="py-12 bg-slate-50 min-h-screen">
@@ -164,7 +222,7 @@ export default function CheckoutPage() {
               <div className="space-y-3 max-h-60 overflow-y-auto">
                 {cart.map((item) => (
                   <div key={item.id} className="flex items-center justify-between text-xs border-b border-slate-100 pb-2">
-                    <span className="font-semibold text-navy-900 truncate max-w-[200px]">{language === 'hi' ? (item.type === 'course' ? COURSE_HI[item.id]?.title ?? item.title : BOOK_HI[item.id]?.title ?? item.title) : item.title} x {item.quantity}</span>
+                    <span className="font-semibold text-navy-900 truncate max-w-[200px]">{language === 'hi' ? BOOK_HI[item.id]?.title ?? item.title : item.title} x {item.quantity}</span>
                     <span className="font-bold text-brand-600">₹{item.price * item.quantity}</span>
                   </div>
                 ))}
@@ -193,6 +251,26 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
+              <div className="pt-4 border-t border-slate-200 space-y-2.5">
+                <h3 className="text-sm font-bold font-heading text-navy-900">{t('Payment Method')}</h3>
+
+                <button
+                  type="button"
+                  className="w-full flex items-start gap-3 p-3.5 rounded-2xl border-2 border-brand-500 bg-brand-50 text-left"
+                >
+                  <Smartphone className="w-5 h-5 mt-0.5 shrink-0 text-brand-600" />
+                  <span className="flex-1">
+                    <span className="block text-xs font-bold text-navy-900">{t('PhonePe UPI / Cards / NetBanking')}</span>
+                    <span className="block text-[11px] text-slate-500 mt-0.5">
+                      {t('All UPI apps, Debit and Credit Cards, and NetBanking accepted')}
+                    </span>
+                  </span>
+                  <span className="w-4 h-4 mt-1 rounded-full border-2 shrink-0 flex items-center justify-center border-brand-500">
+                    <span className="w-2 h-2 rounded-full bg-brand-500" />
+                  </span>
+                </button>
+              </div>
+
               <button
                 type="submit"
                 form="checkout-form"
@@ -202,11 +280,11 @@ export default function CheckoutPage() {
                 {isProcessing ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>{t('Redirecting to Payment...')}</span>
+                    <span>{t('Proceeding to Payment...')}</span>
                   </>
                 ) : (
                   <>
-                    <span>{t('Place Order Now')}</span>
+                    <span>{t('Place Order & Pay via PhonePe')}</span>
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}

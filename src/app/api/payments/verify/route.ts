@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { markOrderPaid } from '@/lib/woocommerce';
+import { sendOrderSuccessNotification } from '@/lib/notifications';
 import {
   getPhonePeConfig,
   getPhonePePaymentStatus,
@@ -37,40 +39,80 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    let completed = false;
+    let transactionId: string | null = null;
+    let state: string | null = null;
+    let errorCode: string | null = null;
+    let detailedErrorCode: string | null = null;
+
     if (config.mode === 'mock') {
-      return NextResponse.json({
-        success: true,
-        data: {
+      completed = true;
+      transactionId = `MOCK${Date.now()}`;
+      state = 'COMPLETED';
+    } else {
+      const status = await getPhonePePaymentStatus({
+        merchantOrderId: merchantTransactionId,
+        config,
+      });
+
+      const data = status?.data;
+      completed = status?.ok === true && data?.state === 'COMPLETED';
+      state = data?.state ?? null;
+      transactionId = data?.paymentDetails?.[0]?.transactionId ?? null;
+      errorCode = data?.errorCode ?? data?.paymentDetails?.[0]?.errorCode ?? null;
+      detailedErrorCode =
+        data?.detailedErrorCode ?? data?.paymentDetails?.[0]?.detailedErrorCode ?? null;
+
+      const reportedAmount = Number(data?.amount);
+      const amountMatches =
+        Number.isFinite(reportedAmount) && reportedAmount === order.amountPaise;
+      if (completed && !amountMatches) {
+        console.error('[payments/verify] amount mismatch', {
           merchantTransactionId,
-          transactionId: `MOCK${Date.now()}`,
-          state: 'COMPLETED',
-          amount: order.amountPaise,
-          code: 'PAYMENT_SUCCESS',
-        },
+          expectedPaise: order.amountPaise,
+          reportedPaise: reportedAmount,
+          state,
+        });
+        completed = false;
+      }
+    }
+
+    if (completed) {
+      await markOrderPaid(order.woocommerceOrderId).catch((error) => {
+        console.error('[payments/verify] failed to mark WooCommerce order paid', error);
+      });
+      await sendOrderSuccessNotification({
+        name: order.customer.name,
+        phone: order.customer.phone,
+        email: order.customer.email || undefined,
+        orderId: String(order.woocommerceOrderId),
+        amountInr: order.amountPaise / 100,
+        items: order.items,
+      }).catch((error) => {
+        console.error('[payments/verify] failed to send order notification', error);
       });
     }
 
-    const status = await getPhonePePaymentStatus({
-      merchantId: config.merchantId,
-      merchantTransactionId,
-      baseUrl: config.baseUrl,
-      saltKey: config.saltKey,
-      saltIndex: config.saltIndex,
-    });
-
-    const data = status?.data?.data;
-    const completed = status?.data?.success === true && data?.state === 'COMPLETED';
-    const amountMatches = typeof data?.amount === 'number' && data.amount === order.amountPaise;
-
     return NextResponse.json({
-      success: completed && amountMatches,
+      success: completed,
+      message: completed
+        ? undefined
+        : state === 'FAILED'
+          ? detailedErrorCode
+            ? `Payment failed at the payment gateway (${detailedErrorCode})`
+            : errorCode
+              ? `Payment failed at the payment gateway (${errorCode})`
+              : 'Payment failed at the payment gateway'
+          : 'Payment is still pending',
       data: {
         merchantTransactionId,
-        transactionId: data?.transactionId ?? null,
-        state: data?.state ?? null,
-        amount: data?.amount ?? null,
-        providerReferenceId: data?.providerReferenceId ?? null,
-        code: data?.state === 'COMPLETED' ? 'PAYMENT_SUCCESS' : data?.state,
+        transactionId,
+        state,
+        amount: order.amountPaise,
+        providerReferenceId: null,
+        errorCode,
+        detailedErrorCode,
+        code: completed ? 'PAYMENT_SUCCESS' : state ?? 'PAYMENT_PENDING',
       },
     });
   } catch (error) {

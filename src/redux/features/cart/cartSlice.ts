@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Course, Book } from '@/types';
+import { Book } from '@/types';
 
 export interface CartItem {
   id: string;
@@ -9,7 +9,7 @@ export interface CartItem {
   originalPrice: number;
   image: string;
   quantity: number;
-  itemData: Course | Book;
+  itemData: Book;
 }
 
 interface CartState {
@@ -30,21 +30,20 @@ export const cartSlice = createSlice({
   name: 'cart',
   initialState,
   reducers: {
-    addToCart: (state, action: PayloadAction<{ item: Course | Book; type: 'course' | 'book' }>) => {
+    addToCart: (state, action: PayloadAction<{ item: Book; type: 'course' | 'book' }>) => {
       const { item, type } = action.payload;
       const existing = state.items.find((i) => i.id === item.id);
 
       if (existing) {
         existing.quantity += 1;
       } else {
-        const image = 'image' in item ? item.image : item.coverImage;
         state.items.push({
           id: item.id,
           type,
           title: item.title,
           price: item.price,
           originalPrice: item.originalPrice,
-          image,
+          image: item.coverImage,
           quantity: 1,
           itemData: item,
         });
@@ -74,9 +73,9 @@ export const cartSlice = createSlice({
       state.isCartOpen = action.payload;
     },
     applyCoupon: (state, action: PayloadAction<string>) => {
-      if (action.payload.toUpperCase() === 'APNI10') {
-        state.couponCode = 'APNI10';
-        state.discountAmount = 100;
+      if (action.payload.toUpperCase() === 'SGS7J8VT') {
+        state.couponCode = 'SGS7J8VT';
+        state.discountAmount = 20;
       }
     },
     hydrateCart: (state, action: PayloadAction<CartItem[]>) => {
