@@ -31,5 +31,8 @@ next-env.d.ts
 # local unprocessed image sources
 /images/
 
-# one-off image processing script
+# one-off image processing / inspection scripts
 process_student_images.cjs
+inspect_books.cjs
+fix_hindi_book.cjs
+optimize_hindi_images.cjs
