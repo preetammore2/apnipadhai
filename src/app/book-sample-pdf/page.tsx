@@ -1,28 +1,36 @@
-import Image from 'next/image';
+'use client';
+
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Download, ExternalLink, FileText } from 'lucide-react';
-import { getBooks } from '@/lib/woocommerce';
-import { enrichBooksWithSamples, getBookSamples } from '@/lib/wordpress';
+import Image from 'next/image';
+import { Download, ExternalLink, FileText, Loader2, WifiOff, RefreshCw } from 'lucide-react';
 import { Book } from '@/types';
+import { useTranslation } from '@/i18n/useTranslation';
 
-export const revalidate = 60;
+export default function BookSamplePdfPage() {
+  const { t } = useTranslation();
+  const [books, setBooks] = useState<Book[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isError, setIsError] = useState(false);
 
-export const metadata = {
-  title: 'Book Sample PDFs - Apni Padhai Publication',
-  description:
-    'Preview and download free sample PDFs of all Apni Padhai Brahmastra books, fetched from our official resources.',
-};
+  const loadBooks = async () => {
+    setIsLoading(true);
+    setIsError(false);
+    try {
+      const res = await fetch('/api/books');
+      if (!res.ok) throw new Error('Failed to load books');
+      const data = (await res.json()) as Book[];
+      setBooks(data.filter((book) => book.samplePdfUrl));
+    } catch {
+      setIsError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-export default async function BookSamplePdfPage() {
-  let books: Book[] = [];
-  try {
-    const [fetchedBooks, samples] = await Promise.all([getBooks(), getBookSamples()]);
-    books = enrichBooksWithSamples(fetchedBooks, samples);
-  } catch {
-    // empty state shown below
-  }
-
-  const withSamples = books.filter((book) => book.samplePdfUrl);
+  useEffect(() => {
+    loadBooks();
+  }, []);
 
   return (
     <div className="py-12 bg-slate-50 min-h-screen">
@@ -30,28 +38,54 @@ export default async function BookSamplePdfPage() {
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-10">
           <span className="text-xs font-bold text-brand-600 uppercase tracking-widest bg-brand-100/80 px-3.5 py-1.5 rounded-full">
-            100% FREE BOOK PREVIEWS
+            {t('100% FREE BOOK PREVIEWS')}
           </span>
           <h1 className="text-3xl sm:text-5xl font-black font-heading text-navy-900 mt-3">
-            Book Sample PDFs
+            {t('Book Sample PDFs')}
           </h1>
           <p className="text-slate-600 text-sm sm:text-base mt-2">
-            Preview a free sample chapter of every Brahmastra book before you buy. Click{' '}
-            <strong>Preview</strong> to read it in your browser or <strong>Download</strong> to save
-            it.
+            {t('Preview a free sample chapter of every Brahmastra book before you buy.')}
+          </p>
+          <p className="text-slate-500 text-xs sm:text-sm mt-1">
+            {t('Click Preview to read it in your browser or Download to save it.')}
           </p>
         </div>
 
-        {withSamples.length === 0 ? (
+        {isLoading && (
+          <div className="flex flex-col items-center justify-center py-20 gap-3 text-slate-500">
+            <Loader2 className="w-8 h-8 animate-spin text-brand-500" />
+            <p className="text-sm font-semibold">{t('Loading sample PDFs...')}</p>
+          </div>
+        )}
+
+        {isError && (
+          <div className="flex flex-col items-center justify-center py-20 gap-4 text-slate-500">
+            <WifiOff className="w-8 h-8 text-red-400" />
+            <p className="text-sm font-semibold text-center">
+              {t('Something went wrong while fetching the sample PDFs. Please try again.')}
+            </p>
+            <button
+              onClick={loadBooks}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold transition-colors"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span>{t('Try Again')}</span>
+            </button>
+          </div>
+        )}
+
+        {!isLoading && !isError && books.length === 0 && (
           <div className="text-center py-20 text-slate-500">
             <FileText className="w-10 h-10 mx-auto text-slate-300 mb-3" />
             <p className="text-sm font-semibold">
-              Sample PDFs are not available right now. Please check back soon.
+              {t('Sample PDFs are not available right now. Please check back soon.')}
             </p>
           </div>
-        ) : (
+        )}
+
+        {!isLoading && !isError && books.length > 0 && (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-            {withSamples.map((book) => (
+            {books.map((book) => (
               <div
                 key={book.id}
                 className="bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-card hover:shadow-card-hover transition-all flex flex-col group"
@@ -74,7 +108,7 @@ export default async function BookSamplePdfPage() {
                     </span>
                   )}
                   <span className="absolute top-2 right-2 px-2 py-0.5 bg-yellow-400 text-navy-950 text-[10px] font-black rounded-full uppercase shadow-sm">
-                    Sample
+                    {t('Sample')}
                   </span>
                 </Link>
 
@@ -105,7 +139,7 @@ export default async function BookSamplePdfPage() {
                       className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 bg-navy-900 hover:bg-black text-white text-xs font-bold rounded-xl transition-colors"
                     >
                       <ExternalLink className="w-3.5 h-3.5 text-yellow-400" />
-                      Preview
+                      {t('Preview')}
                     </a>
                     <a
                       href={book.samplePdfUrl}
@@ -113,7 +147,7 @@ export default async function BookSamplePdfPage() {
                       className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold rounded-xl transition-colors"
                     >
                       <Download className="w-3.5 h-3.5" />
-                      Download
+                      {t('Download')}
                     </a>
                   </div>
                 </div>

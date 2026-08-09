@@ -20,6 +20,22 @@ export const KEYS_CONTENT: Record<string, string> = {
   'Verified Solved Answer Key': 'सत्यापित हल कुंजी',
   'Questions': 'प्रश्न',
 
+  '100% FREE BOOK PREVIEWS': '100% फ्री बुक प्रीव्यू',
+  'Book Sample PDFs': 'बुक सैंपल PDF',
+  'Sample PDFs': 'सैंपल PDF',
+  'Preview a free sample chapter of every Brahmastra book before you buy.':
+    'खरीदने से पहले हर ब्रह्मास्त्र बुक का फ्री सैंपल चैप्टर प्रीव्यू करें।',
+  'Click Preview to read it in your browser or Download to save it.':
+    'इसे ब्राउज़र में पढ़ने के लिए प्रीव्यू पर क्लिक करें या सेव करने के लिए डाउनलोड करें।',
+  'Sample': 'सैंपल',
+  'Preview': 'प्रीव्यू',
+  'Download': 'डाउनलोड',
+  'Loading sample PDFs...': 'सैंपल PDF लोड हो रहे हैं...',
+  'Something went wrong while fetching the sample PDFs. Please try again.':
+    'सैंपल PDF लाने में कुछ गलत हो गया। कृपया फिर से प्रयास करें।',
+  'Sample PDFs are not available right now. Please check back soon.':
+    'सैंपल PDF अभी उपलब्ध नहीं हैं। कृपया जल्द ही दोबारा देखें।',
+
   'SELECTION HALL OF FAME': 'चयन हॉल ऑफ फेम',
   'Our Exam Champions & Rankers': 'हमारे परीक्षा चैंपियंस एवं रैंकर्स',
   'Celebrating students who cleared Rajasthan Police and REET exams with Apni Padhai.':
