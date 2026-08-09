@@ -110,6 +110,11 @@ export const Footer: React.FC = () => {
                 </Link>
               </li>
               <li>
+                <Link href="/book-sample-pdf" className="hover:text-yellow-400 transition-colors flex items-center gap-2">
+                  <span>›</span> {t('Book Sample PDFs')}
+                </Link>
+              </li>
+              <li>
                 <Link href="/results" className="hover:text-yellow-400 transition-colors flex items-center gap-2">
                   <span>›</span> {t('Selections & Top Rankers')}
                 </Link>

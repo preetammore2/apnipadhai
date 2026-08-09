@@ -111,6 +111,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
   const navLinks = [
     { name: t('Home'), href: '/', icon: <Home className="w-4 h-4" /> },
     { name: t('Books'), href: '/books', icon: <BookMarked className="w-4 h-4" /> },
+    { name: t('Sample PDFs'), href: '/book-sample-pdf', icon: <FileText className="w-4 h-4" /> },
     { name: t('PYQs'), href: '/pyqs', icon: <FileText className="w-4 h-4" /> },
     { name: t('Results'), href: '/results', icon: <Award className="w-4 h-4" /> },
     { name: t('Contact'), href: '/contact', icon: <Phone className="w-4 h-4" /> },

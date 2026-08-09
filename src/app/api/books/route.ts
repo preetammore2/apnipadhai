@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { createBook, getBooks, parseBookPayload, WooCommerceError } from '@/lib/woocommerce';
-import { getBookSamples } from '@/lib/wordpress';
+import { enrichBooksWithSamples, getBookSamples } from '@/lib/wordpress';
 import { hasAdminAccess } from '@/lib/auth';
 
 export const runtime = 'nodejs';
@@ -9,14 +9,7 @@ export const runtime = 'nodejs';
 export async function GET() {
   try {
     const [books, samples] = await Promise.all([getBooks(), getBookSamples()]);
-    const enriched = books.map((book) => {
-      if (book.samplePdfUrl) return book;
-      const sample = samples.find((s) =>
-        book.title.toLowerCase().includes(s.keyword.toLowerCase()),
-      );
-      return sample ? { ...book, samplePdfUrl: sample.pdfUrl } : book;
-    });
-    return NextResponse.json(enriched);
+    return NextResponse.json(enrichBooksWithSamples(books, samples));
   } catch (error) {
     console.error('[api/books] error', error);
     return NextResponse.json(

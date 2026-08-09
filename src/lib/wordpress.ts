@@ -263,6 +263,17 @@ export async function getBookSamples(): Promise<BookSample[]> {
     .filter((sample): sample is BookSample => Boolean(sample));
 }
 
+export function enrichBooksWithSamples<T extends { title: string; samplePdfUrl?: string }>(
+  books: T[],
+  samples: BookSample[],
+): T[] {
+  return books.map((book) => {
+    if (book.samplePdfUrl) return book;
+    const sample = samples.find((s) => book.title.toLowerCase().includes(s.keyword.toLowerCase()));
+    return sample ? { ...book, samplePdfUrl: sample.pdfUrl } : book;
+  });
+}
+
 export async function getPosts(perPage = 50): Promise<WordPressPost[]> {
   const [postRes, categories] = await Promise.all([
     fetch(`${WP_API}/posts?${rawParams(perPage)}`, {
