@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
-import { Phone, CheckCircle2, User, Send, GraduationCap } from 'lucide-react';
+import { Phone, CheckCircle2, User, Send, GraduationCap, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { setCounselorModalOpen } from '@/redux/features/ui/uiSlice';
@@ -28,6 +28,13 @@ export const CounselorModal: React.FC<CounselorModalProps> = ({ isOpen: propIsOp
   const [phone, setPhone] = useState('');
   const [targetExam, setTargetExam] = useState('CET 2026');
   const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const WHATSAPP_NUMBER = '917568716768';
+  const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+    `Hello Apni Padhai! ${studentName ? `I am ${studentName}. ` : ''}I would like to talk to a counselor${
+      targetExam ? ` for ${targetExam}` : ''
+    }.`,
+  )}`;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -124,6 +131,26 @@ export const CounselorModal: React.FC<CounselorModalProps> = ({ isOpen: propIsOp
               <Send className="w-4 h-4" />
               <span>{t('Request Call Back Now')}</span>
             </button>
+
+            <div className="relative py-3">
+              <div className="border-t border-slate-200" />
+              <span className="absolute left-1/2 -translate-x-1/2 -top-2.5 bg-white px-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                {t('OR')}
+              </span>
+            </div>
+
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="w-full py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xs rounded-xl transition-all flex items-center justify-center gap-2"
+            >
+              <MessageCircle className="w-4 h-4" />
+              <span>{t('Chat with Counselor on WhatsApp')}</span>
+            </a>
+            <p className="text-[10px] font-semibold text-slate-400 text-center">
+              {t('WhatsApp Helpline:')} <span className="text-emerald-600">+91 75687 16768</span>
+            </p>
           </form>
         </div>
       )}

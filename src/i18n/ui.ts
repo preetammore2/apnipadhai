@@ -404,6 +404,9 @@ export const HI_UI: Record<string, string> = {
   'Request Call Back Now': 'अभी कॉलबैक का अनुरोध करें',
   'Please enter name and phone number': 'कृपया नाम और फोन नंबर दर्ज करें',
   'Counseling Callback Requested Successfully!': 'काउंसलिंग कॉलबैक सफलतापूर्वक अनुरोधित!',
+  'OR': 'या',
+  'Chat with Counselor on WhatsApp': 'व्हाट्सएप पर काउंसलर से बात करें',
+  'WhatsApp Helpline:': 'व्हाट्सएप हेल्पलाइन:',
 
   // ---- About ----
   'OUR STORY & MISSION': 'हमारी कहानी और मिशन',
