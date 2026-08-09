@@ -249,15 +249,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
                 )}
               </button>
 
-              {/* Talk to Counselor Button */}
-              <button
-                onClick={handleCounselorModal}
-                className="hidden xl:flex items-center gap-1.5 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-navy-900 text-xs font-bold rounded-full transition-colors border border-slate-200"
-              >
-                <Phone className="w-3.5 h-3.5 text-amber-600" />
-                <span>{t('Talk to Counselor')}</span>
-              </button>
-
               {/* Download App CTA */}
               <a
                 href="https://play.google.com/store/search?q=apni+padhai&c=apps"
@@ -501,16 +492,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
                 transition={{ delay: 0.3, duration: 0.25 }}
                 className="mt-5 space-y-2"
               >
-                <button
-                  onClick={() => {
-                    setIsMobileMenuOpen(false);
-                    handleCounselorModal();
-                  }}
-                  className="w-full flex items-center justify-center gap-2 py-3.5 bg-slate-100 hover:bg-slate-200 text-navy-900 rounded-2xl text-sm font-bold transition-colors"
-                >
-                  <Phone className="w-4 h-4 text-amber-600" />
-                  <span>{t('Talk to Academic Counselor')}</span>
-                </button>
                 <a
                   href="https://play.google.com/store/search?q=apni+padhai&c=apps"
                   target="_blank"
