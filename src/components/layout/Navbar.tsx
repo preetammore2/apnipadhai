@@ -531,7 +531,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
         <Link
           href="/"
           className={`flex flex-col items-center gap-0.5 text-[10px] font-bold whitespace-nowrap min-w-0 ${
-            pathname === '/' ? 'text-amber-700 font-black' : 'text-slate-500'
+            isLinkActive('/') ? 'text-amber-700 font-black' : 'text-slate-500'
           }`}
         >
           <Home className="w-5 h-5" />
@@ -540,7 +540,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
         <Link
           href="/books"
           className={`flex flex-col items-center gap-0.5 text-[10px] font-bold whitespace-nowrap min-w-0 ${
-            pathname.startsWith('/books') ? 'text-amber-700 font-black' : 'text-slate-500'
+            isLinkActive('/books') ? 'text-amber-700 font-black' : 'text-slate-500'
           }`}
         >
           <BookMarked className="w-5 h-5" />
@@ -549,11 +549,29 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
         <Link
           href="/pyqs"
           className={`flex flex-col items-center gap-0.5 text-[10px] font-bold whitespace-nowrap min-w-0 ${
-            pathname === '/pyqs' ? 'text-amber-700 font-black' : 'text-slate-500'
+            isLinkActive('/pyqs') ? 'text-amber-700 font-black' : 'text-slate-500'
           }`}
         >
           <FileText className="w-5 h-5" />
           <span>{t('PYQs')}</span>
+        </Link>
+        <Link
+          href="/results"
+          className={`flex flex-col items-center gap-0.5 text-[10px] font-bold whitespace-nowrap min-w-0 ${
+            isLinkActive('/results') ? 'text-amber-700 font-black' : 'text-slate-500'
+          }`}
+        >
+          <Award className="w-5 h-5" />
+          <span>{t('Results')}</span>
+        </Link>
+        <Link
+          href="/contact"
+          className={`flex flex-col items-center gap-0.5 text-[10px] font-bold whitespace-nowrap min-w-0 ${
+            isLinkActive('/contact') ? 'text-amber-700 font-black' : 'text-slate-500'
+          }`}
+        >
+          <Phone className="w-5 h-5" />
+          <span>{t('Contact')}</span>
         </Link>
         <button
           onClick={() => dispatch(setCartOpen(true))}
