@@ -36,3 +36,4 @@ process_student_images.cjs
 inspect_books.cjs
 fix_hindi_book.cjs
 optimize_hindi_images.cjs
+update_sample_meta.cjs

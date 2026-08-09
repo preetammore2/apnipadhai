@@ -206,23 +206,61 @@ export async function getPyqs(): Promise<PYQ[]> {
 const SAMPLE_TOPIC_PATTERNS: { pattern: RegExp; keyword: string }[] = [
   { pattern: /culture|art/i, keyword: 'art' },
   { pattern: /history/i, keyword: 'history' },
-  { pattern: /geo/i, keyword: 'geo' },
+  { pattern: /geograph|geo/i, keyword: 'geo' },
   { pattern: /computer/i, keyword: 'computer' },
   { pattern: /हिन्दी|हिंदी|hindi/i, keyword: 'hindi' },
+  { pattern: /english/i, keyword: 'english' },
+  { pattern: /math|ganit|ankganit/i, keyword: 'ganit' },
+  { pattern: /polity/i, keyword: 'polity' },
+  { pattern: /science/i, keyword: 'science' },
+  { pattern: /4th|fourth|iv-?th/i, keyword: '4th grade' },
 ];
+
+async function getMediaPdfLinks(): Promise<string[]> {
+  try {
+    const urls: string[] = [];
+    for (let page = 1; page <= 3; page++) {
+      const params = new URLSearchParams({
+        per_page: '100',
+        page: String(page),
+        media_type: 'application',
+        _fields: 'source_url,mime_type',
+      });
+      const res = await fetch(`${WP_API}/media?${params.toString()}`, {
+        next: { revalidate: WP_REVALIDATE_SECONDS },
+      });
+      if (!res.ok) break;
+      const items = (await res.json()) as { source_url: string; mime_type?: string }[];
+      if (!Array.isArray(items) || items.length === 0) break;
+      for (const item of items) {
+        if (item.source_url?.toLowerCase().endsWith('.pdf')) urls.push(item.source_url);
+      }
+      if (items.length < 100) break;
+    }
+    return [...new Set(urls)];
+  } catch {
+    return [];
+  }
+}
 
 export async function getBookSamples(): Promise<BookSample[]> {
   const page = await getPageBySlug('book-sample-pdf');
-  if (!page) return [];
-  return extractPdfLinks(page.contentHtml).map((url) => {
-    const fileName = pdfFileName(url);
-    const pattern = SAMPLE_TOPIC_PATTERNS.find((p) => p.pattern.test(fileName));
-    return {
-      keyword: pattern?.keyword ?? (fileName.match(/[a-z]/i) ? fileName.toLowerCase() : 'hindi'),
-      title: page.title || titleFromFileName(fileName),
-      pdfUrl: url,
-    };
-  });
+  const pageLinks = page ? extractPdfLinks(page.contentHtml) : [];
+  const mediaLinks = await getMediaPdfLinks();
+  const links = [...new Set([...pageLinks, ...mediaLinks])];
+
+  return links
+    .map((url) => {
+      const fileName = pdfFileName(url);
+      const topic = SAMPLE_TOPIC_PATTERNS.find((p) => p.pattern.test(fileName));
+      if (!topic) return null;
+      return {
+        keyword: topic.keyword,
+        title: titleFromFileName(fileName),
+        pdfUrl: url,
+      };
+    })
+    .filter((sample): sample is BookSample => Boolean(sample));
 }
 
 export async function getPosts(perPage = 50): Promise<WordPressPost[]> {
