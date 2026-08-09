@@ -81,6 +81,22 @@ export interface BookPayload {
   inStock?: boolean;
   sku?: string;
   coverImage?: string;
+  author?: string;
+  edition?: string;
+  pages?: number;
+  examTarget?: string;
+  samplePdfUrl?: string;
+  features?: string[];
+  tableOfContents?: string[];
+}
+
+function asStringList(v: unknown): string[] | undefined {
+  if (!Array.isArray(v)) return undefined;
+  const list = v
+    .filter((item): item is string => typeof item === 'string')
+    .map((item) => item.trim())
+    .filter(Boolean);
+  return list.length > 0 ? list : undefined;
 }
 
 export function parseBookPayload(body: unknown): BookPayload {
@@ -99,9 +115,7 @@ export function parseBookPayload(body: unknown): BookPayload {
     subtitle: typeof b.subtitle === 'string' ? b.subtitle.trim() : undefined,
     description: typeof b.description === 'string' ? b.description.trim() : undefined,
     category: typeof b.category === 'string' ? b.category.trim() : undefined,
-    categories: Array.isArray(b.categories)
-      ? b.categories.filter((c): c is string => typeof c === 'string').map((c) => c.trim()).filter(Boolean)
-      : undefined,
+    categories: asStringList(b.categories),
     price: asNum(b.price),
     regularPrice: asNum(b.regularPrice) ?? asNum(b.regular_price),
     salePrice: asNum(b.salePrice) ?? asNum(b.sale_price),
@@ -110,7 +124,24 @@ export function parseBookPayload(body: unknown): BookPayload {
     coverImage:
       (typeof b.coverImage === 'string' ? b.coverImage.trim() : undefined) ??
       (typeof b.image === 'string' ? b.image.trim() : undefined),
+    author: typeof b.author === 'string' ? b.author.trim() : undefined,
+    edition: typeof b.edition === 'string' ? b.edition.trim() : undefined,
+    pages: asNum(b.pages),
+    examTarget: typeof b.examTarget === 'string' ? b.examTarget.trim() : undefined,
+    samplePdfUrl: typeof b.samplePdfUrl === 'string' ? b.samplePdfUrl.trim() : undefined,
+    features: asStringList(b.features),
+    tableOfContents: asStringList(b.tableOfContents),
   };
+}
+
+interface WoocommerceAttribute {
+  name: string;
+  options?: string[];
+}
+
+interface WoocommerceMeta {
+  key: string;
+  value: unknown;
 }
 
 interface WoocommerceProduct {
@@ -128,6 +159,8 @@ interface WoocommerceProduct {
   images: { id: number; src: string }[];
   short_description: string;
   description: string;
+  attributes?: WoocommerceAttribute[];
+  meta_data?: WoocommerceMeta[];
 }
 
 export interface WoocommerceOrder {
@@ -150,6 +183,39 @@ export interface TrackedOrder {
 interface WoocommerceOrderDetails extends WoocommerceOrder {
   date_created?: string;
   billing?: { phone?: string };
+}
+
+function enrichBook(product: WoocommerceProduct): {
+  author?: string;
+  edition?: string;
+  pages?: number;
+  examTarget?: string;
+  samplePdfUrl?: string;
+  features?: string[];
+  tableOfContents?: string[];
+} {
+  const meta: Record<string, string> = {};
+  for (const entry of product.meta_data ?? []) {
+    if (typeof entry.value === 'string') meta[entry.key] = entry.value;
+  }
+  const attribute = (name: string): string | undefined =>
+    product.attributes?.find(
+      (a) => a.name.toLowerCase() === name.toLowerCase(),
+    )?.options?.[0];
+  const pages = Number(meta['_ap_pages'] ?? attribute('Pages'));
+  const features = meta['_ap_features'] ? meta['_ap_features'].split('\n').filter(Boolean) : undefined;
+  const tableOfContents = meta['_ap_table_of_contents']
+    ? meta['_ap_table_of_contents'].split('\n').filter(Boolean)
+    : undefined;
+  return {
+    author: meta['_ap_author'] ?? attribute('Author'),
+    edition: meta['_ap_edition'] ?? attribute('Edition'),
+    pages: Number.isFinite(pages) && pages > 0 ? pages : undefined,
+    examTarget: meta['_ap_exam_target'] ?? attribute('Exam Target'),
+    samplePdfUrl: meta['_ap_sample_pdf_url'] ?? undefined,
+    features,
+    tableOfContents,
+  };
 }
 
 function mapProduct(product: WoocommerceProduct): Book {
@@ -179,6 +245,7 @@ function mapProduct(product: WoocommerceProduct): Book {
     coverImage: product.images[0]?.src ?? '',
     description: stripHtml(product.description) || undefined,
     sku: product.sku,
+    ...enrichBook(product),
   };
 }
 
@@ -201,6 +268,8 @@ export async function getBooks(): Promise<Book[]> {
       'images',
       'short_description',
       'description',
+      'attributes',
+      'meta_data',
     ].join(','),
   });
 
@@ -274,6 +343,17 @@ function buildProductBody(
   }
   if (input.sku) body.sku = input.sku;
   if (input.coverImage) body.images = [{ src: input.coverImage }];
+
+  const meta: { key: string; value: string }[] = [];
+  if (input.author) meta.push({ key: '_ap_author', value: input.author });
+  if (input.edition) meta.push({ key: '_ap_edition', value: input.edition });
+  if (typeof input.pages === 'number') meta.push({ key: '_ap_pages', value: String(input.pages) });
+  if (input.examTarget) meta.push({ key: '_ap_exam_target', value: input.examTarget });
+  if (input.samplePdfUrl) meta.push({ key: '_ap_sample_pdf_url', value: input.samplePdfUrl });
+  if (input.features?.length) meta.push({ key: '_ap_features', value: input.features.join('\n') });
+  if (input.tableOfContents?.length)
+    meta.push({ key: '_ap_table_of_contents', value: input.tableOfContents.join('\n') });
+  if (meta.length > 0) body.meta_data = meta;
 
   const categoryNames = [...(input.categories ?? [])];
   if (input.category && !categoryNames.includes(input.category)) {

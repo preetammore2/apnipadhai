@@ -156,27 +156,28 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
           <div className="flex items-center justify-between gap-2 sm:gap-3">
             
             {/* Brand Logo */}
-            <Link href="/" className="flex items-center gap-2 sm:gap-2.5 min-w-0 group">
-              <div className="relative w-9 h-9 sm:w-11 sm:h-11 rounded-2xl overflow-hidden shadow-md group-hover:scale-105 transition-transform p-0.5 bg-white shrink-0">
+            <Link href="/" className="flex items-center gap-2 sm:gap-2.5 min-w-0 group shrink-0">
+              <div className="relative w-9 h-9 sm:w-10 sm:h-10 lg:w-11 lg:h-11 rounded-2xl overflow-hidden shadow-md group-hover:scale-105 transition-transform p-0.5 bg-white shrink-0">
                 <Image
-                  src="/logo.jpg"
+                  src="/logo.png"
                   alt="Apni Padhai Logo"
                   fill
+                  sizes="44px"
                   className="object-cover rounded-xl"
                 />
               </div>
               <div className="flex flex-col min-w-0">
-                <span className="font-heading font-extrabold text-lg sm:text-2xl tracking-tight text-navy-900 leading-none truncate">
+                <span className="font-heading font-extrabold text-lg sm:text-xl lg:text-2xl tracking-tight text-navy-900 leading-none truncate">
                   Apni <span className="text-gradient">Padhai</span>
                 </span>
-                <span className="text-[8px] sm:text-[10px] font-extrabold text-amber-600 tracking-wider sm:tracking-widest uppercase mt-0.5 truncate">
+                <span className="hidden sm:block text-[8px] sm:text-[10px] font-extrabold text-amber-600 tracking-wider sm:tracking-widest uppercase mt-0.5 truncate">
                   {t('Publication & EdTech')}
                 </span>
               </div>
             </Link>
 
             {/* Desktop Navigation Links */}
-            <nav className="hidden lg:flex items-center gap-1.5 bg-slate-50/80 p-1.5 rounded-full border border-slate-200/80">
+            <nav className="hidden lg:flex items-center gap-1 bg-slate-50/80 p-1.5 rounded-full border border-slate-200/80">
               {navLinks.map((link) => {
                 const isActive = isLinkActive(link.href);
 
@@ -184,7 +185,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
                   <Link
                     key={link.name}
                     href={link.href}
-                    className={`group relative flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-colors ${
+                    className={`group relative flex items-center gap-1 px-3 xl:px-4 py-2 rounded-full text-xs font-bold transition-colors ${
                       isActive ? 'text-navy-900' : 'text-slate-700 hover:text-navy-900'
                     }`}
                   >
@@ -193,7 +194,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
                       <motion.span
                         layoutId="nav-pill"
                         className="absolute inset-0 bg-yellow-400 shadow-sm rounded-full"
-                        transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                        transition={{ type: 'spring', stiffness: 420, damping: 38, mass: 0.8 }}
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
                       />
                     )}
                     <span className="relative z-10">{link.name}</span>
@@ -259,7 +262,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
                 href="https://play.google.com/store/search?q=apni+padhai&c=apps"
                 target="_blank"
                 rel="noreferrer"
-                className="hidden md:flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-yellow-400 hover:to-amber-500 text-navy-950 font-black text-xs rounded-full shadow-button-glow transition-all transform hover:-translate-y-0.5 shrink-0"
+                className="hidden xl:flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-yellow-400 hover:to-amber-500 text-navy-950 font-black text-xs rounded-full shadow-button-glow transition-all transform hover:-translate-y-0.5 shrink-0"
               >
                 <Download className="w-4 h-4" />
                 <span>{t('Download App')}</span>
@@ -268,21 +271,34 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
               {/* Mobile Menu Toggle */}
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="p-2 sm:p-2.5 text-slate-700 hover:text-navy-900 rounded-xl lg:hidden"
+                className="relative p-2 sm:p-2.5 text-slate-700 hover:text-navy-900 rounded-xl lg:hidden"
                 aria-label={isMobileMenuOpen ? t('Close menu') : t('Open menu')}
                 aria-expanded={isMobileMenuOpen}
               >
-                <AnimatePresence mode="wait" initial={false}>
-                  <motion.span
-                    key={isMobileMenuOpen ? 'close' : 'menu'}
-                    initial={{ rotate: -90, opacity: 0, scale: 0.7 }}
-                    animate={{ rotate: 0, opacity: 1, scale: 1 }}
-                    exit={{ rotate: 90, opacity: 0, scale: 0.7 }}
-                    transition={{ duration: 0.2 }}
-                    className="flex items-center justify-center"
-                  >
-                    {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-                  </motion.span>
+                <AnimatePresence initial={false}>
+                  {isMobileMenuOpen ? (
+                    <motion.span
+                      key="close-icon"
+                      initial={{ rotate: -90, opacity: 0, scale: 0.5 }}
+                      animate={{ rotate: 0, opacity: 1, scale: 1 }}
+                      exit={{ rotate: 90, opacity: 0, scale: 0.5 }}
+                      transition={{ duration: 0.25, ease: 'easeOut' }}
+                      className="absolute inset-0 flex items-center justify-center"
+                    >
+                      <X className="w-6 h-6" />
+                    </motion.span>
+                  ) : (
+                    <motion.span
+                      key="menu-icon"
+                      initial={{ rotate: 90, opacity: 0, scale: 0.5 }}
+                      animate={{ rotate: 0, opacity: 1, scale: 1 }}
+                      exit={{ rotate: -90, opacity: 0, scale: 0.5 }}
+                      transition={{ duration: 0.25, ease: 'easeOut' }}
+                      className="absolute inset-0 flex items-center justify-center"
+                    >
+                      <Menu className="w-6 h-6" />
+                    </motion.span>
+                  )}
                 </AnimatePresence>
               </button>
             </div>
@@ -290,77 +306,88 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
         </div>
 
         {/* Global Search Bar Dropdown */}
-        <AnimatePresence>
+        <AnimatePresence initial={false}>
           {isSearchOpen && (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              transition={{ height: { duration: 0.25, ease: 'easeOut' }, opacity: { duration: 0.15 } }}
-              className="border-t border-amber-100 bg-amber-50/50 p-4"
+              transition={{
+                height: { duration: 0.3, ease: [0.32, 0.72, 0, 1] },
+                opacity: { duration: 0.2 },
+              }}
+              className="overflow-hidden border-t border-amber-100 bg-amber-50/50"
             >
-              <div className="max-w-3xl mx-auto relative">
-                <Search className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  placeholder={t('Search for Brahmastra Books, Science, Hindi, English, PYQs...')}
-                  value={searchQuery}
-                  onChange={(e) => dispatch(setSearchQuery(e.target.value))}
-                  className="w-full pl-12 pr-10 py-3 bg-white border border-amber-200 rounded-2xl text-sm focus:outline-none focus:border-yellow-500 shadow-sm text-navy-900"
-                  autoFocus
-                />
-                {searchQuery && (
-                  <button
-                    onClick={() => dispatch(setSearchQuery(''))}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
-
-              {/* Search Results Dropdown */}
-              {searchQuery.trim() && (
-                <div className="max-w-3xl mx-auto mt-3 bg-white rounded-2xl border border-amber-100 shadow-lg overflow-hidden">
-                  {totalResults === 0 ? (
-                    <div className="p-6 text-center">
-                      <p className="text-xs font-bold text-slate-600">{t('No results found for')} &quot;{searchQuery}&quot;</p>
-                      <p className="text-[11px] text-slate-400 mt-1">
-                        {t('Try searching for')} &quot;{t('Science')}&quot;, &quot;CET&quot;, &quot;Rajasthan GK&quot; {t('or')} &quot;English&quot;.
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="max-h-[420px] overflow-y-auto">
-                      <div className="py-2">
-                        <p className="px-4 pb-1.5 text-[10px] font-black uppercase tracking-wider text-amber-700">
-                          {t('Brahmastra Books')}
-                        </p>
-                        {searchBooks.slice(0, 6).map((book) => (
-                          <Link
-                            key={book.id}
-                            href={`/books/${book.id}`}
-                            onClick={closeSearch}
-                            className="flex items-center gap-3 px-4 py-2.5 hover:bg-amber-50/70 transition-colors"
-                          >
-                            <div className="p-2 bg-slate-100 rounded-xl shrink-0">
-                              <BookOpen className="w-4 h-4 text-blue-600" />
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <p className="text-xs font-bold text-navy-900 truncate">
-                                {language === 'hi' ? BOOK_HI[book.id]?.title ?? book.title : book.title}
-                              </p>
-                              <p className="text-[10px] text-slate-500 truncate">
-                                {book.category}
-                              </p>
-                            </div>
-                            <span className="text-xs font-black text-navy-900 shrink-0">₹{book.price}</span>
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.25, ease: 'easeOut', delay: 0.05 }}
+                className="p-4"
+              >
+                <div className="max-w-3xl mx-auto relative">
+                  <Search className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    placeholder={t('Search for Brahmastra Books, Science, Hindi, English, PYQs...')}
+                    value={searchQuery}
+                    onChange={(e) => dispatch(setSearchQuery(e.target.value))}
+                    className="w-full pl-12 pr-10 py-3 bg-white border border-amber-200 rounded-2xl text-sm focus:outline-none focus:border-yellow-500 shadow-sm text-navy-900"
+                    autoFocus
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => dispatch(setSearchQuery(''))}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
                   )}
                 </div>
-              )}
+
+                {/* Search Results Dropdown */}
+                {searchQuery.trim() && (
+                  <div className="max-w-3xl mx-auto mt-3 bg-white rounded-2xl border border-amber-100 shadow-lg overflow-hidden">
+                    {totalResults === 0 ? (
+                      <div className="p-6 text-center">
+                        <p className="text-xs font-bold text-slate-600">{t('No results found for')} &quot;{searchQuery}&quot;</p>
+                        <p className="text-[11px] text-slate-400 mt-1">
+                          {t('Try searching for')} &quot;{t('Science')}&quot;, &quot;CET&quot;, &quot;Rajasthan GK&quot; {t('or')} &quot;English&quot;.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="max-h-[420px] overflow-y-auto">
+                        <div className="py-2">
+                          <p className="px-4 pb-1.5 text-[10px] font-black uppercase tracking-wider text-amber-700">
+                            {t('Brahmastra Books')}
+                          </p>
+                          {searchBooks.slice(0, 6).map((book) => (
+                            <Link
+                              key={book.id}
+                              href={`/books/${book.id}`}
+                              onClick={closeSearch}
+                              className="flex items-center gap-3 px-4 py-2.5 hover:bg-amber-50/70 transition-colors"
+                            >
+                              <div className="p-2 bg-slate-100 rounded-xl shrink-0">
+                                <BookOpen className="w-4 h-4 text-blue-600" />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <p className="text-xs font-bold text-navy-900 truncate">
+                                  {language === 'hi' ? BOOK_HI[book.id]?.title ?? book.title : book.title}
+                                </p>
+                                <p className="text-[10px] text-slate-500 truncate">
+                                  {book.category}
+                                </p>
+                              </div>
+                              <span className="text-xs font-black text-navy-900 shrink-0">₹{book.price}</span>
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </motion.div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -406,7 +433,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
                   className="flex items-center gap-2 min-w-0 group"
                 >
                   <div className="relative w-9 h-9 rounded-2xl overflow-hidden p-0.5 bg-white shadow-md shrink-0">
-                    <Image src="/logo.jpg" alt="Apni Padhai Logo" fill className="object-cover rounded-xl" />
+                    <Image src="/logo.png" alt="Apni Padhai Logo" fill sizes="36px" className="object-cover rounded-xl" />
                   </div>
                   <div className="flex flex-col min-w-0">
                     <span className="font-heading font-extrabold text-lg tracking-tight text-navy-900 leading-none truncate">

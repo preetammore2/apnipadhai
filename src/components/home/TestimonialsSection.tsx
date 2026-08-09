@@ -20,7 +20,7 @@ export const TestimonialsSection: React.FC = () => {
             {t('Join The Apni Padhai Family Today!')}
           </h2>
           <p className="text-slate-600 text-sm sm:text-base mt-2">
-            {t('Real success stories from aspirants who cracked Sub Inspector, CET, RAS, and LDC exams.')}
+            {t('Real success stories from students who cleared government exams with Apni Padhai.')}
           </p>
         </div>
       </div>

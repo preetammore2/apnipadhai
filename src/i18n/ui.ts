@@ -39,7 +39,6 @@ export const HI_UI: Record<string, string> = {
   'Looking for custom exam strategy?': 'कस्टम परीक्षा रणनीति चाहते हैं?',
   'View All Batches →': 'सभी बैच देखें →',
   'View All Batches': 'सभी बैच देखें',
-  'View Full Ranker Gallery': 'पूरी रैंकर गैलरी देखें',
   'Browse All Books': 'सभी किताबें देखें',
   'Search All PYQs Hub': 'सभी PYQs हब खोजें',
 
@@ -260,26 +259,25 @@ export const HI_UI: Record<string, string> = {
   'LDC': 'LDC',
 
   // ---- Results ----
-  'HALL OF FAME 2022-2026': 'हॉल ऑफ फेम 2022-2026',
-  'Apni Padhai Selection Champions': 'अपनी पढ़ाई चयन चैंपियंस',
-  'Celebrating top rankers who transformed their dedication into official government officer roles.':
-    'उन शीर्ष रैंकर्स का जश्न जिन्होंने अपने समर्पण को आधिकारिक सरकारी अधिकारी पदों में बदला।',
-  'Roll No:': 'रोल नं.:',
   'SELECTION HALL OF FAME': 'चयन हॉल ऑफ फेम',
   'Our Exam Champions & Rankers': 'हमारे परीक्षा चैंपियंस एवं रैंकर्स',
-  'Over 12,500+ student selections produced across RAS, Sub Inspector, CET, SSC GD, and LDC recruitment exams.':
-    'RAS, सब इंस्पेक्टर, CET, SSC GD और LDC भर्ती परीक्षाओं में 12,500+ छात्र चयन।',
-  'Total Officer Selections': 'कुल अधिकारी चयन',
-  'Top SI Exam Rank': 'शीर्ष SI परीक्षा रैंक',
-  'CET Top State Ranker': 'CET शीर्ष राज्य रैंकर',
-  'Direct Book Match Rate': 'डायरेक्ट बुक मैच दर',
+  'Celebrating students who cleared Rajasthan Police and REET exams with Apni Padhai.':
+    'अपनी पढ़ाई के साथ राजस्थान पुलिस और रीट परीक्षा पास करने वाले छात्रों का सम्मान।',
+  'RAJASTHAN POLICE SELECTIONS': 'राजस्थान पुलिस चयन',
+  'Rajasthan Police Selected Students': 'राजस्थान पुलिस में चयनित छात्र',
+  'Young aspirants who cleared the Rajasthan Police recruitment exam with Apni Padhai.':
+    'अपनी पढ़ाई के साथ राजस्थान पुलिस भर्ती परीक्षा पास करने वाले युवा अभ्यर्थी।',
+  'REET L1/L2 SELECTIONS': 'रीट L1/L2 चयन',
+  'REET L1 / L2 Qualified Students': 'रीट L1/L2 उत्तीर्ण छात्र',
+  'Teachers who qualified the Rajasthan Eligibility Examination for Level 1 & Level 2.':
+    'स्तर 1 और स्तर 2 के लिए राजस्थान शिक्षक पात्रता परीक्षा उत्तीर्ण करने वाले शिक्षक।',
 
   // ---- Testimonials ----
   'STUDENTS': 'छात्र',
   'APNI PADHAI': 'अपनी पढ़ाई',
   'Join The Apni Padhai Family Today!': 'आज ही अपनी पढ़ाई परिवार से जुड़ें!',
-  'Real success stories from aspirants who cracked Sub Inspector, CET, RAS, and LDC exams.':
-    'उन उम्मीदवारों की वास्तविक सफलता की कहानियां जिन्होंने सब इंस्पेक्टर, CET, RAS और LDC परीक्षाएं पास कीं।',
+  'Real success stories from students who cleared government exams with Apni Padhai.':
+    'अपनी पढ़ाई के साथ सरकारी परीक्षाएं पास करने वाले छात्रों की वास्तविक सफलता की कहानियां।',
 
   // ---- Founder ----
   'FOUNDER & LEAD EDUCATOR': 'संस्थापक एवं मुख्य शिक्षक',
@@ -345,6 +343,7 @@ export const HI_UI: Record<string, string> = {
   'Empowering students across India with affordable high-quality live courses, bestselling Brahmastra books, updated previous year question papers, and expert mentorship.':
     'किफायती उच्च-गुणवत्ता वाले लाइव कोर्स, बेस्टसेलिंग ब्रह्मास्त्र किताबें, अपडेटेड पिछले वर्ष के प्रश्न पत्र और विशेषज्ञ मेंटरशिप के साथ पूरे भारत के छात्रों को सशक्त बनाना।',
   'Explore Platform': 'प्लेटफॉर्म एक्सप्लोर करें',
+  'About Us': 'हमारे बारे में',
   'All Online Courses': 'सभी ऑनलाइन कोर्स',
   'Brahmastra Books Store': 'ब्रह्मास्त्र किताबें स्टोर',
   'Previous Years Papers (PYQs)': 'पिछले वर्षों के पेपर (PYQs)',
@@ -432,6 +431,7 @@ export const HI_UI: Record<string, string> = {
   // ---- Careers ----
   'JOIN OUR TEAM': 'हमारी टीम से जुड़ें',
   'Careers at Apni Padhai': 'अपनी पढ़ाई में करियर',
+  'Careers': 'करियर',
   'Build the future of EdTech with us. We are looking for passionate subject experts, content writers, video editors, and layout designers.':
     'हमारे साथ EdTech का भविष्य बनाएं। हम जुनूनी विषय विशेषज्ञों, कंटेंट राइटर्स, वीडियो एडिटर्स और लेआउट डिज़ाइनर्स की तलाश में हैं।',
   'Apply Now': 'अभी आवेदन करें',

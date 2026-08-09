@@ -28,6 +28,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# local unprocessed image sources
+/images/
 
-.vercel
-.env*
+# one-off image processing script
+process_student_images.cjs

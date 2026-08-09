@@ -22,6 +22,7 @@ export const KEYS_ACCOUNT: Record<string, string> = {
   'Thank you for ordering with Apni Padhai Publication. Tracking updates will be sent to your phone number':
     'अपनी पढ़ाई प्रकाशन से ऑर्डर करने के लिए धन्यवाद। ट्रैकिंग अपडेट आपके फोन नंबर पर भेजे जाएंगे',
   'Go to Student Dashboard': 'स्टूडेंट डैशबोर्ड पर जाएं',
+  'Continue Shopping': 'खरीदारी जारी रखें',
   'Secure Checkout': 'सुरक्षित चेकआउट',
   'Shipping & Contact Details': 'शिपिंग और संपर्क विवरण',
   'Full Name *': 'पूरा नाम *',
@@ -50,7 +51,8 @@ export const KEYS_ACCOUNT: Record<string, string> = {
   'PhonePe UPI / Cards / NetBanking': 'फोनपे UPI / कार्ड / नेटबैंकिंग',
   'All UPI apps, Debit and Credit Cards, and NetBanking accepted':
     'सभी UPI ऐप, डेबिट और क्रेडिट कार्ड, और नेटबैंकिंग स्वीकार किए जाते हैं',
-  'Email (optional)': 'ईमेल (वैकल्पिक)',
+  'Email *': 'ईमेल *',
+  'Please enter a valid email address': 'कृपया सही ईमेल पता दर्ज करें',
   'Please enter a valid 10-digit phone number': 'कृपया मान्य 10 अंकों का फोन नंबर दर्ज करें',
   'Your cart is empty': 'आपका कार्ट खाली है',
   'Redirecting to Payment...': 'भुगतान पर रीडायरेक्ट हो रहा है...',

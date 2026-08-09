@@ -4,6 +4,7 @@ import React from 'react';
 import Image from 'next/image';
 import { useTranslation } from '@/i18n/useTranslation';
 import { CheckCircle2, Heart, ShieldCheck, Target, Youtube, Send } from 'lucide-react';
+import { FeaturesSection } from '@/components/home/FeaturesSection';
 
 export default function AboutPage() {
   const { t } = useTranslation();
@@ -116,6 +117,9 @@ export default function AboutPage() {
             </p>
           </div>
         </div>
+
+        {/* Why Over 100,000 Aspirants Choose Us */}
+        <FeaturesSection />
 
       </div>
     </div>

@@ -29,8 +29,8 @@ export interface PYQ {
   category: 'RAS' | 'Sub Inspector' | 'CET' | 'LDC' | 'SSC GD' | 'Rajasthan GK' | 'Teacher Exams';
   year: number;
   state: 'Rajasthan' | 'All India';
-  questionsCount: number;
-  pdfSize: string;
+  questionsCount?: number;
+  pdfSize?: string;
   downloadUrl: string;
   hasSolution: boolean;
   subject: string;
@@ -66,18 +66,6 @@ export interface Testimonial {
   city: string;
   isVideo?: boolean;
   videoUrl?: string;
-}
-
-export interface ResultRanker {
-  id: string;
-  name: string;
-  exam: string;
-  rank: string;
-  rollNo: string;
-  year: string;
-  photo: string;
-  district: string;
-  testimonial: string;
 }
 
 export interface BlogArticle {

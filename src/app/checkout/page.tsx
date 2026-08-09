@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAppSelector } from '@/redux/hooks';
-import { ArrowRight, Loader2, Tag, ShoppingBag, Smartphone } from 'lucide-react';
+import { ArrowRight, Loader2, ShoppingBag, Smartphone } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from '@/i18n/useTranslation';
 import { BOOK_HI } from '@/i18n/data';
@@ -17,10 +17,6 @@ export default function CheckoutPage() {
   const discountAmount = useAppSelector((state) => state.cart.discountAmount);
   const totalAmount = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const totalPayable = Math.max(0, totalAmount - discountAmount);
-  const totalSavings = cart.reduce(
-    (sum, item) => sum + (item.originalPrice - item.price) * item.quantity,
-    0
-  );
   const [formData, setFormData] = useState({ name: '', phone: '', email: '', address: '', city: '', pincode: '' });
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -61,6 +57,10 @@ export default function CheckoutPage() {
     }
     if (!formData.phone.trim().match(/^[0-9]{10}$/)) {
       toast.error(t('Please enter a valid 10-digit phone number'));
+      return;
+    }
+    if (!formData.email.trim().match(/^\S+@\S+\.\S+$/)) {
+      toast.error(t('Please enter a valid email address'));
       return;
     }
     if (cart.length === 0) {
@@ -164,9 +164,10 @@ export default function CheckoutPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-navy-900 mb-1">{t('Email (optional)')}</label>
+                  <label className="block text-xs font-bold text-navy-900 mb-1">{t('Email *')}</label>
                   <input
                     type="email"
+                    required
                     placeholder="rahul@example.com"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -229,18 +230,6 @@ export default function CheckoutPage() {
               </div>
 
               <div className="pt-2 space-y-1.5 text-xs text-slate-600">
-                <div className="flex justify-between">
-                  <span>{t('Total Discount Savings')}</span>
-                  <span className="font-bold text-emerald-600">-₹{totalSavings}</span>
-                </div>
-                {couponCode && (
-                  <div className="flex justify-between">
-                    <span className="flex items-center gap-1">
-                      <Tag className="w-3.5 h-3.5" /> {t('Coupon Discount')} ({couponCode})
-                    </span>
-                    <span className="font-bold text-emerald-600">-₹{discountAmount}</span>
-                  </div>
-                )}
                 <div className="flex justify-between">
                   <span>{t('Delivery Charges')}</span>
                   <span className="font-bold text-emerald-600">{t('FREE')}</span>

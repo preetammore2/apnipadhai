@@ -3,20 +3,16 @@
 import React, { useState } from 'react';
 import { HeroSection } from '@/components/home/HeroSection';
 import { TrustSection } from '@/components/home/TrustSection';
-import { FeaturesSection } from '@/components/home/FeaturesSection';
 import { BooksSection } from '@/components/home/BooksSection';
 import { FounderSpotlight } from '@/components/home/FounderSpotlight';
 import { PyqQuickSection } from '@/components/home/PyqQuickSection';
-import { ResultsSection } from '@/components/home/ResultsSection';
 import { TestimonialsSection } from '@/components/home/TestimonialsSection';
 import { AppDownloadSection } from '@/components/home/AppDownloadSection';
 import { CommunitySection } from '@/components/home/CommunitySection';
 import { YouTubeSection } from '@/components/home/YouTubeSection';
 import { CoursesSection } from '@/components/home/CoursesSection';
 import { UpdatesSection } from '@/components/home/UpdatesSection';
-import { NewsletterSection } from '@/components/home/NewsletterSection';
 import { FaqSection } from '@/components/home/FaqSection';
-import { TrackOrderSection } from '@/components/home/TrackOrderSection';
 import { BookDealsSection } from '@/components/home/BookDealsSection';
 import { CounselorModal } from '@/components/layout/CounselorModal';
 import { ArrowRight, Phone, Download, Sparkles } from 'lucide-react';
@@ -35,29 +31,23 @@ export default function HomePage() {
       {/* 2. Trust Numbers Section */}
       <TrustSection />
 
-      {/* 3. Why Students Choose Apni Padhai */}
-      <FeaturesSection />
-
-      {/* 4. Brahmastra Books Store */}
+      {/* 3. Brahmastra Books Store */}
       <BooksSection />
 
       {/* 4b. Books with Discount (from WordPress books-with-discount page) */}
       <BookDealsSection />
 
-      {/* 6. Founder Spotlight (Rohit Sir) */}
-      <FounderSpotlight />
-
-      {/* 7. Solved PYQs Section */}
+      {/* 6. Solved PYQs Section */}
       <PyqQuickSection />
 
-      {/* 8. Top Rankers & Selections */}
-      <ResultsSection />
-
-      {/* 9. Student Love & Testimonials */}
+      {/* 7. Student Love & Testimonials */}
       <TestimonialsSection />
 
-      {/* 10. Free Lectures / YouTube Section */}
+      {/* 9. Free Lectures / YouTube Section */}
       <YouTubeSection />
+
+      {/* 10. Founder's Vision (Rohit Sir) */}
+      <FounderSpotlight />
 
       {/* 11. Community Section (600K+ YouTube Subscribers & 200K+ Telegram Followers) */}
       <CommunitySection />
@@ -73,12 +63,6 @@ export default function HomePage() {
 
       {/* 14b. FAQs (from WordPress FAQ page) */}
       <FaqSection />
-
-      {/* 14c. Track Your Order (from WordPress track-your-order page) */}
-      <TrackOrderSection />
-
-      {/* 15. Newsletter Signup */}
-      <NewsletterSection />
 
       {/* 12. Final CTA Banner */}
       <section className="py-20 bg-navy-950 text-white text-center relative overflow-hidden border-t border-amber-500/20">

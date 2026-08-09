@@ -72,12 +72,6 @@ export const cartSlice = createSlice({
     setCartOpen: (state, action: PayloadAction<boolean>) => {
       state.isCartOpen = action.payload;
     },
-    applyCoupon: (state, action: PayloadAction<string>) => {
-      if (action.payload.toUpperCase() === 'SGS7J8VT') {
-        state.couponCode = 'SGS7J8VT';
-        state.discountAmount = 20;
-      }
-    },
     hydrateCart: (state, action: PayloadAction<CartItem[]>) => {
       state.items = action.payload;
     },
@@ -90,7 +84,6 @@ export const {
   updateQuantity,
   clearCart,
   setCartOpen,
-  applyCoupon,
   hydrateCart,
 } = cartSlice.actions;
 

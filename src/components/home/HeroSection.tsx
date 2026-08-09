@@ -65,15 +65,14 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenCounselorModal }
           className="space-y-6 sm:space-y-8"
         >
           {/* Top Pill Badge */}
-          <motion.div variants={itemVariants} className="inline-block">
+          {/* <motion.div variants={itemVariants} className="inline-block">
             <div className="inline-flex items-center gap-2.5 px-4 sm:px-5 py-1.5 sm:py-2 bg-white/[0.04] backdrop-blur-md border border-brand-400/30 rounded-full text-[11px] sm:text-xs font-semibold uppercase tracking-[0.18em] text-brand-300 mx-auto max-w-full">
               <span className="flex h-1.5 w-1.5 relative shrink-0">
                 <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-brand-400" />
               </span>
               <Sparkles className="w-3.5 h-3.5 text-brand-400 shrink-0" />
-              <span className="truncate min-w-0">{t("India's Smart Educational Platform & Publication")}</span>
             </div>
-          </motion.div>
+          </motion.div> */}
 
           {/* Main Headline */}
           <motion.h1

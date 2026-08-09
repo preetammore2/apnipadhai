@@ -41,7 +41,7 @@ export const Footer: React.FC = () => {
             <div className="flex items-center gap-3">
               <div className="relative w-12 h-12 bg-white rounded-2xl overflow-hidden shadow-lg p-1">
                 <Image
-                  src="/logo.jpg"
+                  src="/logo.png"
                   alt="Apni Padhai Publication Logo"
                   fill
                   className="object-cover rounded-xl"
@@ -84,6 +84,21 @@ export const Footer: React.FC = () => {
           <div>
             <h4 className="text-sm font-bold font-heading uppercase tracking-wider text-yellow-400 mb-4">{t('Explore Platform')}</h4>
             <ul className="space-y-2.5 text-xs text-slate-300">
+              <li>
+                <Link href="/about" className="hover:text-yellow-400 transition-colors flex items-center gap-2">
+                  <span>›</span> {t('About Us')}
+                </Link>
+              </li>
+              <li>
+                <Link href="/careers" className="hover:text-yellow-400 transition-colors flex items-center gap-2">
+                  <span>›</span> {t('Careers')}
+                </Link>
+              </li>
+              <li>
+                <Link href="/#courses" className="hover:text-yellow-400 transition-colors flex items-center gap-2">
+                  <span>›</span> {t('Courses')}
+                </Link>
+              </li>
               <li>
                 <Link href="/books" className="hover:text-yellow-400 transition-colors flex items-center gap-2">
                   <span>›</span> {t('Brahmastra Books Store')}

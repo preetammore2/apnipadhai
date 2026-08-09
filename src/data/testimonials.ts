@@ -3,57 +3,37 @@ import { Testimonial } from '@/types';
 export const TESTIMONIALS_DATA: Testimonial[] = [
   {
     id: 'test-1',
-    name: 'Devendra Meena',
-    exam: 'Sub Inspector (SI)',
-    rank: 'Rank 4',
-    selectionYear: '2022',
-    quote: 'Apni Padhai test series and Rohit Sir\'s Rajasthan GK lectures were the game changers in my preparation. The Brahmastra books covered 95% of direct questions in the exam!',
+    name: 'Dipesh',
+    exam: 'REET L1/L2',
+    rank: 'Rank 672',
+    selectionYear: '2026',
+    quote:
+      'मैने कुछ टॉपिक आपकी ज्योग्राफी की किताब से और कुछ टॉपिक कल्चर वाली किताब से कवर किए थे जिसका मुझे कम समय में ज्यादा फायदा हुआ और मैने 672 रैंक (NTSP) हासिल की 🙏🙏',
     rating: 5,
-    photo: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=200&q=80',
-    city: 'Jaipur'
+    photo: '/images/REET_L1_L2/Dipesh%20(Jhunjhunu).jpg',
+    city: 'Jhunjhunu',
   },
   {
     id: 'test-2',
-    name: 'Pooja Choudhary',
-    exam: 'Rajasthan CET (Graduate Level)',
-    rank: 'Rank 12',
-    selectionYear: '2024',
-    quote: 'The affordable course pricing brought top quality Kota/Jaipur standard faculty right into my mobile. Science Brahmastra book was concise, crisp, and 100% exam accurate.',
+    name: 'Lalit',
+    exam: 'REET L1/L2',
+    selectionYear: '2026',
+    quote:
+      "I'm really glad to say that your content is so good. Your marathon video for Rajasthan GK is amazing and it's helpful for me to quick revision before appearing to the exam.",
     rating: 5,
-    photo: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
-    city: 'Jodhpur'
+    photo: '/images/REET_L1_L2/Lalit%20(Salumbar).jpg',
+    city: 'Salumbar',
   },
   {
     id: 'test-3',
-    name: 'Rakesh Sharma',
-    exam: 'High Court LDC',
-    rank: 'Selected',
-    selectionYear: '2023',
-    quote: 'I cleared LDC in my first attempt! The English & Hindi Brahmastra combo books gave me complete confidence in language papers.',
+    name: 'Nand kishor',
+    exam: 'REET L1/L2 (Level 1)',
+    rank: 'Rank 1178',
+    selectionYear: '2026',
+    quote:
+      'मेरी सफलता में रोहित सर के द्वारा निकाले गए GK के ब्रह्मास्त्र का बहुत योगदान रहा। मैने इन ब्रह्मास्त्र को पढ़कर आज लेवल 1 अध्यापक भर्ती परीक्षा में 1178 रैंक प्राप्त की। अध्यापक बनने के इस सफर में',
     rating: 5,
-    photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80',
-    city: 'Bhilwara'
+    photo: '/images/REET_L1_L2/Nand%20kishor%20(kota).jpg',
+    city: 'Kota',
   },
-  {
-    id: 'test-4',
-    name: 'Sunita Verma',
-    exam: 'Grade 3 Teacher (Level 2)',
-    rank: 'Rank 19',
-    selectionYear: '2023',
-    quote: 'Rohit Sir\'s Art & Culture lectures were so engaging that I remembered all Lok Devtas and Forts without taking heavy notes. Thank you Apni Padhai team!',
-    rating: 5,
-    photo: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=200&q=80',
-    city: 'Ajmer'
-  },
-  {
-    id: 'test-5',
-    name: 'Mahesh Gurjar',
-    exam: 'SSC GD Constable',
-    rank: 'Rank 45',
-    selectionYear: '2024',
-    quote: 'The mock test speed analysis feature in Apni Padhai App helped me double my problem solving speed in mathematics. Truly the smart learning platform of India!',
-    rating: 5,
-    photo: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80',
-    city: 'Kota'
-  }
 ];

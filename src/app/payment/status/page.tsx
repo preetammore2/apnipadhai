@@ -111,10 +111,10 @@ function PaymentStatusContent() {
             )}
             <div className="pt-2 space-y-2">
               <Link
-                href="/dashboard"
+                href="/books"
                 className="block w-full px-6 py-3 bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white rounded-xl text-xs font-bold shadow-button-glow transition-all"
               >
-                {t('Go to Student Dashboard')}
+                {t('Continue Shopping')}
               </Link>
               <Link
                 href="/"

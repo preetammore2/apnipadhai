@@ -1,22 +1,54 @@
 'use client';
 
-import React, { useState } from 'react';
-import { PYQS_DATA } from '@/data/pyqs';
+import React, { useEffect, useMemo, useState } from 'react';
+import { PYQ } from '@/types';
 import { PYQ_HI } from '@/i18n/data';
 import { useTranslation } from '@/i18n/useTranslation';
-import { Search, Download, CheckCircle, Filter } from 'lucide-react';
+import { Search, Download, CheckCircle, Filter, Loader2, RefreshCw, WifiOff } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function PyqPage() {
   const { t, language } = useTranslation();
+  const [pyqs, setPyqs] = useState<PYQ[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isError, setIsError] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [selectedYear, setSelectedYear] = useState<string>('All');
 
-  const categories = ['All', 'RAS', 'Sub Inspector', 'CET', 'LDC', 'SSC GD', 'Rajasthan GK'];
-  const years = ['All', '2025', '2024', '2023', '2021'];
+  const loadPyqs = async () => {
+    setIsLoading(true);
+    setIsError(false);
+    try {
+      const res = await fetch('/api/pyqs');
+      if (!res.ok) throw new Error('Failed to load PYQs');
+      const data = (await res.json()) as PYQ[];
+      setPyqs(data);
+    } catch (error) {
+      console.error('[pyqs] load error', error);
+      setIsError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  const filteredPyqs = PYQS_DATA.filter((pyq) => {
+  useEffect(() => {
+    loadPyqs();
+  }, []);
+
+  const categories = useMemo(() => {
+    const set = new Set<string>(['All']);
+    pyqs.forEach((pyq) => set.add(pyq.category));
+    return Array.from(set);
+  }, [pyqs]);
+
+  const years = useMemo(() => {
+    const set = new Set<string>(['All']);
+    pyqs.forEach((pyq) => set.add(String(pyq.year)));
+    return Array.from(set).sort((a, b) => (a === 'All' ? -1 : Number(b) - Number(a)));
+  }, [pyqs]);
+
+  const filteredPyqs = pyqs.filter((pyq) => {
     const matchesCategory = selectedCategory === 'All' || pyq.category === selectedCategory;
     const matchesYear = selectedYear === 'All' || pyq.year.toString() === selectedYear;
     const matchesSearch =
@@ -29,7 +61,6 @@ export default function PyqPage() {
   return (
     <div className="py-12 bg-slate-50 min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-10">
           <span className="text-xs font-bold text-brand-600 uppercase tracking-widest bg-brand-100/80 px-3.5 py-1.5 rounded-full">
@@ -99,52 +130,91 @@ export default function PyqPage() {
           </div>
         </div>
 
-        {/* PYQs Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredPyqs.map((pyq) => (
-            <div
-              key={pyq.id}
-              className="bg-white rounded-3xl p-6 border border-slate-200 shadow-card hover:shadow-card-hover transition-all flex flex-col justify-between group"
+        {isLoading && (
+          <div className="flex flex-col items-center justify-center py-20 gap-3 text-slate-500">
+            <Loader2 className="w-8 h-8 animate-spin text-brand-500" />
+            <p className="text-sm font-semibold">{t('Loading previous year papers...')}</p>
+          </div>
+        )}
+
+        {isError && (
+          <div className="flex flex-col items-center justify-center py-20 gap-4 text-slate-500">
+            <WifiOff className="w-8 h-8 text-red-400" />
+            <p className="text-sm font-semibold text-center">
+              {t('Something went wrong while fetching the question papers. Please try again.')}
+            </p>
+            <button
+              onClick={loadPyqs}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold transition-colors"
             >
-              <div>
-                <div className="flex items-center justify-between gap-2 mb-3">
-                  <span className="px-3 py-1 bg-brand-50 text-brand-700 text-xs font-bold rounded-full">
-                    {t(pyq.category)} • {pyq.year}
-                  </span>
-                  <span className="text-[11px] font-bold text-slate-400">{pyq.pdfSize}</span>
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span>{t('Try Again')}</span>
+            </button>
+          </div>
+        )}
+
+        {!isLoading && !isError && filteredPyqs.length === 0 && (
+          <div className="text-center py-20 text-slate-500">
+            <p className="text-sm font-semibold">{t('No papers match your filters. Try adjusting your search.')}</p>
+          </div>
+        )}
+
+        {/* PYQs Grid */}
+        {!isLoading && !isError && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredPyqs.map((pyq) => (
+              <div
+                key={pyq.id}
+                className="bg-white rounded-3xl p-6 border border-slate-200 shadow-card hover:shadow-card-hover transition-all flex flex-col justify-between group"
+              >
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <span className="px-3 py-1 bg-brand-50 text-brand-700 text-xs font-bold rounded-full">
+                      {t(pyq.category)} • {pyq.year}
+                    </span>
+                    {pyq.pdfSize && (
+                      <span className="text-[11px] font-bold text-slate-400">{pyq.pdfSize}</span>
+                    )}
+                  </div>
+
+                  <h3 className="text-base font-bold font-heading text-navy-900 group-hover:text-brand-600 transition-colors mb-2">
+                    {language === 'hi' ? PYQ_HI[pyq.id]?.title ?? pyq.title : pyq.title}
+                  </h3>
+                  <p className="text-xs text-slate-500 mb-4">
+                    {language === 'hi' ? PYQ_HI[pyq.id]?.subject ?? pyq.subject : pyq.subject}
+                  </p>
+
+                  {pyq.hasSolution && (
+                    <div className="flex items-center gap-2 text-xs font-semibold text-emerald-600 mb-4">
+                      <CheckCircle className="w-4 h-4" />
+                      <span>{t('Verified Solved Answer Key')}</span>
+                    </div>
+                  )}
                 </div>
 
-                <h3 className="text-base font-bold font-heading text-navy-900 group-hover:text-brand-600 transition-colors mb-2">
-                  {language === 'hi' ? PYQ_HI[pyq.id]?.title ?? pyq.title : pyq.title}
-                </h3>
-                <p className="text-xs text-slate-500 mb-4">
-                  {language === 'hi' ? PYQ_HI[pyq.id]?.subject ?? pyq.subject : pyq.subject}
-                </p>
+                <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+                  {pyq.questionsCount ? (
+                    <span className="text-xs font-bold text-slate-500">
+                      {pyq.questionsCount} {t('Questions')}
+                    </span>
+                  ) : (
+                    <span />
+                  )}
 
-                <div className="flex items-center gap-2 text-xs font-semibold text-emerald-600 mb-4">
-                  <CheckCircle className="w-4 h-4" />
-                  <span>{t('Verified Solved Answer Key')}</span>
+                  <a
+                    href={pyq.downloadUrl}
+                    download
+                    onClick={() => toast.success(`${t('Downloading official solved PDF for')} ${pyq.title}`)}
+                    className="px-4 py-2 bg-navy-900 hover:bg-brand-600 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>{t('Download PDF')}</span>
+                  </a>
                 </div>
               </div>
-
-              <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-500">
-                  {pyq.questionsCount} {t('Questions')}
-                </span>
-
-                <a
-                  href={pyq.downloadUrl}
-                  download
-                  onClick={() => toast.success(`${t('Downloading official solved PDF for')} ${pyq.title}`)}
-                  className="px-4 py-2 bg-navy-900 hover:bg-brand-600 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>{t('Download PDF')}</span>
-                </a>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

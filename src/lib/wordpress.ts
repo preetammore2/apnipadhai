@@ -1,5 +1,9 @@
+import { PYQ } from '@/types';
+
 const WP_URL = process.env.WP_URL ?? 'https://apnipadhaipublication.com';
 const WP_API = `${WP_URL}/wp-json/wp/v2`;
+
+const WP_REVALIDATE_SECONDS = Number(process.env.WP_REVALIDATE_SECONDS ?? '60');
 
 export interface WordPressPost {
   id: number;
@@ -9,17 +13,20 @@ export interface WordPressPost {
   content: string;
   contentHtml: string;
   date: string;
+  modified: string;
   link: string;
   author: string;
   categories: string[];
   categoryNames: string[];
   imageUrl: string;
+  tags: string[];
 }
 
 export interface WordPressCategory {
   id: number;
   name: string;
   slug: string;
+  count: number;
 }
 
 function stripHtml(html: string | undefined): string {
@@ -33,22 +40,35 @@ function extractFirstImage(html: string | undefined): string {
   return match?.[1] ?? '';
 }
 
+interface EmbeddedTerm {
+  taxonomy: string;
+  name: string;
+  slug: string;
+}
+
 interface RawPost {
   id: number;
   slug: string;
   link: string;
   date: string;
+  modified: string;
   title: { rendered: string };
   excerpt: { rendered: string };
   content: { rendered: string };
   categories: number[];
+  tags: number[];
   author: number;
+  _embedded?: {
+    author?: { name: string }[];
+    'wp:featuredmedia'?: { source_url: string }[];
+    'wp:term'?: EmbeddedTerm[][];
+  };
 }
 
 const rawParams = (perPage: number): string =>
   new URLSearchParams({
     per_page: String(perPage),
-    _fields: ['id', 'slug', 'link', 'date', 'title', 'excerpt', 'content', 'categories', 'author'].join(','),
+    _embed: 'true',
   }).toString();
 
 export async function getCategories(): Promise<WordPressCategory[]> {
@@ -58,21 +78,158 @@ export async function getCategories(): Promise<WordPressCategory[]> {
       _fields: ['id', 'name', 'slug', 'count'].join(','),
     });
     const res = await fetch(`${WP_API}/categories?${params.toString()}`, {
-      cache: 'force-cache',
+      next: { revalidate: WP_REVALIDATE_SECONDS },
     });
     if (!res.ok) return [];
-    const raw = (await res.json()) as { id: number; name: string; slug: string; count: number }[];
-    return raw
-      .filter((c) => c.count > 0)
-      .map((c) => ({ id: c.id, name: stripHtml(c.name), slug: c.slug }));
+    const raw = (await res.json()) as WordPressCategory[];
+    return raw.filter((c) => c.count > 0);
   } catch {
     return [];
   }
 }
 
+export interface WordPressPdf {
+  id: string;
+  title: string;
+  url: string;
+  source: string;
+}
+
+export interface BookSample {
+  keyword: string;
+  title: string;
+  pdfUrl: string;
+}
+
+async function getPageBySlug(slug: string): Promise<{ title: string; contentHtml: string } | undefined> {
+  try {
+    const params = new URLSearchParams({
+      slug,
+      _fields: ['id', 'title', 'content'].join(','),
+    });
+    const res = await fetch(`${WP_API}/pages?${params.toString()}`, {
+      next: { revalidate: WP_REVALIDATE_SECONDS },
+    });
+    if (!res.ok) return undefined;
+    const pages = (await res.json()) as {
+      id: number;
+      title: { rendered: string };
+      content: { rendered: string };
+    }[];
+    const page = pages[0];
+    if (!page) return undefined;
+    return { title: stripHtml(page.title.rendered), contentHtml: page.content.rendered ?? '' };
+  } catch {
+    return undefined;
+  }
+}
+
+function extractPdfLinks(contentHtml: string): string[] {
+  const urls: string[] = [];
+  const pattern = /href="([^"]+\.pdf(?:\?[^"]*)?)"/gi;
+  let match: RegExpExecArray | null;
+  while ((match = pattern.exec(contentHtml)) !== null) {
+    urls.push(match[1]);
+  }
+  return [...new Set(urls)];
+}
+
+function pdfFileName(url: string): string {
+  const clean = url.split('?')[0];
+  const name = clean.split('/').pop() ?? '';
+  return name.replace(/\.pdf$/i, '');
+}
+
+export async function getPdfLinks(pageSlug: string): Promise<WordPressPdf[]> {
+  const page = await getPageBySlug(pageSlug);
+  if (!page) return [];
+  return extractPdfLinks(page.contentHtml).map((url, index) => ({
+    id: `${pageSlug}-${index + 1}`,
+    title: page.title || titleFromFileName(pdfFileName(url)),
+    url,
+    source: pageSlug,
+  }));
+}
+
+function titleFromFileName(fileName: string): string {
+  return fileName
+    .replace(/[-_]+/g, ' ')
+    .replace(/\b[a-z]/g, (c) => c.toUpperCase())
+    .trim();
+}
+
+const PYQ_PAGE_SLUGS = ['ras-previous-year-papers', 'all-previous-year-paper'];
+
+function derivePyq(link: WordPressPdf): PYQ {
+  const fileName = pdfFileName(link.url);
+  const year = Number(fileName.match(/(\d{4})/)?.[1] ?? 0);
+  const isMains = /mains/i.test(fileName);
+  const isRas = link.source === 'ras-previous-year-papers';
+
+  let title: string;
+  if (isRas) {
+    title = isMains
+      ? `RAS Mains Official Solved Question Paper ${year || ''}`.trim()
+      : `RAS Prelims Official Solved Question Paper ${year || ''}`.trim();
+  } else {
+    const shiftMatch = fileName.match(/GK[-_]?(\d{1,2})$/i);
+    const shift = shiftMatch ? ` - Shift ${shiftMatch[1]}` : '';
+    title = `SI Official Solved Question Paper ${year || ''}${shift} (General Knowledge)`.trim();
+  }
+
+  const subject = isRas && isMains
+    ? 'General Hindi, English, GK & Essay Papers'
+    : 'General Knowledge & General Science';
+
+  return {
+    id: link.id,
+    title,
+    examName: isRas ? 'Rajasthan Administrative Service (RAS)' : 'Rajasthan Police Sub Inspector',
+    category: isRas ? 'RAS' : 'Sub Inspector',
+    year,
+    state: 'Rajasthan',
+    downloadUrl: link.url,
+    hasSolution: true,
+    subject,
+  };
+}
+
+export async function getPyqs(): Promise<PYQ[]> {
+  const results = await Promise.all(PYQ_PAGE_SLUGS.map((slug) => getPdfLinks(slug)));
+  const links = results.flat();
+  if (links.length === 0) {
+    throw new Error('WordPress PYQ request failed');
+  }
+  return links.map(derivePyq);
+}
+
+const SAMPLE_TOPIC_PATTERNS: { pattern: RegExp; keyword: string }[] = [
+  { pattern: /culture|art/i, keyword: 'art' },
+  { pattern: /history/i, keyword: 'history' },
+  { pattern: /geo/i, keyword: 'geo' },
+  { pattern: /computer/i, keyword: 'computer' },
+  { pattern: /हिन्दी|हिंदी|hindi/i, keyword: 'hindi' },
+];
+
+export async function getBookSamples(): Promise<BookSample[]> {
+  const page = await getPageBySlug('book-sample-pdf');
+  if (!page) return [];
+  return extractPdfLinks(page.contentHtml).map((url) => {
+    const fileName = pdfFileName(url);
+    const pattern = SAMPLE_TOPIC_PATTERNS.find((p) => p.pattern.test(fileName));
+    return {
+      keyword: pattern?.keyword ?? (fileName.match(/[a-z]/i) ? fileName.toLowerCase() : 'hindi'),
+      title: page.title || titleFromFileName(fileName),
+      pdfUrl: url,
+    };
+  });
+}
+
 export async function getPosts(perPage = 50): Promise<WordPressPost[]> {
   const [postRes, categories] = await Promise.all([
-    fetch(`${WP_API}/posts?${rawParams(perPage)}`, { cache: 'force-cache' }),
+    fetch(`${WP_API}/posts?${rawParams(perPage)}`, {
+      next: { revalidate: WP_REVALIDATE_SECONDS },
+    }),
     getCategories(),
   ]);
 
@@ -82,43 +239,37 @@ export async function getPosts(perPage = 50): Promise<WordPressPost[]> {
 
   const posts = (await postRes.json()) as RawPost[];
   const categoryNameById = new Map(categories.map((c) => [c.id, c.name]));
-  const postsWithAuthor = await Promise.all(
-    posts.map(async (post) => {
-      let author = 'Apni Padhai';
-      try {
-        const userRes = await fetch(
-          `${WP_API}/users/${post.author}?_fields=name`,
-          { cache: 'force-cache' },
-        );
-        if (userRes.ok) {
-          const user = (await userRes.json()) as { name: string };
-          author = user.name;
-        }
-      } catch {
-        // keep default author
-      }
-      return { post, author };
-    }),
-  );
 
-  return postsWithAuthor.map(({ post, author }) => {
+  return posts.map((post) => {
+    const author = post._embedded?.author?.[0]?.name ?? 'Apni Padhai';
+    const imageUrl =
+      post._embedded?.['wp:featuredmedia']?.[0]?.source_url ??
+      extractFirstImage(post.content.rendered ?? '');
+    const tags =
+      post._embedded?.['wp:term']
+        ?.flat()
+        .filter((term) => term.taxonomy === 'post_tag')
+        .map((term) => term.name) ?? [];
     const categoryNames = post.categories
       .map((id) => categoryNameById.get(id))
       .filter((name): name is string => Boolean(name));
     const contentHtml = post.content.rendered ?? '';
+
     return {
       id: post.id,
       slug: post.slug,
       link: post.link,
       date: post.date,
+      modified: post.modified ?? post.date,
       title: stripHtml(post.title.rendered),
       excerpt: stripHtml(post.excerpt.rendered) || stripHtml(post.content.rendered).slice(0, 200),
       content: stripHtml(post.content.rendered),
       contentHtml,
       categories: post.categories.map((id) => String(id)),
       categoryNames: categoryNames.length > 0 ? categoryNames : ['Blog'],
-      imageUrl: extractFirstImage(contentHtml),
+      imageUrl,
       author,
+      tags,
     };
   });
 }

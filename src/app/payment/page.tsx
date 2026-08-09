@@ -34,18 +34,30 @@ function PaymentPageContent() {
           return;
         }
 
-        const sdk = await loadPhonePeCheckout();
-        sdk.transact({
-          tokenUrl: data.redirectUrl,
-          type: 'IFRAME',
-          callback: (response) => {
-            if (response === 'CONCLUDED') {
-              window.location.href = `/payment/status?merchantTransactionId=${data.merchantTransactionId}`;
-            } else {
-              setState('cancelled');
-            }
-          },
-        });
+        let sdk;
+        try {
+          sdk = await loadPhonePeCheckout();
+        } catch {
+          window.location.href = data.redirectUrl;
+          return;
+        }
+
+        try {
+          sdk.transact({
+            tokenUrl: data.redirectUrl,
+            type: 'IFRAME',
+            callback: (response) => {
+              if (response === 'CONCLUDED') {
+                window.location.href = `/payment/status?merchantTransactionId=${data.merchantTransactionId}`;
+              } else {
+                setState('cancelled');
+              }
+            },
+          });
+        } catch {
+          window.location.href = data.redirectUrl;
+          return;
+        }
       } catch (error) {
         console.error('[payment] failed to start payment', error);
         setState('error');

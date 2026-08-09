@@ -22,13 +22,16 @@ export const KEYS_CONTENT: Record<string, string> = {
 
   'SELECTION HALL OF FAME': 'चयन हॉल ऑफ फेम',
   'Our Exam Champions & Rankers': 'हमारे परीक्षा चैंपियंस एवं रैंकर्स',
-  'Over 12,500+ student selections produced across RAS, Sub Inspector, CET, SSC GD, and LDC recruitment exams.':
-    'RAS, सब इंस्पेक्टर, CET, SSC GD और LDC भर्ती परीक्षाओं में 12,500+ छात्र चयन।',
-  'Total Officer Selections': 'कुल अधिकारी चयन',
-  'Top SI Exam Rank': 'शीर्ष SI परीक्षा रैंक',
-  'CET Top State Ranker': 'CET शीर्ष राज्य रैंकर',
-  'Direct Book Match Rate': 'डायरेक्ट बुक मैच दर',
-  'Roll No:': 'रोल नं.:',
+  'Celebrating students who cleared Rajasthan Police and REET exams with Apni Padhai.':
+    'अपनी पढ़ाई के साथ राजस्थान पुलिस और रीट परीक्षा पास करने वाले छात्रों का सम्मान।',
+  'RAJASTHAN POLICE SELECTIONS': 'राजस्थान पुलिस चयन',
+  'Rajasthan Police Selected Students': 'राजस्थान पुलिस में चयनित छात्र',
+  'Young aspirants who cleared the Rajasthan Police recruitment exam with Apni Padhai.':
+    'अपनी पढ़ाई के साथ राजस्थान पुलिस भर्ती परीक्षा पास करने वाले युवा अभ्यर्थी।',
+  'REET L1/L2 SELECTIONS': 'रीट L1/L2 चयन',
+  'REET L1 / L2 Qualified Students': 'रीट L1/L2 उत्तीर्ण छात्र',
+  'Teachers who qualified the Rajasthan Eligibility Examination for Level 1 & Level 2.':
+    'स्तर 1 और स्तर 2 के लिए राजस्थान शिक्षक पात्रता परीक्षा उत्तीर्ण करने वाले शिक्षक।',
 
   'EXAM NEWS & STUDY ARTICLES': 'परीक्षा समाचार और स्टडी आर्टिकल',
   'Latest Updates & Notifications': 'नवीनतम अपडेट और अधिसूचनाएं',

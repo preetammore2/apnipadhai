@@ -49,14 +49,8 @@ export const KEYS_HOME_B: Record<string, string> = {
   'Buy Now': 'अभी खरीदें',
   'STUDENTS': 'छात्र',
   'Join The Apni Padhai Family Today!': 'आज ही अपनी पढ़ाई परिवार से जुड़ें!',
-  'Real success stories from aspirants who cracked Sub Inspector, CET, RAS, and LDC exams.':
-    'उन उम्मीदवारों की वास्तविक सफलता की कहानियां जिन्होंने सब इंस्पेक्टर, CET, RAS और LDC परीक्षाएं पास कीं।',
-  'HALL OF FAME 2022-2026': 'हॉल ऑफ फेम 2022-2026',
-  'Apni Padhai Selection Champions': 'अपनी पढ़ाई चयन चैंपियंस',
-  'Celebrating top rankers who transformed their dedication into official government officer roles.':
-    'उन शीर्ष रैंकर्स का जश्न जिन्होंने अपने समर्पण को आधिकारिक सरकारी अधिकारी पदों में बदला।',
-  'View Full Ranker Gallery': 'पूरी रैंकर गैलरी देखें',
-  'Roll No:': 'रोल नं.:',
+  'Real success stories from students who cleared government exams with Apni Padhai.':
+    'अपनी पढ़ाई के साथ सरकारी परीक्षाएं पास करने वाले छात्रों की वास्तविक सफलता की कहानियां।',
   'FREE STUDY RESOURCES': 'फ्री स्टडी रिसोर्स',
   'Previous Year Question Papers (PYQs)': 'पिछले वर्ष के प्रश्न पत्र (PYQs)',
   'Free solved question papers for RAS, SI, CET, SSC GD & LDC with detailed explanations.':

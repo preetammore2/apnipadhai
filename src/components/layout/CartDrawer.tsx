@@ -1,43 +1,26 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ShoppingBag, X, Trash2, Plus, Minus, ArrowRight, Tag, ShieldCheck } from 'lucide-react';
+import { ShoppingBag, X, Trash2, Plus, Minus, ArrowRight, ShieldCheck } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import {
   removeFromCart,
   updateQuantity,
   setCartOpen,
-  applyCoupon,
 } from '@/redux/features/cart/cartSlice';
-import { toast } from 'sonner';
 import { useTranslation } from '@/i18n/useTranslation';
 import { BOOK_HI } from '@/i18n/data';
 
 export const CartDrawer: React.FC = () => {
   const dispatch = useAppDispatch();
   const { t, language } = useTranslation();
-  const { items, isCartOpen, couponCode, discountAmount } = useAppSelector((state) => state.cart);
-  const [couponInput, setCouponInput] = useState('');
+  const { items, isCartOpen, discountAmount } = useAppSelector((state) => state.cart);
 
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const totalSavings = items.reduce(
-    (sum, item) => sum + (item.originalPrice - item.price) * item.quantity,
-    0
-  );
   const finalTotal = Math.max(0, subtotal - discountAmount);
-
-  const handleApplyCoupon = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (couponInput.toUpperCase() === 'SGS7J8VT') {
-      dispatch(applyCoupon('SGS7J8VT'));
-      toast.success('Coupon SGS7J8VT applied! ₹20 Extra Discount');
-    } else {
-      toast.error(t('Invalid Coupon Code. Try "SGS7J8VT"'));
-    }
-  };
 
   return (
     <AnimatePresence>
@@ -157,42 +140,12 @@ export const CartDrawer: React.FC = () => {
             {/* Drawer Footer Summary */}
             {items.length > 0 && (
               <div className="p-6 border-t border-slate-200 bg-slate-50 space-y-4">
-                {/* Coupon Input */}
-                <form onSubmit={handleApplyCoupon} className="flex gap-2">
-                  <div className="relative flex-1">
-                    <Tag className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                    <input
-                      type="text"
-                      placeholder={t('Coupon Code (Try SGS7J8VT)')}
-                      value={couponInput}
-                      onChange={(e) => setCouponInput(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-yellow-500 uppercase font-bold text-navy-900"
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    className="px-4 py-2 bg-navy-900 hover:bg-black text-white text-xs font-bold rounded-xl shrink-0"
-                  >
-                    {t('Apply')}
-                  </button>
-                </form>
-
                 {/* Calculation Breakdown */}
                 <div className="space-y-1.5 text-xs text-slate-600">
                   <div className="flex justify-between">
                     <span>{t('Subtotal')}</span>
                     <span className="font-bold text-navy-900">₹{subtotal}</span>
                   </div>
-                  <div className="flex justify-between text-emerald-600">
-                    <span>{t('Total Discount Savings')}</span>
-                    <span className="font-bold">-₹{totalSavings}</span>
-                  </div>
-                  {couponCode && (
-                    <div className="flex justify-between text-emerald-600">
-                      <span>{t('Coupon Discount')} ({couponCode})</span>
-                      <span className="font-bold">-₹{discountAmount}</span>
-                    </div>
-                  )}
                   <div className="flex justify-between text-navy-900 font-black text-base pt-2 border-t border-slate-200">
                     <span>{t('Total Payable')}</span>
                     <span className="text-amber-700">₹{finalTotal}</span>
