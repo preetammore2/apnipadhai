@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
 
     const config = getPhonePeConfig();
     const merchantTransactionId = generateMerchantTransactionId();
-    const origin = getRedirectBaseUrl(request.headers);
+    const origin = getRedirectBaseUrl();
     const redirectUrl = `${origin}/payment/status?merchantTransactionId=${merchantTransactionId}`;
 
     let paymentResponse;

@@ -142,11 +142,9 @@ export function getRequestBaseUrl(headers: Headers): string {
   return `${proto}://${host}`;
 }
 
-export function getRedirectBaseUrl(headers: Headers): string {
+export function getRedirectBaseUrl(): string {
   const override = (process.env.PHONEPE_REDIRECT_BASE_URL ?? '').trim().replace(/\/+$/, '');
-  if (override) return override;
-  const base = getRequestBaseUrl(headers);
-  return /^https?:\/\/.+/.test(base) ? base : 'https://apnipadhai.vercel.app';
+  return override || 'https://apnipadhaipublication.com';
 }
 
 export function isPaymentRequestAllowed(headers: Headers): boolean {
