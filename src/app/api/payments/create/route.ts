@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createOrder } from '@/lib/woocommerce';
+import { createOrder, WooCommerceError } from '@/lib/woocommerce';
 import {
   createPhonePePayment,
   generateMerchantTransactionId,
   getPhonePeConfig,
   getRedirectBaseUrl,
   getRequestBaseUrl,
+  isPaymentRequestAllowed,
   signOrderToken,
   ORDER_TOKEN_TTL_MS,
 } from '@/lib/phonepe';
@@ -14,6 +15,10 @@ export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
   try {
+    if (!isPaymentRequestAllowed(request.headers)) {
+      return NextResponse.json({ success: false, message: 'Forbidden' }, { status: 403 });
+    }
+
     const body = await request.json().catch(() => null);
     if (!body) {
       return NextResponse.json({ success: false, message: 'Invalid request body' }, { status: 400 });
@@ -49,6 +54,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (!/^[6-9]\d{9}$/.test(phone)) {
+      return NextResponse.json(
+        { success: false, message: 'Please enter a valid 10-digit phone number' },
+        { status: 400 },
+      );
+    }
+
     const order = await createOrder({
       items,
       couponCode: typeof body.couponCode === 'string' ? body.couponCode : undefined,
@@ -66,6 +78,12 @@ export async function POST(request: NextRequest) {
     if (!Number.isFinite(amountPaise) || amountPaise <= 0) {
       return NextResponse.json(
         { success: false, message: 'Order total must be greater than zero' },
+        { status: 400 },
+      );
+    }
+    if (amountPaise < 100) {
+      return NextResponse.json(
+        { success: false, message: 'Order total must be at least ₹1' },
         { status: 400 },
       );
     }
@@ -99,12 +117,22 @@ export async function POST(request: NextRequest) {
 
     const redirect = paymentResponse?.data?.redirectUrl;
     if (!paymentResponse?.ok || !redirect) {
+      const data = paymentResponse?.data;
+      const code = data?.code ?? data?.errorCode ?? data?.detailedErrorCode ?? 'PAYMENT_INITIATION_FAILED';
       console.error('[payments/create] PhonePe initiation failed', {
         status: paymentResponse?.status,
-        data: paymentResponse?.data,
+        data,
       });
       return NextResponse.json(
-        { success: false, message: paymentResponse?.data?.message || 'Payment initiation failed' },
+        {
+          success: false,
+          code,
+          message:
+            data?.message ??
+            (code !== 'PAYMENT_INITIATION_FAILED'
+              ? `Payment gateway error (${code})`
+              : 'Payment initiation failed'),
+        },
         { status: 502 },
       );
     }
@@ -149,6 +177,12 @@ export async function POST(request: NextRequest) {
     return response;
   } catch (error) {
     console.error('[payments/create] error', error);
+    if (error instanceof WooCommerceError) {
+      return NextResponse.json(
+        { success: false, message: error.message || 'Could not create order' },
+        { status: error.status >= 400 && error.status < 600 ? error.status : 502 },
+      );
+    }
     return NextResponse.json(
       { success: false, message: 'Could not start payment. Please try again.' },
       { status: 500 },

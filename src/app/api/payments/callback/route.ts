@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getPhonePeConfig, getPhonePePaymentStatus, verifyOrderToken } from '@/lib/phonepe';
+import {
+  getPhonePeConfig,
+  getPhonePePaymentStatus,
+  isPaymentRequestAllowed,
+  verifyOrderToken,
+} from '@/lib/phonepe';
 import { markOrderPaid } from '@/lib/woocommerce';
 import { sendOrderSuccessNotification } from '@/lib/notifications';
 
@@ -7,6 +12,10 @@ export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
   try {
+    if (!isPaymentRequestAllowed(request.headers)) {
+      return NextResponse.json({ success: false }, { status: 403 });
+    }
+
     const body = await request.json().catch(() => null);
     const payload =
       body && typeof body.payload === 'object' && body.payload !== null

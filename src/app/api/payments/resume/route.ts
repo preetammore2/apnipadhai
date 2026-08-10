@@ -1,10 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getPhonePeConfig, verifyOrderToken } from '@/lib/phonepe';
+import {
+  getPhonePeConfig,
+  isPaymentRequestAllowed,
+  verifyOrderToken,
+} from '@/lib/phonepe';
 
 export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
   try {
+    if (!isPaymentRequestAllowed(request.headers)) {
+      return NextResponse.json({ success: false, message: 'Forbidden' }, { status: 403 });
+    }
+
     const config = getPhonePeConfig();
     const token = request.cookies.get('ap_order')?.value;
     const order = token ? verifyOrderToken(token, config.signingSecret) : null;

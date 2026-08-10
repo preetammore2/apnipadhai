@@ -145,7 +145,30 @@ export function getRequestBaseUrl(headers: Headers): string {
 export function getRedirectBaseUrl(headers: Headers): string {
   const override = (process.env.PHONEPE_REDIRECT_BASE_URL ?? '').trim().replace(/\/+$/, '');
   if (override) return override;
-  return getRequestBaseUrl(headers);
+  const base = getRequestBaseUrl(headers);
+  return /^https?:\/\/.+/.test(base) ? base : 'https://apnipadhai.vercel.app';
+}
+
+export function isPaymentRequestAllowed(headers: Headers): boolean {
+  const origin = (headers.get('origin') ?? '').trim().replace(/\/+$/, '');
+  if (!origin) return true;
+
+  const self = (getRequestBaseUrl(headers) ?? '').replace(/\/+$/, '');
+  if (origin === self) return true;
+
+  const allowed = (process.env.CORS_ALLOWED_ORIGINS ?? '')
+    .split(',')
+    .map((item) => item.trim().replace(/\/+$/, ''))
+    .filter(Boolean)
+    .filter((item) => item !== '*');
+
+  return allowed.some((candidate) => {
+    if (candidate === origin) return true;
+    const pattern = candidate
+      .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      .replace(/\*/g, '.*');
+    return new RegExp(`^${pattern}$`).test(origin);
+  });
 }
 
 export interface CreatePaymentParams {
@@ -232,6 +255,65 @@ export async function getPhonePePaymentStatus(
 }
 
 export const ORDER_TOKEN_TTL_MS = 30 * 60 * 1000;
+
+export interface InitiateRefundParams {
+  merchantOrderId: string;
+  merchantRefundId: string;
+  amountPaise: number;
+  config: PhonePeConfig;
+}
+
+export interface RefundStatusParams {
+  merchantRefundId: string;
+  config: PhonePeConfig;
+}
+
+export async function createPhonePeRefund(
+  params: InitiateRefundParams,
+): Promise<PhonePePaymentResponse> {
+  const accessToken = await getAccessToken();
+
+  const payload = {
+    merchantOrderId: params.merchantOrderId,
+    merchantRefundId: params.merchantRefundId,
+    amount: params.amountPaise,
+    currency: 'INR',
+  };
+
+  const res = await fetch(`${params.config.apiBaseUrl}/payments/v2/refund`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `O-Bearer ${accessToken}`,
+    },
+    body: JSON.stringify(payload),
+    cache: 'no-store',
+  });
+
+  const data = (await res.json().catch(() => null)) as PhonePePaymentData | null;
+  return { ok: res.ok, status: res.status, data };
+}
+
+export async function getPhonePeRefundStatus(
+  params: RefundStatusParams,
+): Promise<PhonePePaymentResponse> {
+  const accessToken = await getAccessToken();
+
+  const res = await fetch(
+    `${params.config.apiBaseUrl}/payments/v2/refund/${encodeURIComponent(params.merchantRefundId)}/status`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `O-Bearer ${accessToken}`,
+      },
+      cache: 'no-store',
+    },
+  );
+
+  const data = (await res.json().catch(() => null)) as PhonePePaymentData | null;
+  return { ok: res.ok, status: res.status, data };
+}
 
 export interface OrderTokenPayload {
   merchantTransactionId: string;

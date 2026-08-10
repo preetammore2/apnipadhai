@@ -4,6 +4,7 @@ import { sendOrderSuccessNotification } from '@/lib/notifications';
 import {
   getPhonePeConfig,
   getPhonePePaymentStatus,
+  isPaymentRequestAllowed,
   verifyOrderToken,
 } from '@/lib/phonepe';
 
@@ -11,6 +12,10 @@ export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
   try {
+    if (!isPaymentRequestAllowed(request.headers)) {
+      return NextResponse.json({ success: false, message: 'Forbidden' }, { status: 403 });
+    }
+
     const body = await request.json().catch(() => null);
     const merchantTransactionId =
       typeof body?.merchantTransactionId === 'string' ? body.merchantTransactionId : '';
