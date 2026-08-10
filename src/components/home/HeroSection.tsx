@@ -4,7 +4,6 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import {
-  Sparkles,
   Download,
   BookOpen,
   CheckCircle2,
@@ -50,6 +49,19 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenCounselorModal }
 
   return (
     <section className="relative min-h-[85vh] bg-hero-dark overflow-hidden flex items-center pt-8 sm:pt-12 pb-16 sm:pb-24">
+      {/* Background Video */}
+      <video
+        className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+        src="/images/hero-bg.mp4"
+        autoPlay
+        muted
+        loop
+        playsInline
+      />
+
+      {/* Dark Overlay for readability */}
+      <div className="absolute inset-0 bg-slate-950/70 pointer-events-none" />
+
       {/* Subtle Light Grid Overlay */}
       <div className="absolute inset-0 bg-grid-light pointer-events-none" />
 
