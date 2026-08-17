@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
 const CSRF_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
@@ -46,7 +46,7 @@ export function isSameOriginOrAllowed(headers: Headers): boolean {
   return isOriginAllowed(headers.get('origin'), headers);
 }
 
-export function createCorsHeaders(request: NextRequest): Headers {
+export function createCorsHeaders(request: Request): Headers {
   const origin = (request.headers.get('origin') ?? '').trim().replace(/\/+$/, '');
   const self = requestBaseUrl(request.headers).replace(/\/+$/, '');
   const allowedOrigin = origin && origin !== self && isOriginAllowed(origin, request.headers)
@@ -79,10 +79,10 @@ export function createCorsHeaders(request: NextRequest): Headers {
   return headers;
 }
 
-export function isCsrfBlocked(request: NextRequest): boolean {
+export function isCsrfBlocked(request: Request): boolean {
   if (!CSRF_METHODS.has(request.method)) return false;
 
-  const pathname = request.nextUrl.pathname;
+  const pathname = new URL(request.url).pathname;
   if (CSRF_EXEMPT_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`))) {
     return false;
   }

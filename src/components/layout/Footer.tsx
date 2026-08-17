@@ -7,13 +7,11 @@ import {
   MapPin,
   Phone,
   Mail,
-  Youtube,
-  Instagram,
   Send,
-  Facebook,
   ArrowUp,
   ShieldCheck,
 } from 'lucide-react';
+import { FaYoutube, FaInstagram, FaFacebook } from 'react-icons/fa';
 import { toast } from 'sonner';
 import { useTranslation } from '@/i18n/useTranslation';
 
@@ -205,7 +203,7 @@ export const Footer: React.FC = () => {
                 className="p-2.5 bg-white/10 hover:bg-red-600 rounded-xl text-white transition-colors"
                 title="YouTube Channel"
               >
-                <Youtube className="w-4 h-4" />
+                <FaYoutube className="w-4 h-4" />
               </a>
               <a
                 href="https://t.me/Aapni_Padhai"
@@ -223,7 +221,7 @@ export const Footer: React.FC = () => {
                 className="p-2.5 bg-white/10 hover:bg-pink-600 rounded-xl text-white transition-colors"
                 title="Instagram"
               >
-                <Instagram className="w-4 h-4" />
+                <FaInstagram className="w-4 h-4" />
               </a>
               <a
                 href="https://www.facebook.com/apnipadhaipublication"
@@ -232,7 +230,7 @@ export const Footer: React.FC = () => {
                 className="p-2.5 bg-white/10 hover:bg-blue-600 rounded-xl text-white transition-colors"
                 title="Facebook Page"
               >
-                <Facebook className="w-4 h-4" />
+                <FaFacebook className="w-4 h-4" />
               </a>
             </div>
           </div>

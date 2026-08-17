@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { createCorsHeaders, forbiddenJson, isCsrfBlocked } from '@/lib/cors';
 
-export function middleware(request: NextRequest) {
+export function proxy(request: Request) {
   if (request.method === 'OPTIONS') {
     return new NextResponse(null, {
       status: 204,

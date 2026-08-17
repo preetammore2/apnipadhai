@@ -3,7 +3,8 @@
 import React from 'react';
 import Image from 'next/image';
 import { useTranslation } from '@/i18n/useTranslation';
-import { CheckCircle2, Heart, ShieldCheck, Target, Youtube, Send } from 'lucide-react';
+import { CheckCircle2, Heart, ShieldCheck, Target, Send } from 'lucide-react';
+import { FaYoutube } from 'react-icons/fa';
 import { FeaturesSection } from '@/components/home/FeaturesSection';
 
 export default function AboutPage() {
@@ -69,7 +70,7 @@ export default function AboutPage() {
                 rel="noreferrer"
                 className="px-5 py-3 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl flex items-center gap-2 shadow-button-glow transition-all"
               >
-                <Youtube className="w-4 h-4" />
+                <FaYoutube className="w-4 h-4" />
                 <span>{t('YouTube Channel')}</span>
               </a>
               <a

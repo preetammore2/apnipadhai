@@ -4,7 +4,8 @@ import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Youtube, PlayCircle, Radio, Clock, ArrowRight, ExternalLink, Loader2, RefreshCw, WifiOff, Video } from 'lucide-react';
+import { PlayCircle, Radio, Clock, ArrowRight, ExternalLink, Loader2, RefreshCw, WifiOff, Video } from 'lucide-react';
+import { FaYoutube } from 'react-icons/fa';
 import { useTranslation } from '@/i18n/useTranslation';
 import { YouTubeVideo } from '@/types';
 
@@ -84,7 +85,7 @@ export const YouTubeSection: React.FC = () => {
             </span>
           ) : (
             <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-navy-950/80 text-white text-[10px] font-black uppercase rounded-md backdrop-blur-sm">
-              <Youtube className="w-3 h-3 text-red-500" /> {t('Lecture')}
+              <FaYoutube className="w-3 h-3 text-red-500" /> {t('Lecture')}
             </span>
           )}
         </div>
@@ -103,7 +104,7 @@ export const YouTubeSection: React.FC = () => {
         </h3>
         <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
           <span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-500">
-            <Youtube className="w-3.5 h-3.5 text-red-600" /> {channel.handle}
+            <FaYoutube className="w-3.5 h-3.5 text-red-600" /> {channel.handle}
           </span>
           <span className="inline-flex items-center gap-1 text-[11px] font-black text-navy-900 group-hover:text-red-700 transition-colors">
             {t('Watch')} <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
@@ -122,7 +123,7 @@ export const YouTubeSection: React.FC = () => {
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
           <div className="max-w-2xl">
             <span className="text-xs font-black text-red-700 uppercase tracking-widest bg-red-50 px-3.5 py-1.5 rounded-full border border-red-200 inline-flex items-center gap-1.5">
-              <Youtube className="w-3.5 h-3.5" /> {t('FREE LECTURES ON YOUTUBE')}
+              <FaYoutube className="w-3.5 h-3.5" /> {t('FREE LECTURES ON YOUTUBE')}
             </span>
             <h2 className="text-3xl sm:text-4xl font-extrabold font-heading text-navy-900 mt-3">
               {t('Watch Free Exam-Oriented Lectures')}
@@ -138,7 +139,7 @@ export const YouTubeSection: React.FC = () => {
             rel="noreferrer"
             className="inline-flex items-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white text-sm font-black rounded-2xl shadow-sm transition-all hover:-translate-y-0.5"
           >
-            <Youtube className="w-4 h-4" />
+            <FaYoutube className="w-4 h-4" />
             <span>{t('Subscribe on YouTube')}</span>
             <ExternalLink className="w-3.5 h-3.5 opacity-70" />
           </a>
@@ -182,7 +183,7 @@ export const YouTubeSection: React.FC = () => {
               rel="noreferrer"
               className="mt-5 px-6 py-3 bg-red-600 hover:bg-red-700 text-white text-xs font-black rounded-xl transition-all inline-flex items-center gap-2"
             >
-              <Youtube className="w-4 h-4" />
+              <FaYoutube className="w-4 h-4" />
               <span>{t('Visit Our Channel')}</span>
             </a>
           </div>
@@ -217,7 +218,7 @@ export const YouTubeSection: React.FC = () => {
                 rel="noreferrer"
                 className="inline-flex items-center gap-2 px-8 py-3.5 bg-red-600 hover:bg-red-700 text-white text-sm font-black rounded-2xl shadow-sm transition-all hover:-translate-y-0.5"
               >
-                <Youtube className="w-4 h-4" />
+                <FaYoutube className="w-4 h-4" />
                 <span>{t('View All Videos on YouTube')}</span>
               </a>
             </div>

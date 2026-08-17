@@ -2,7 +2,8 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Youtube, Send, Instagram, ArrowRight, Users } from 'lucide-react';
+import { Send, ArrowRight, Users } from 'lucide-react';
+import { FaYoutube, FaInstagram } from 'react-icons/fa';
 import Link from 'next/link';
 import { useTranslation } from '@/i18n/useTranslation';
 
@@ -13,7 +14,7 @@ export const CommunitySection: React.FC = () => {
       id: 'youtube',
       name: 'Apni Padhai YouTube',
       count: '600K+ Subscribers',
-      icon: <Youtube className="w-10 h-10 text-red-600" />,
+      icon: <FaYoutube className="w-10 h-10 text-red-600" />,
       bgGradient: 'from-red-50 to-amber-50/50 hover:border-red-300',
       badge: 'FREE LECTURES & TRICKS',
       href: 'https://www.youtube.com/@AapniPadhai',
@@ -33,7 +34,7 @@ export const CommunitySection: React.FC = () => {
       id: 'instagram',
       name: 'Apni Padhai Instagram',
       count: '150K+ Community',
-      icon: <Instagram className="w-10 h-10 text-pink-600" />,
+      icon: <FaInstagram className="w-10 h-10 text-pink-600" />,
       bgGradient: 'from-pink-50 to-amber-50/50 hover:border-pink-300',
       badge: 'CURRENT AFFAIRS REELS',
       href: 'https://www.instagram.com/apnipadhai_official/',

@@ -4,7 +4,8 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Quote, Youtube, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Quote, CheckCircle2, ArrowRight } from 'lucide-react';
+import { FaYoutube } from 'react-icons/fa';
 import { useTranslation } from '@/i18n/useTranslation';
 
 export const FounderSpotlight: React.FC = () => {
@@ -110,7 +111,7 @@ export const FounderSpotlight: React.FC = () => {
                 rel="noreferrer"
                 className="inline-flex items-center gap-2 px-6 py-3.5 bg-white/[0.06] hover:bg-white/[0.12] text-white font-semibold text-xs rounded-xl border border-white/15 transition-all duration-300 hover:border-white/25"
               >
-                <Youtube className="w-4 h-4 text-red-500" />
+                <FaYoutube className="w-4 h-4 text-red-500" />
                 <span>{t('Watch Free Lectures on YouTube')}</span>
               </a>
             </div>
