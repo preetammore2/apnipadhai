@@ -3,9 +3,6 @@ const nextConfig = {
   reactStrictMode: true,
   productionBrowserSourceMaps: false,
   poweredByHeader: false,
-  compiler: {
-    removeConsole: process.env.NODE_ENV === 'production',
-  },
   images: {
     remotePatterns: [
       {
