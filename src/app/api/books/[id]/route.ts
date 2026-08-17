@@ -7,7 +7,10 @@ import {
   updateBook,
   WooCommerceError,
 } from '@/lib/woocommerce';
+import { deleteMirroredBook, mirrorBooksSafe, upsertMirroredBook } from '@/lib/db-books';
 import { hasAdminAccess } from '@/lib/auth';
+import { getClientIp, rateLimitResponse } from '@/lib/rate-limit';
+import { denyIfCrossOrigin, readJsonBody } from '@/lib/request-security';
 
 export const runtime = 'nodejs';
 
@@ -38,13 +41,23 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const crossOrigin = denyIfCrossOrigin(request);
+  if (crossOrigin) return crossOrigin;
+
+  const throttled = rateLimitResponse(request, {
+    limit: 30,
+    windowMs: 15 * 60 * 1000,
+    key: `books-write:${getClientIp(request)}`,
+  });
+  if (throttled) return throttled;
+
   if (!hasAdminAccess(request)) {
     return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
   }
 
   try {
     const { id } = await params;
-    const body = await request.json().catch(() => null);
+    const body = await readJsonBody<unknown>(request);
     if (!body) {
       return NextResponse.json(
         { success: false, message: 'Invalid request body' },
@@ -53,6 +66,7 @@ export async function PUT(
     }
     const payload = parseBookPayload(body);
     const book = await updateBook(id, payload);
+    void mirrorBooksSafe(() => upsertMirroredBook(book));
     revalidatePath('/api/books');
     revalidatePath('/books');
     return NextResponse.json({ success: true, book });
@@ -70,6 +84,16 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const crossOrigin = denyIfCrossOrigin(request);
+  if (crossOrigin) return crossOrigin;
+
+  const throttled = rateLimitResponse(request, {
+    limit: 30,
+    windowMs: 15 * 60 * 1000,
+    key: `books-write:${getClientIp(request)}`,
+  });
+  if (throttled) return throttled;
+
   if (!hasAdminAccess(request)) {
     return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
   }
@@ -77,6 +101,7 @@ export async function DELETE(
   try {
     const { id } = await params;
     await deleteBook(id);
+    void mirrorBooksSafe(() => deleteMirroredBook(id));
     revalidatePath('/api/books');
     revalidatePath('/books');
     return NextResponse.json({ success: true, message: 'Book deleted' });

@@ -33,8 +33,7 @@ export const YouTubeSection: React.FC = () => {
       if (!res.ok) throw new Error('Failed to load videos');
       const data = (await res.json()) as YouTubeFeed;
       setFeed(data);
-    } catch (error) {
-      console.error('[YouTubeSection] load error', error);
+    } catch {
       setIsError(true);
     } finally {
       setIsLoading(false);

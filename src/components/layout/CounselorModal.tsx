@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { setCounselorModalOpen } from '@/redux/features/ui/uiSlice';
 import { useTranslation } from '@/i18n/useTranslation';
+import { digitsOnly, isTenDigitPhone } from '@/lib/validation';
 
 interface CounselorModalProps {
   isOpen?: boolean;
@@ -40,6 +41,10 @@ export const CounselorModal: React.FC<CounselorModalProps> = ({ isOpen: propIsOp
     e.preventDefault();
     if (!studentName || !phone) {
       toast.error(t('Please enter name and phone number'));
+      return;
+    }
+    if (!isTenDigitPhone(phone)) {
+      toast.error(t('Please enter a valid 10-digit phone number'));
       return;
     }
     setIsSubmitted(true);
@@ -96,10 +101,13 @@ export const CounselorModal: React.FC<CounselorModalProps> = ({ isOpen: propIsOp
                 <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="tel"
+                  inputMode="numeric"
+                  maxLength={10}
+                  pattern="[0-9]{10}"
                   required
                   placeholder="9876543210"
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  onChange={(e) => setPhone(digitsOnly(e.target.value, 10))}
                   className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-yellow-500 text-navy-900"
                 />
               </div>

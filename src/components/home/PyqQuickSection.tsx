@@ -22,8 +22,7 @@ export const PyqQuickSection: React.FC = () => {
       if (!res.ok) throw new Error('Failed to load PYQs');
       const data = (await res.json()) as PYQ[];
       setPyqs(data);
-    } catch (error) {
-      console.error('[PyqQuickSection] load error', error);
+    } catch {
       setIsError(true);
     } finally {
       setIsLoading(false);

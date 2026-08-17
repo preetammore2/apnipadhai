@@ -285,7 +285,7 @@ export const BooksSection: React.FC = () => {
                     }}
                     className="px-4 py-2 bg-yellow-400 hover:bg-yellow-500 text-navy-950 text-xs font-black rounded-xl transition-all shadow-sm"
                   >
-                    {t('Buy Now')}
+                    {t('Add to Cart')}
                   </button>
                 </div>
               </motion.div>

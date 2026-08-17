@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { ChevronDown, HelpCircle, ArrowRight, MessageCircleQuestion, Truck, BookOpen, GraduationCap, Wallet, Smartphone } from 'lucide-react';
 import { useTranslation } from '@/i18n/useTranslation';
 import { FAQ_DATA, FAQ_CATEGORIES } from '@/data/faq';
+import { useSiteContent } from '@/lib/use-site-content';
 
 const CATEGORY_ICONS: Record<string, { icon: React.ElementType; color: string }> = {
   'Orders & Delivery': { icon: Truck, color: 'bg-blue-50 text-blue-600' },
@@ -17,13 +18,18 @@ const CATEGORY_ICONS: Record<string, { icon: React.ElementType; color: string }>
 
 export const FaqSection: React.FC = () => {
   const { t } = useTranslation();
+  const content = useSiteContent();
+  const faqs = content?.faqs?.length ? content.faqs : FAQ_DATA;
+  const categories = content?.faqs?.length
+    ? ['All', ...Array.from(new Set(content.faqs.map((faq) => faq.category)))]
+    : ['All', ...FAQ_CATEGORIES];
   const [activeCategory, setActiveCategory] = useState<string>('All');
-  const [openId, setOpenId] = useState<string | null>(FAQ_DATA[0]?.id ?? null);
+  const [openId, setOpenId] = useState<string | null>(faqs[0]?.id ?? null);
 
   const filtered =
     activeCategory === 'All'
-      ? FAQ_DATA
-      : FAQ_DATA.filter((faq) => faq.category === activeCategory);
+      ? faqs
+      : faqs.filter((faq) => faq.category === activeCategory);
 
   return (
     <section className="py-20 bg-white relative overflow-hidden">
@@ -44,7 +50,7 @@ export const FaqSection: React.FC = () => {
 
         {/* Category Tabs */}
         <div className="flex flex-wrap justify-center gap-2 mb-10">
-          {['All', ...FAQ_CATEGORIES].map((category) => {
+          {categories.map((category) => {
             const isActive = activeCategory === category;
             return (
               <button

@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { BookOpen, PlayCircle, FileCheck2, Clock, Users, ArrowRight, ExternalLink } from 'lucide-react';
 import { useTranslation } from '@/i18n/useTranslation';
+import { useSiteContent } from '@/lib/use-site-content';
 
 interface Course {
   id: string;
@@ -14,7 +15,7 @@ interface Course {
   description: string;
   image: string;
   url: string;
-  type: 'online batch' | 'foundation course';
+  type: string;
   features: string[];
   tag: string;
 }
@@ -55,6 +56,19 @@ const TEST_SERIES = [
 
 export const CoursesSection: React.FC = () => {
   const { t } = useTranslation();
+  const content = useSiteContent();
+  const remoteCourses: Course[] = (content?.courses ?? []).map((course) => ({
+    id: course.id,
+    title: course.title,
+    tagline: course.tagline ?? '',
+    description: course.description,
+    image: course.image ?? '',
+    url: course.url,
+    type: course.type || 'Online Batch',
+    features: course.features ?? [],
+    tag: course.tag ?? '',
+  }));
+  const courses = remoteCourses.length > 0 ? remoteCourses : COURSES;
 
   return (
     <section id="courses" className="py-20 bg-gradient-to-b from-white via-amber-50/40 to-white relative overflow-hidden">
@@ -75,7 +89,7 @@ export const CoursesSection: React.FC = () => {
 
         {/* Online Courses */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {COURSES.map((course, idx) => (
+          {courses.map((course, idx) => (
             <motion.div
               key={course.id}
               initial={{ opacity: 0, y: 24 }}
@@ -85,15 +99,23 @@ export const CoursesSection: React.FC = () => {
               className="bg-white rounded-3xl border-2 border-slate-100 hover:border-amber-300 shadow-card hover:shadow-card-hover transition-all overflow-hidden flex flex-col group"
             >
               <div className="relative h-52 sm:h-56 bg-slate-100 overflow-hidden">
-                <Image
-                  src={course.image}
-                  alt={course.title}
-                  fill
-                  className="object-contain p-4 group-hover:scale-105 transition-transform duration-500"
-                />
-                <span className="absolute top-3 left-3 z-10 px-2.5 py-1 bg-yellow-400 text-navy-950 text-[10px] font-black rounded-full shadow-sm">
-                  {t(course.tag)}
-                </span>
+                {course.image ? (
+                  <Image
+                    src={course.image}
+                    alt={course.title}
+                    fill
+                    className="object-contain p-4 group-hover:scale-105 transition-transform duration-500"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <BookOpen className="w-16 h-16 text-amber-300" />
+                  </div>
+                )}
+                {course.tag && (
+                  <span className="absolute top-3 left-3 z-10 px-2.5 py-1 bg-yellow-400 text-navy-950 text-[10px] font-black rounded-full shadow-sm">
+                    {t(course.tag)}
+                  </span>
+                )}
                 <span className="absolute top-3 right-3 z-10 px-2.5 py-1 bg-navy-900/90 text-white text-[10px] font-bold rounded-full flex items-center gap-1">
                   <PlayCircle className="w-3 h-3 text-yellow-400" /> {t(course.type)}
                 </span>
@@ -103,7 +125,9 @@ export const CoursesSection: React.FC = () => {
                 <h3 className="text-lg font-extrabold font-heading text-navy-900 leading-snug">
                   {t(course.title)}
                 </h3>
-                <p className="text-xs font-bold text-brand-600 mt-1">{t(course.tagline)}</p>
+                {course.tagline && (
+                  <p className="text-xs font-bold text-brand-600 mt-1">{t(course.tagline)}</p>
+                )}
                 <p className="text-xs text-slate-500 leading-relaxed mt-3 flex-grow">
                   {t(course.description)}
                 </p>

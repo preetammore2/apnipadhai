@@ -13,6 +13,7 @@ import {
 import { useTranslation } from '@/i18n/useTranslation';
 import { useAppDispatch } from '@/redux/hooks';
 import { setCounselorModalOpen } from '@/redux/features/ui/uiSlice';
+import { useSiteContent } from '@/lib/use-site-content';
 
 interface HeroSectionProps {
   onOpenCounselorModal?: () => void;
@@ -21,6 +22,7 @@ interface HeroSectionProps {
 export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenCounselorModal }) => {
   const dispatch = useAppDispatch();
   const { t } = useTranslation();
+  const { hero } = useSiteContent() ?? {};
 
   const handleCounselorModal = () => {
     dispatch(setCounselorModalOpen(true));
@@ -91,8 +93,32 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenCounselorModal }
             variants={itemVariants}
             className="text-3xl sm:text-5xl lg:text-6xl font-black font-heading text-white leading-[1.15] tracking-tight max-w-4xl mx-auto px-2"
           >
-            {t('Learn with Expert Educators & Crack Your')}{' '}
-            <span className="text-gradient-gold">{t('Dream Exam')}</span>
+            {hero ? (
+              (() => {
+                const highlight = (hero.highlight ?? '').trim();
+                if (!highlight) return hero.title;
+                const idx = hero.title
+                  .toLowerCase()
+                  .indexOf(highlight.toLowerCase());
+                if (idx === -1) return hero.title;
+                const before = hero.title.slice(0, idx).replace(/\s+$/, '');
+                const after = hero.title.slice(idx + highlight.length).replace(/^\s+/, '');
+                return (
+                  <>
+                    {before && <>{before} </>}
+                    <span className="text-gradient-gold">
+                      {hero.title.slice(idx, idx + highlight.length)}
+                    </span>
+                    {after && <> {after}</>}
+                  </>
+                );
+              })()
+            ) : (
+              <>
+                {t('Learn with Expert Educators & Crack Your')}{' '}
+                <span className="text-gradient-gold">{t('Dream Exam')}</span>
+              </>
+            )}
           </motion.h1>
 
           {/* Subtitle */}
@@ -100,9 +126,15 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenCounselorModal }
             variants={itemVariants}
             className="text-sm sm:text-lg text-slate-300 leading-relaxed max-w-3xl mx-auto font-medium px-2"
           >
-            {t('Comprehensive online live coaching for Rajasthan CET 2026, Sub Inspector (SI), RAS, SSC GD & State Exams. Access bestselling')}{' '}
-            <strong className="text-white font-bold">{t('Brahmastra Study Books')}</strong>
-            {t(', solved PYQs, and daily test series.')}
+            {hero?.subtitle ? (
+              hero.subtitle
+            ) : (
+              <>
+                {t('Comprehensive online live coaching for Rajasthan CET 2026, Sub Inspector (SI), RAS, SSC GD & State Exams. Access bestselling')}{' '}
+                <strong className="text-white font-bold">{t('Brahmastra Study Books')}</strong>
+                {t(', solved PYQs, and daily test series.')}
+              </>
+            )}
           </motion.p>
 
           {/* CTAs */}

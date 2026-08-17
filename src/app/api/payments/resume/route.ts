@@ -4,6 +4,7 @@ import {
   isPaymentRequestAllowed,
   verifyOrderToken,
 } from '@/lib/phonepe';
+import { getClientIp, rateLimitResponse } from '@/lib/rate-limit';
 
 export const runtime = 'nodejs';
 
@@ -12,6 +13,13 @@ export async function POST(request: NextRequest) {
     if (!isPaymentRequestAllowed(request.headers)) {
       return NextResponse.json({ success: false, message: 'Forbidden' }, { status: 403 });
     }
+
+    const throttled = rateLimitResponse(request, {
+      limit: 30,
+      windowMs: 5 * 60 * 1000,
+      key: `payment-resume:${getClientIp(request)}`,
+    });
+    if (throttled) return throttled;
 
     const config = getPhonePeConfig();
     const token = request.cookies.get('ap_order')?.value;
@@ -36,12 +44,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    return NextResponse.json({
-      success: true,
-      redirectUrl: order.redirectUrl,
-      merchantTransactionId: order.merchantTransactionId,
-      embed: config.mode !== 'mock',
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        redirectUrl: order.redirectUrl,
+        merchantTransactionId: order.merchantTransactionId,
+        embed: false,
+      },
+      { headers: { 'Cache-Control': 'no-store' } },
+    );
   } catch (error) {
     console.error('[payments/resume] error', error);
     return NextResponse.json(

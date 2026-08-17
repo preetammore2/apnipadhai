@@ -1,5 +1,7 @@
 import React from 'react';
 import { LegalPage } from '@/components/legal/LegalPage';
+import { WpPageView } from '@/components/wp/WpPageView';
+import { getManagedPageOrWp } from '@/lib/db-pages';
 
 export const metadata = {
   title: 'Return & Refund Policy — Apni Padhai',
@@ -7,7 +9,10 @@ export const metadata = {
     'Return and refund policy of Apni Padhai Publication covering online courses, printed books, and digital products.',
 };
 
-export default function RefundPolicyPage() {
+export default async function RefundPolicyPage() {
+  const wp = await getManagedPageOrWp('ap-refund-policy');
+  if (wp) return <WpPageView title={wp.title} html={wp.contentHtml} />;
+
   return (
     <LegalPage
       badge="Return & Refund Policy"

@@ -1,0 +1,30 @@
+.apsc-field {
+  margin-bottom: 16px;
+}
+
+.apsc-field label {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.apsc-field .description {
+  display: block;
+  margin-top: 4px;
+}
+
+.apsc-image-field img.apsc-preview {
+  max-width: 160px;
+  max-height: 180px;
+  width: auto;
+  height: auto;
+  display: block;
+  margin: 6px 0 8px;
+  border: 1px solid #dcdcde;
+  border-radius: 6px;
+  padding: 4px;
+  background: #f6f7f7;
+}
+
+.apsc-image-field .button {
+  margin-right: 4px;
+}

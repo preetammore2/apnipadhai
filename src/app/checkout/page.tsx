@@ -3,22 +3,33 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useAppSelector } from '@/redux/hooks';
-import { ArrowRight, Loader2, ShoppingBag, Smartphone } from 'lucide-react';
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
+import { applyCoupon, clearCoupon } from '@/redux/features/cart/cartSlice';
+import { ArrowRight, Loader2, ShoppingBag, Smartphone, Tag, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from '@/i18n/useTranslation';
 import { BOOK_HI } from '@/i18n/data';
+import { useStoreSettings } from '@/lib/use-store-settings';
+import { computeCartTotals, findActiveCoupon } from '@/lib/pricing';
+import { digitsOnly, isSixDigitPincode, isTenDigitPhone } from '@/lib/validation';
 
 export default function CheckoutPage() {
   const { t, language } = useTranslation();
   const router = useRouter();
+  const dispatch = useAppDispatch();
   const cart = useAppSelector((state) => state.cart.items);
   const couponCode = useAppSelector((state) => state.cart.couponCode);
-  const discountAmount = useAppSelector((state) => state.cart.discountAmount);
-  const totalAmount = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const totalPayable = Math.max(0, totalAmount - discountAmount);
+  const settings = useStoreSettings();
+  const settingsLoaded = settings !== null;
+  const totals = computeCartTotals(
+    cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
+    settings,
+    couponCode,
+  );
   const [formData, setFormData] = useState({ name: '', phone: '', email: '', address: '', city: '', pincode: '' });
   const [isProcessing, setIsProcessing] = useState(false);
+  const [couponInput, setCouponInput] = useState('');
+  const [couponError, setCouponError] = useState('');
 
   const reminderSent = useRef(false);
 
@@ -43,11 +54,36 @@ export default function CheckoutPage() {
             price: item.price,
           })),
         }),
-      }).catch((error) => {
-        console.error('[checkout] cart reminder failed', error);
-      });
+      }).catch(() => undefined);
     };
   }, [cart, formData, language]);
+
+  const handleApplyCoupon = () => {
+    const code = couponInput.trim();
+    setCouponError('');
+    if (!code) {
+      setCouponError(t('Enter a coupon code'));
+      return;
+    }
+    if (!settings) {
+      setCouponError(t('Coupon codes are still loading. Please try again.'));
+      return;
+    }
+    const coupon = findActiveCoupon(settings, code);
+    if (!coupon) {
+      setCouponError(t('Invalid or inactive coupon code'));
+      return;
+    }
+    dispatch(applyCoupon(code));
+    setCouponInput('');
+    toast.success(`${t('Coupon applied')}: ${coupon.code}`);
+  };
+
+  const handleRemoveCoupon = () => {
+    dispatch(clearCoupon());
+    setCouponInput('');
+    setCouponError('');
+  };
 
   const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,12 +91,20 @@ export default function CheckoutPage() {
       toast.error(t('Please complete shipping details'));
       return;
     }
-    if (!formData.phone.trim().match(/^[0-9]{10}$/)) {
+    if (!isTenDigitPhone(formData.phone.trim())) {
       toast.error(t('Please enter a valid 10-digit phone number'));
       return;
     }
     if (!formData.email.trim().match(/^\S+@\S+\.\S+$/)) {
       toast.error(t('Please enter a valid email address'));
+      return;
+    }
+    if (!formData.city.trim()) {
+      toast.error(t('Please enter your city'));
+      return;
+    }
+    if (!isSixDigitPincode(formData.pincode.trim())) {
+      toast.error(t('Please enter a valid 6-digit pincode'));
       return;
     }
     if (cart.length === 0) {
@@ -96,7 +140,6 @@ export default function CheckoutPage() {
       }
       router.push('/payment');
     } catch (error) {
-      console.error('[checkout] order creation error', error);
       toast.error(error instanceof Error ? error.message : t('Could not create order. Please try again.'));
       setIsProcessing(false);
     }
@@ -154,10 +197,13 @@ export default function CheckoutPage() {
                     <label className="block text-xs font-bold text-navy-900 mb-1">{t('Phone Number *')}</label>
                     <input
                       type="tel"
+                      inputMode="numeric"
+                      maxLength={10}
+                      pattern="[0-9]{10}"
                       required
                       placeholder="9876543210"
                       value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      onChange={(e) => setFormData({ ...formData, phone: digitsOnly(e.target.value, 10) })}
                       className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-500 text-navy-900"
                     />
                   </div>
@@ -203,10 +249,13 @@ export default function CheckoutPage() {
                     <label className="block text-xs font-bold text-navy-900 mb-1">{t('Pincode *')}</label>
                     <input
                       type="text"
+                      inputMode="numeric"
+                      maxLength={6}
+                      pattern="[0-9]{6}"
                       required
                       placeholder="302001"
                       value={formData.pincode}
-                      onChange={(e) => setFormData({ ...formData, pincode: e.target.value })}
+                      onChange={(e) => setFormData({ ...formData, pincode: digitsOnly(e.target.value, 6) })}
                       className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-500 text-navy-900"
                     />
                   </div>
@@ -231,13 +280,90 @@ export default function CheckoutPage() {
 
               <div className="pt-2 space-y-1.5 text-xs text-slate-600">
                 <div className="flex justify-between">
-                  <span>{t('Delivery Charges')}</span>
-                  <span className="font-bold text-emerald-600">{t('FREE')}</span>
+                  <span>{t('Subtotal')}</span>
+                  <span className="font-bold text-navy-900">₹{totals.subtotal}</span>
+                </div>
+                {totals.discount > 0 && (
+                  <div className="flex justify-between">
+                    <span>{totals.discountLabel || t('Discount')}</span>
+                    <span className="font-bold text-emerald-600">-₹{totals.discount}</span>
+                  </div>
+                )}
+                <div className="flex justify-between">
+                  <span>{settings?.shipping.label ?? t('Delivery Charges')}</span>
+                  <span className="font-bold text-navy-900">
+                    {!settingsLoaded ? (
+                      <span className="inline-block h-3 w-10 animate-pulse rounded bg-slate-200 align-middle" />
+                    ) : totals.shipping > 0 ? (
+                      `₹${totals.shipping}`
+                    ) : (
+                      t('FREE')
+                    )}
+                  </span>
                 </div>
                 <div className="flex justify-between text-navy-900 font-black text-base pt-2 border-t border-slate-200">
                   <span>{t('Total Payable')}</span>
-                  <span className="text-brand-600">₹{totalPayable}</span>
+                  <span className="text-brand-600">
+                    {!settingsLoaded ? (
+                      <span className="inline-block h-3.5 w-12 animate-pulse rounded bg-slate-200 align-middle" />
+                    ) : (
+                      `₹${totals.total}`
+                    )}
+                  </span>
                 </div>
+              </div>
+
+              {/* Coupon */}
+              <div className="pt-4 border-t border-slate-200">
+                {couponCode ? (
+                  <div className="flex items-center justify-between bg-emerald-50 border border-emerald-200 rounded-xl px-3.5 py-2.5">
+                    <div className="flex items-center gap-2">
+                      <Tag className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <div>
+                        <p className="text-xs font-black text-emerald-700">{couponCode}</p>
+                        {totals.discount > 0 && (
+                          <p className="text-[11px] text-emerald-600">-₹{totals.discount} applied</p>
+                        )}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleRemoveCoupon}
+                      className="p-1.5 text-emerald-600 hover:text-emerald-800 hover:bg-emerald-100 rounded-lg transition-colors"
+                      aria-label={t('Remove coupon')}
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <div>
+                    <p className="text-xs font-bold text-navy-900 mb-1.5">
+                      {t('Have a coupon?')}
+                    </p>
+                    <div className="flex gap-2">
+                      <input
+                        value={couponInput}
+                        onChange={(e) => {
+                          setCouponInput(e.target.value.toUpperCase());
+                          setCouponError('');
+                        }}
+                        placeholder="e.g. AP10"
+                        className="flex-1 px-3.5 py-2.5 border border-slate-200 rounded-xl text-xs font-bold uppercase focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-500"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleApplyCoupon}
+                        disabled={!settingsLoaded}
+                        className="px-4 py-2.5 bg-navy-900 enabled:hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold rounded-xl transition-colors"
+                      >
+                        {t('Apply')}
+                      </button>
+                    </div>
+                    {couponError && (
+                      <p className="text-[11px] font-semibold text-red-600 mt-1.5">{couponError}</p>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div className="pt-4 border-t border-slate-200 space-y-2.5">

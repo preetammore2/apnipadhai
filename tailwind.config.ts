@@ -40,9 +40,9 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
-        heading: ['Sora', 'sans-serif'],
-        display: ['Poppins', 'sans-serif'],
+        sans: ['var(--font-inter)', 'sans-serif'],
+        heading: ['var(--font-sora)', 'sans-serif'],
+        display: ['var(--font-poppins)', 'sans-serif'],
       },
       boxShadow: {
         'glass': '0 8px 32px 0 rgba(234, 179, 8, 0.12)',

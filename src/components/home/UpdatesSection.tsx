@@ -48,8 +48,7 @@ export const UpdatesSection: React.FC = () => {
       if (!res.ok) throw new Error('Failed to load posts');
       const data = (await res.json()) as WordPressPost[];
       setPosts(data);
-    } catch (error) {
-      console.error('[UpdatesSection] load error', error);
+    } catch {
       setIsError(true);
     } finally {
       setIsLoading(false);

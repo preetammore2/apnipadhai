@@ -18,8 +18,8 @@ export const LanguagePersistence: React.FC = () => {
       if (saved === 'en' || saved === 'hi') {
         dispatch(setLanguage(saved as Language));
       }
-    } catch (e) {
-      console.error('Failed to load language from storage', e);
+    } catch {
+      // Ignore unavailable or corrupted storage; default language remains active.
     }
     hydrated.current = true;
   }, [dispatch]);
@@ -28,8 +28,8 @@ export const LanguagePersistence: React.FC = () => {
     if (!hydrated.current) return;
     try {
       localStorage.setItem(STORAGE_KEY, language);
-    } catch (e) {
-      console.error('Failed to save language to storage', e);
+    } catch {
+      // Ignore storage write failures, such as private browsing quota limits.
     }
   }, [language]);
 

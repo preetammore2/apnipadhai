@@ -1,74 +1,16 @@
-import { NextRequest, NextResponse } from 'next/server';
-import {
-  getPhonePeConfig,
-  getPhonePePaymentStatus,
-  isPaymentRequestAllowed,
-  verifyOrderToken,
-} from '@/lib/phonepe';
-import { markOrderPaid } from '@/lib/woocommerce';
-import { sendOrderSuccessNotification } from '@/lib/notifications';
+import { NextRequest } from 'next/server';
+import { handlePhonePeS2S } from '@/lib/phonepe-s2s';
 
 export const runtime = 'nodejs';
 
-export async function POST(request: NextRequest) {
-  try {
-    if (!isPaymentRequestAllowed(request.headers)) {
-      return NextResponse.json({ success: false }, { status: 403 });
-    }
-
-    const body = await request.json().catch(() => null);
-    const payload =
-      body && typeof body.payload === 'object' && body.payload !== null
-        ? body.payload
-        : body;
-
-    const merchantOrderId =
-      typeof payload?.merchantOrderId === 'string' ? payload.merchantOrderId : '';
-
-    if (!merchantOrderId) {
-      return NextResponse.json({ success: false }, { status: 400 });
-    }
-
-    const config = getPhonePeConfig();
-    let completed = false;
-
-    if (config.mode !== 'mock') {
-      const status = await getPhonePePaymentStatus({
-        merchantOrderId,
-        config,
-      });
-
-      const data = status?.data;
-      completed = status?.ok === true && data?.state === 'COMPLETED';
-    } else {
-      completed = true;
-    }
-
-    if (!completed) {
-      return NextResponse.json({ success: false }, { status: 400 });
-    }
-
-    const token = request.cookies.get('ap_order')?.value;
-    const order = token ? verifyOrderToken(token, config.signingSecret) : null;
-    if (order && order.merchantTransactionId === merchantOrderId) {
-      await markOrderPaid(order.woocommerceOrderId).catch((error) => {
-        console.error('[payments/callback] failed to mark WooCommerce order paid', error);
-      });
-      await sendOrderSuccessNotification({
-        name: order.customer.name,
-        phone: order.customer.phone,
-        email: order.customer.email || undefined,
-        orderId: String(order.woocommerceOrderId),
-        amountInr: order.amountPaise / 100,
-        items: order.items,
-      }).catch((error) => {
-        console.error('[payments/callback] failed to send order notification', error);
-      });
-    }
-
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('[payments/callback] error', error);
-    return NextResponse.json({ success: false }, { status: 500 });
-  }
+/**
+ * Legacy callback path (kept for the classic PG V1 `callbackUrl`).
+ *
+ * This is now a thin alias of the shared S2S handler. New integrations should
+ * use /api/phonepe/callback or /api/phonepe/webhook, but this route is
+ * preserved so both paths can be registered with the proxy without breaking
+ * existing session URLs.
+ */
+export async function POST(request: NextRequest): Promise<Response> {
+  return handlePhonePeS2S(request);
 }

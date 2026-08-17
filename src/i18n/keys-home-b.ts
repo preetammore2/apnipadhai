@@ -46,7 +46,7 @@ export const KEYS_HOME_B: Record<string, string> = {
   'Add to Cart': 'कार्ट में डालें',
   'Pages': 'पेज',
   'Doorstep Delivery': 'घर तक डिलीवरी',
-  'Buy Now': 'अभी खरीदें',
+  'Buy Now': 'कार्ट में डालें',
   'STUDENTS': 'छात्र',
   'Join The Apni Padhai Family Today!': 'आज ही अपनी पढ़ाई परिवार से जुड़ें!',
   'Real success stories from students who cleared government exams with Apni Padhai.':

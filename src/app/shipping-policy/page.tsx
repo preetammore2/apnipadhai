@@ -1,5 +1,7 @@
 import React from 'react';
 import { LegalPage } from '@/components/legal/LegalPage';
+import { WpPageView } from '@/components/wp/WpPageView';
+import { getManagedPageOrWp } from '@/lib/db-pages';
 
 export const metadata = {
   title: 'Shipping Policy — Apni Padhai Publication',
@@ -7,7 +9,10 @@ export const metadata = {
     'Shipping policy of Apni Padhai Publication covering order processing, delivery timelines, tracking, and delivery coverage across India.',
 };
 
-export default function ShippingPolicyPage() {
+export default async function ShippingPolicyPage() {
+  const wp = await getManagedPageOrWp('ap-shipping-policy');
+  if (wp) return <WpPageView title={wp.title} html={wp.contentHtml} />;
+
   return (
     <LegalPage
       badge="Shipping Policy"

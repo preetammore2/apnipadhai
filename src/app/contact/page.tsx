@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { MapPin, Phone, Mail, Clock, Send, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { digitsOnly, isTenDigitPhone } from '@/lib/validation';
 
 export default function ContactPage() {
   const [formState, setFormState] = useState({ name: '', email: '', phone: '', subject: '', message: '' });
@@ -12,6 +13,10 @@ export default function ContactPage() {
     e.preventDefault();
     if (!formState.name || !formState.phone || !formState.message) {
       toast.error('Please fill in required fields');
+      return;
+    }
+    if (!isTenDigitPhone(formState.phone)) {
+      toast.error('Please enter a valid 10-digit phone number');
       return;
     }
     setSubmitted(true);
@@ -143,10 +148,13 @@ export default function ContactPage() {
                       <label className="block text-xs font-bold text-navy-900 mb-1.5 uppercase tracking-wider">Phone Number *</label>
                       <input
                         type="tel"
+                        inputMode="numeric"
+                        maxLength={10}
+                        pattern="[0-9]{10}"
                         required
                         placeholder="9876543210"
                         value={formState.phone}
-                        onChange={(e) => setFormState({ ...formState, phone: e.target.value })}
+                        onChange={(e) => setFormState({ ...formState, phone: digitsOnly(e.target.value, 10) })}
                         className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-500 text-navy-900"
                       />
                     </div>

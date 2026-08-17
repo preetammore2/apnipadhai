@@ -63,6 +63,23 @@ function stripHtml(html: string | undefined): string {
   return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
+/**
+ * Accept only absolute http(s) URLs for user/admin-supplied asset links
+ * (cover images, sample PDFs). Blocks javascript:, data:, and relative paths
+ * that could be abused downstream as links/images.
+ */
+function safeHttpUrl(value: string | undefined): string | undefined {
+  if (!value) return undefined;
+  const url = value.trim();
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return undefined;
+    return url;
+  } catch {
+    return undefined;
+  }
+}
+
 interface WoocommerceCategory {
   id: number;
   name: string;
@@ -121,14 +138,17 @@ export function parseBookPayload(body: unknown): BookPayload {
     salePrice: asNum(b.salePrice) ?? asNum(b.sale_price),
     inStock: typeof b.inStock === 'boolean' ? b.inStock : undefined,
     sku: typeof b.sku === 'string' ? b.sku.trim() : undefined,
-    coverImage:
+    coverImage: safeHttpUrl(
       (typeof b.coverImage === 'string' ? b.coverImage.trim() : undefined) ??
-      (typeof b.image === 'string' ? b.image.trim() : undefined),
+        (typeof b.image === 'string' ? b.image.trim() : undefined),
+    ),
     author: typeof b.author === 'string' ? b.author.trim() : undefined,
     edition: typeof b.edition === 'string' ? b.edition.trim() : undefined,
     pages: asNum(b.pages),
     examTarget: typeof b.examTarget === 'string' ? b.examTarget.trim() : undefined,
-    samplePdfUrl: typeof b.samplePdfUrl === 'string' ? b.samplePdfUrl.trim() : undefined,
+    samplePdfUrl: safeHttpUrl(
+      typeof b.samplePdfUrl === 'string' ? b.samplePdfUrl.trim() : undefined,
+    ),
     features: asStringList(b.features),
     tableOfContents: asStringList(b.tableOfContents),
   };
@@ -178,11 +198,19 @@ export interface TrackedOrder {
   currency: string;
   dateCreated: string;
   billingPhone: string;
+  billingEmail?: string;
+  billingName?: string;
+  items?: { name: string; quantity: number; price: number }[];
 }
 
 interface WoocommerceOrderDetails extends WoocommerceOrder {
   date_created?: string;
-  billing?: { phone?: string };
+  billing?: { phone?: string; email?: string; first_name?: string; last_name?: string };
+  line_items?: {
+    name: string;
+    quantity: number;
+    total: string;
+  }[];
 }
 
 function enrichBook(product: WoocommerceProduct): {
@@ -416,9 +444,12 @@ export interface CreateOrderInput {
     phone?: string;
     email?: string;
   };
-  couponCode?: string;
   paymentMethod?: PaymentMethod;
   merchantTransactionId?: string;
+  shippingAmount?: number;
+  shippingLabel?: string;
+  discountAmount?: number;
+  discountLabel?: string;
 }
 
 export async function createOrder(input: CreateOrderInput): Promise<WoocommerceOrder> {  const method = PAYMENT_METHODS[input.paymentMethod ?? 'phonepe'];
@@ -432,14 +463,29 @@ export async function createOrder(input: CreateOrderInput): Promise<WoocommerceO
     })),
   };
 
+  if (input.shippingAmount && input.shippingAmount > 0) {
+    body.shipping_lines = [
+      {
+        method_id: 'flat_rate',
+        method_title: input.shippingLabel || 'Delivery Charges',
+        total: input.shippingAmount.toFixed(2),
+      },
+    ];
+  }
+
+  if (input.discountAmount && input.discountAmount > 0) {
+    body.fee_lines = [
+      {
+        name: input.discountLabel || 'Discount',
+        total: `-${input.discountAmount.toFixed(2)}`,
+      },
+    ];
+  }
+
   if (input.merchantTransactionId) {
     body.meta_data = [
       { key: '_ap_phonepe_merchant_transaction_id', value: input.merchantTransactionId },
     ];
-  }
-
-  if (input.couponCode) {
-    body.coupon_lines = [{ code: input.couponCode }];
   }
 
   if (input.billing) {
@@ -488,10 +534,12 @@ function normalizePhone(phone: string): string {
 export async function getOrderById(orderId: number): Promise<TrackedOrder | undefined> {
   try {
     const order = await request<WoocommerceOrderDetails>(
-      `/orders/${orderId}?_fields=id,status,total,currency,date_created,billing`,
+      `/orders/${orderId}?_fields=id,status,total,currency,date_created,billing,line_items`,
       {},
       { cache: 'no-store' },
     );
+    const firstName = order.billing?.first_name ?? '';
+    const lastName = order.billing?.last_name ?? '';
     return {
       id: order.id,
       status: order.status,
@@ -499,6 +547,13 @@ export async function getOrderById(orderId: number): Promise<TrackedOrder | unde
       currency: order.currency,
       dateCreated: order.date_created ?? '',
       billingPhone: order.billing?.phone ?? '',
+      billingEmail: order.billing?.email ?? undefined,
+      billingName: `${firstName} ${lastName}`.trim() || undefined,
+      items: (order.line_items ?? []).map((item) => ({
+        name: item.name,
+        quantity: item.quantity,
+        price: Number(item.total) || 0,
+      })),
     };
   } catch (error) {
     if (error instanceof WooCommerceError && error.status === 404) {
@@ -506,6 +561,24 @@ export async function getOrderById(orderId: number): Promise<TrackedOrder | unde
     }
     throw error;
   }
+}
+
+export const PAID_ORDER_STATUSES = new Set(['processing', 'completed']);
+
+/**
+ * Mark an order paid only if it is not already paid. Returns 'paid' when this
+ * call performed the transition, 'already' when it was already paid, or
+ * 'missing' when the order could not be found. Callers use the return value to
+ * run side effects (e.g. success notifications) exactly once per order.
+ */
+export async function markOrderPaidIfNeeded(
+  orderId: number,
+): Promise<'paid' | 'already' | 'missing'> {
+  const order = await getOrderById(orderId).catch(() => undefined);
+  if (!order) return 'missing';
+  if (PAID_ORDER_STATUSES.has(order.status)) return 'already';
+  await markOrderPaid(orderId);
+  return 'paid';
 }
 
 export function phoneMatchesOrder(order: TrackedOrder, phone: string): boolean {

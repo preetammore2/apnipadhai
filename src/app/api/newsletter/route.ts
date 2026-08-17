@@ -1,13 +1,25 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { getClientIp, rateLimitResponse } from '@/lib/rate-limit';
+import { denyIfCrossOrigin, readJsonBody } from '@/lib/request-security';
 
 export const runtime = 'nodejs';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  const crossOrigin = denyIfCrossOrigin(request);
+  if (crossOrigin) return crossOrigin;
+
+  const throttled = rateLimitResponse(request, {
+    limit: 5,
+    windowMs: 60 * 60 * 1000,
+    key: `newsletter:${getClientIp(request)}`,
+  });
+  if (throttled) return throttled;
+
   try {
-    const body = (await request.json()) as { email?: string };
-    const email = body?.email?.trim() ?? '';
+    const body = await readJsonBody<{ email?: unknown }>(request);
+    const email = typeof body?.email === 'string' ? body.email.trim().slice(0, 254) : '';
 
     if (!EMAIL_REGEX.test(email)) {
       return NextResponse.json(
@@ -15,8 +27,6 @@ export async function POST(request: Request) {
         { status: 400 },
       );
     }
-
-    console.info('[api/newsletter] subscription request', { email });
 
     return NextResponse.json({
       success: true,

@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createOrder, WooCommerceError } from '@/lib/woocommerce';
+import { createOrder, getBooks, WooCommerceError } from '@/lib/woocommerce';
+import { computeCartTotals } from '@/lib/pricing';
+import { getStoreSettings } from '@/lib/store-settings';
+import { getClientIp, rateLimitResponse } from '@/lib/rate-limit';
+import { readJsonBody } from '@/lib/request-security';
+import { normalizePhone, normalizePincode } from '@/lib/validation';
 import {
   createPhonePePayment,
   generateMerchantTransactionId,
@@ -9,6 +14,7 @@ import {
   isPaymentRequestAllowed,
   signOrderToken,
   ORDER_TOKEN_TTL_MS,
+  type PhonePePaymentData,
 } from '@/lib/phonepe';
 
 export const runtime = 'nodejs';
@@ -19,7 +25,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, message: 'Forbidden' }, { status: 403 });
     }
 
-    const body = await request.json().catch(() => null);
+    const throttled = rateLimitResponse(request, {
+      limit: 20,
+      windowMs: 60 * 60 * 1000,
+      key: `payment-create:${getClientIp(request)}`,
+    });
+    if (throttled) return throttled;
+
+    const body = await readJsonBody<{
+      items?: unknown;
+      customer?: unknown;
+      couponCode?: unknown;
+    }>(request);
     if (!body) {
       return NextResponse.json({ success: false, message: 'Invalid request body' }, { status: 400 });
     }
@@ -41,11 +58,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, message: 'Your cart is empty' }, { status: 400 });
     }
 
-    const customer =
-      typeof body.customer === 'object' && body.customer ? body.customer : {};
+    const rawCustomer = body.customer;
+    const customer: Record<string, unknown> =
+      typeof rawCustomer === 'object' && rawCustomer !== null
+        ? (rawCustomer as Record<string, unknown>)
+        : {};
 
-    const name = typeof customer.name === 'string' ? customer.name.trim() : '';
-    const phone = typeof customer.phone === 'string' ? customer.phone.trim() : '';
+    const name = typeof customer.name === 'string' ? customer.name.trim().slice(0, 120) : '';
+    const phone = normalizePhone(customer.phone);
 
     if (!name || !phone) {
       return NextResponse.json(
@@ -54,24 +74,69 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!/^[6-9]\d{9}$/.test(phone)) {
+    const phoneThrottled = rateLimitResponse(request, {
+      limit: 5,
+      windowMs: 60 * 60 * 1000,
+      key: `payment-create-phone:${phone}`,
+    });
+    if (phoneThrottled) return phoneThrottled;
+
+    const email =
+      typeof customer.email === 'string' ? customer.email.trim().slice(0, 254) : '';
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return NextResponse.json(
-        { success: false, message: 'Please enter a valid 10-digit phone number' },
+        { success: false, message: 'Please enter a valid email address' },
         { status: 400 },
       );
     }
 
+    const address =
+      typeof customer.address === 'string' ? customer.address.trim().slice(0, 300) : '';
+    const city = typeof customer.city === 'string' ? customer.city.trim().slice(0, 100) : '';
+    const pincode = normalizePincode(customer.postcode);
+    if (!address || !city) {
+      return NextResponse.json(
+        { success: false, message: 'Address and city are required' },
+        { status: 400 },
+      );
+    }
+    if (!pincode) {
+      return NextResponse.json(
+        { success: false, message: 'Please enter a valid 6-digit pincode' },
+        { status: 400 },
+      );
+    }
+
+    const couponCode = typeof body.couponCode === 'string' ? body.couponCode : undefined;
+    const [settings, books] = await Promise.all([getStoreSettings(), getBooks()]);
+    const bookPrices = new Map(books.map((book) => [Number(book.id), book.price]));
+    const subtotal = items.reduce(
+      (sum: number, item: { productId: number; quantity: number }) => {
+        const price = bookPrices.get(item.productId);
+        return sum + (price ?? 0) * item.quantity;
+      },
+      0,
+    );
+    const totals = computeCartTotals(subtotal, settings, couponCode);
+
+    const config = getPhonePeConfig();
+    const merchantTransactionId = generateMerchantTransactionId();
+
     const order = await createOrder({
       items,
-      couponCode: typeof body.couponCode === 'string' ? body.couponCode : undefined,
       billing: {
         firstName: name,
         phone,
-        email: typeof customer.email === 'string' ? customer.email.trim() : undefined,
-        address: typeof customer.address === 'string' ? customer.address.trim() : undefined,
-        city: typeof customer.city === 'string' ? customer.city.trim() : undefined,
-        postcode: typeof customer.postcode === 'string' ? customer.postcode.trim() : undefined,
+        email: email || undefined,
+        address: address || undefined,
+        city: city || undefined,
+        postcode: pincode,
       },
+      shippingAmount: totals.shipping,
+      shippingLabel: settings.shipping.label,
+      discountAmount: totals.discount,
+      discountLabel: totals.discountLabel,
+      merchantTransactionId,
     });
 
     const amountPaise = Math.round(Number(order.total) * 100);
@@ -88,10 +153,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const config = getPhonePeConfig();
-    const merchantTransactionId = generateMerchantTransactionId();
     const origin = getRedirectBaseUrl();
     const redirectUrl = `${origin}/payment/status?merchantTransactionId=${merchantTransactionId}`;
+    const callbackUrl = `${origin}/api/phonepe/callback?orderId=${order.id}`;
 
     let paymentResponse;
 
@@ -100,10 +164,13 @@ export async function POST(request: NextRequest) {
         ok: true,
         status: 200,
         data: {
+          merchantTransactionId,
           orderId: `MOCK${Date.now()}`,
           state: 'PENDING',
           redirectUrl: `${getRequestBaseUrl(request.headers)}/api/payments/mock-pay?merchantTransactionId=${merchantTransactionId}`,
-        },
+          code: 'PAYMENT_INITIATED',
+          message: 'Mock payment initiated',
+        } as PhonePePaymentData,
       };
     } else {
       paymentResponse = await createPhonePePayment({
@@ -111,6 +178,7 @@ export async function POST(request: NextRequest) {
         amountPaise,
         mobileNumber: phone,
         redirectUrl,
+        callbackUrl,
         config,
       });
     }
@@ -150,22 +218,25 @@ export async function POST(request: NextRequest) {
         customer: {
           name,
           phone,
-          email: typeof customer.email === 'string' ? customer.email.trim() : '',
-          address: typeof customer.address === 'string' ? customer.address.trim() : '',
-          city: typeof customer.city === 'string' ? customer.city.trim() : '',
-          pincode: typeof customer.postcode === 'string' ? customer.postcode.trim() : '',
+          email,
+          address,
+          city,
+          pincode,
         },
         exp: Date.now() + ORDER_TOKEN_TTL_MS,
       },
       config.signingSecret,
     );
 
-    const response = NextResponse.json({
-      success: true,
-      redirectUrl: redirect,
-      merchantTransactionId,
-      embed: config.mode !== 'mock',
-    });
+    const response = NextResponse.json(
+      {
+        success: true,
+        redirectUrl: redirect,
+        merchantTransactionId,
+        embed: false,
+      },
+      { headers: { 'Cache-Control': 'no-store' } },
+    );
     response.cookies.set('ap_order', token, {
       httpOnly: true,
       sameSite: 'lax',

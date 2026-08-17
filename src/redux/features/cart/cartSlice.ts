@@ -75,6 +75,13 @@ export const cartSlice = createSlice({
     hydrateCart: (state, action: PayloadAction<CartItem[]>) => {
       state.items = action.payload;
     },
+    applyCoupon: (state, action: PayloadAction<string>) => {
+      state.couponCode = action.payload.trim();
+    },
+    clearCoupon: (state) => {
+      state.couponCode = null;
+      state.discountAmount = 0;
+    },
   },
 });
 
@@ -85,6 +92,8 @@ export const {
   clearCart,
   setCartOpen,
   hydrateCart,
+  applyCoupon,
+  clearCoupon,
 } = cartSlice.actions;
 
 export default cartSlice.reducer;

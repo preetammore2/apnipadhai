@@ -13,14 +13,17 @@ import {
 } from '@/redux/features/cart/cartSlice';
 import { useTranslation } from '@/i18n/useTranslation';
 import { BOOK_HI } from '@/i18n/data';
+import { useStoreSettings } from '@/lib/use-store-settings';
+import { computeCartTotals } from '@/lib/pricing';
 
 export const CartDrawer: React.FC = () => {
   const dispatch = useAppDispatch();
   const { t, language } = useTranslation();
-  const { items, isCartOpen, discountAmount } = useAppSelector((state) => state.cart);
+  const { items, isCartOpen, couponCode } = useAppSelector((state) => state.cart);
+  const settings = useStoreSettings();
 
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const finalTotal = Math.max(0, subtotal - discountAmount);
+  const totals = computeCartTotals(subtotal, settings, couponCode);
 
   return (
     <AnimatePresence>
@@ -144,11 +147,23 @@ export const CartDrawer: React.FC = () => {
                 <div className="space-y-1.5 text-xs text-slate-600">
                   <div className="flex justify-between">
                     <span>{t('Subtotal')}</span>
-                    <span className="font-bold text-navy-900">₹{subtotal}</span>
+                    <span className="font-bold text-navy-900">₹{totals.subtotal}</span>
+                  </div>
+                  {totals.discount > 0 && (
+                    <div className="flex justify-between">
+                      <span>{settings?.discount.label ?? t('Discount')}</span>
+                      <span className="font-bold text-emerald-600">-₹{totals.discount}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span>{settings?.shipping.label ?? t('Delivery Charges')}</span>
+                    <span className="font-bold text-navy-900">
+                      {totals.shipping > 0 ? `₹${totals.shipping}` : t('FREE')}
+                    </span>
                   </div>
                   <div className="flex justify-between text-navy-900 font-black text-base pt-2 border-t border-slate-200">
                     <span>{t('Total Payable')}</span>
-                    <span className="text-amber-700">₹{finalTotal}</span>
+                    <span className="text-amber-700">₹{totals.total}</span>
                   </div>
                 </div>
 

@@ -6,7 +6,7 @@ const WP_API = `${WP_URL}/wp-json/wp/v2`;
 const WP_REVALIDATE_SECONDS = Number(process.env.WP_REVALIDATE_SECONDS ?? '60');
 
 export interface WordPressPost {
-  id: number;
+  id: string | number;
   slug: string;
   title: string;
   excerpt: string;
@@ -100,7 +100,6 @@ export interface BookSample {
   title: string;
   pdfUrl: string;
 }
-
 async function getPageBySlug(slug: string): Promise<{ title: string; contentHtml: string } | undefined> {
   try {
     const params = new URLSearchParams({
@@ -122,6 +121,13 @@ async function getPageBySlug(slug: string): Promise<{ title: string; contentHtml
   } catch {
     return undefined;
   }
+}
+
+/** Public reader for a WordPress page by slug (used by feedback/results/pages). */
+export async function getWordPressPage(
+  slug: string,
+): Promise<{ title: string; contentHtml: string } | undefined> {
+  return getPageBySlug(slug);
 }
 
 function extractPdfLinks(contentHtml: string): string[] {

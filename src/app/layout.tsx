@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Inter, Manrope, Poppins, Sora } from 'next/font/google';
 import './globals.css';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
@@ -8,6 +9,31 @@ import { CartPersistence } from '@/components/layout/CartPersistence';
 import { WishlistPersistence } from '@/components/layout/WishlistPersistence';
 import { LanguagePersistence } from '@/components/layout/LanguagePersistence';
 import { Toaster } from 'sonner';
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
+});
+
+const manrope = Manrope({
+  subsets: ['latin'],
+  variable: '--font-manrope',
+  display: 'swap',
+});
+
+const poppins = Poppins({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-poppins',
+  display: 'swap',
+});
+
+const sora = Sora({
+  subsets: ['latin'],
+  variable: '--font-sora',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: 'Apni Padhai — Bestselling Brahmastra Books & Live Coaching',
@@ -30,7 +56,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="scroll-smooth">
+    <html
+      lang="en"
+      className={`${inter.variable} ${manrope.variable} ${poppins.variable} ${sora.variable} scroll-smooth`}
+    >
       <body className="antialiased bg-slate-50 text-navy-900 selection:bg-yellow-200 selection:text-amber-900">
         <ReduxProvider>
           <CartPersistence />

@@ -1,20 +1,15 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
 
 export default function Error({
-  error,
   reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  useEffect(() => {
-    console.error(error);
-  }, [error]);
-
   return (
     <div className="min-h-[80vh] bg-slate-50 flex items-center justify-center p-6 text-center">
       <div className="bg-white p-10 sm:p-12 rounded-3xl border border-slate-200 shadow-card max-w-md w-full space-y-6">

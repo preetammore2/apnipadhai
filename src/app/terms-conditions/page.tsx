@@ -1,5 +1,7 @@
 import React from 'react';
 import { LegalPage } from '@/components/legal/LegalPage';
+import { WpPageView } from '@/components/wp/WpPageView';
+import { getManagedPageOrWp } from '@/lib/db-pages';
 
 export const metadata = {
   title: 'Terms & Conditions — Apni Padhai',
@@ -7,7 +9,10 @@ export const metadata = {
     'Terms and conditions governing the use of Apni Padhai Publication website, online courses, books, and related services.',
 };
 
-export default function TermsConditionsPage() {
+export default async function TermsConditionsPage() {
+  const wp = await getManagedPageOrWp('ap-terms-conditions');
+  if (wp) return <WpPageView title={wp.title} html={wp.contentHtml} />;
+
   return (
     <LegalPage
       badge="Terms & Conditions"

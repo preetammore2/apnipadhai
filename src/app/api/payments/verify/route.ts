@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { markOrderPaid } from '@/lib/woocommerce';
+import { markOrderPaidIfNeeded } from '@/lib/woocommerce';
 import { sendOrderSuccessNotification } from '@/lib/notifications';
+import { getClientIp, rateLimitResponse } from '@/lib/rate-limit';
+import { readJsonBody } from '@/lib/request-security';
+import { isMerchantTransactionId } from '@/lib/validation';
 import {
   getPhonePeConfig,
   getPhonePePaymentStatus,
@@ -16,11 +19,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, message: 'Forbidden' }, { status: 403 });
     }
 
-    const body = await request.json().catch(() => null);
+    const throttled = rateLimitResponse(request, {
+      limit: 30,
+      windowMs: 5 * 60 * 1000,
+      key: `payment-verify:${getClientIp(request)}`,
+    });
+    if (throttled) return throttled;
+
+    const body = await readJsonBody<{ merchantTransactionId?: unknown }>(request);
     const merchantTransactionId =
       typeof body?.merchantTransactionId === 'string' ? body.merchantTransactionId : '';
 
-    if (!merchantTransactionId) {
+    if (!isMerchantTransactionId(merchantTransactionId)) {
       return NextResponse.json(
         { success: false, message: 'Missing payment reference' },
         { status: 400 },
@@ -63,10 +73,9 @@ export async function POST(request: NextRequest) {
       const data = status?.data;
       completed = status?.ok === true && data?.state === 'COMPLETED';
       state = data?.state ?? null;
-      transactionId = data?.paymentDetails?.[0]?.transactionId ?? null;
-      errorCode = data?.errorCode ?? data?.paymentDetails?.[0]?.errorCode ?? null;
-      detailedErrorCode =
-        data?.detailedErrorCode ?? data?.paymentDetails?.[0]?.detailedErrorCode ?? null;
+      transactionId = data?.transactionId ?? null;
+      errorCode = data?.errorCode ?? null;
+      detailedErrorCode = data?.detailedErrorCode ?? null;
 
       const reportedAmount = Number(data?.amount);
       const amountMatches =
@@ -83,43 +92,52 @@ export async function POST(request: NextRequest) {
     }
 
     if (completed) {
-      await markOrderPaid(order.woocommerceOrderId).catch((error) => {
-        console.error('[payments/verify] failed to mark WooCommerce order paid', error);
-      });
-      await sendOrderSuccessNotification({
-        name: order.customer.name,
-        phone: order.customer.phone,
-        email: order.customer.email || undefined,
-        orderId: String(order.woocommerceOrderId),
-        amountInr: order.amountPaise / 100,
-        items: order.items,
-      }).catch((error) => {
-        console.error('[payments/verify] failed to send order notification', error);
-      });
+      const transition = await markOrderPaidIfNeeded(order.woocommerceOrderId).catch(
+        (error) => {
+          console.error('[payments/verify] failed to mark WooCommerce order paid', error);
+          return 'missing' as const;
+        },
+      );
+      if (transition === 'paid') {
+        await sendOrderSuccessNotification({
+          name: order.customer.name,
+          phone: order.customer.phone,
+          email: order.customer.email || undefined,
+          orderId: String(order.woocommerceOrderId),
+          amountInr: order.amountPaise / 100,
+          items: order.items,
+        }).catch((error) => {
+          console.error('[payments/verify] failed to send order notification', error);
+        });
+      }
     }
 
-    return NextResponse.json({
-      success: completed,
-      message: completed
-        ? undefined
-        : state === 'FAILED'
-          ? detailedErrorCode
-            ? `Payment failed at the payment gateway (${detailedErrorCode})`
-            : errorCode
-              ? `Payment failed at the payment gateway (${errorCode})`
-              : 'Payment failed at the payment gateway'
-          : 'Payment is still pending',
-      data: {
-        merchantTransactionId,
-        transactionId,
-        state,
-        amount: order.amountPaise,
-        providerReferenceId: null,
-        errorCode,
-        detailedErrorCode,
-        code: completed ? 'PAYMENT_SUCCESS' : state ?? 'PAYMENT_PENDING',
+    return NextResponse.json(
+      {
+        success: completed,
+        message: completed
+          ? undefined
+          : state === 'FAILED'
+            ? detailedErrorCode
+              ? `Payment failed at the payment gateway (${detailedErrorCode})`
+              : errorCode
+                ? `Payment failed at the payment gateway (${errorCode})`
+                : 'Payment failed at the payment gateway'
+            : 'Payment is still pending',
+        data: {
+          merchantTransactionId,
+          transactionId,
+          state,
+          amount: order.amountPaise,
+          orderId: order.woocommerceOrderId,
+          providerReferenceId: null,
+          errorCode,
+          detailedErrorCode,
+          code: completed ? 'PAYMENT_SUCCESS' : state ?? 'PAYMENT_PENDING',
+        },
       },
-    });
+      { headers: { 'Cache-Control': 'no-store' } },
+    );
   } catch (error) {
     console.error('[payments/verify] error', error);
     return NextResponse.json(

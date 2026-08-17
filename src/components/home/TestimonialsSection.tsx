@@ -4,11 +4,14 @@ import React from 'react';
 import { TESTIMONIALS_DATA } from '@/data/testimonials';
 import { TESTIMONIAL_HI } from '@/i18n/data';
 import { useTranslation } from '@/i18n/useTranslation';
+import { useSiteContent } from '@/lib/use-site-content';
 import { Star, Quote, Heart } from 'lucide-react';
 import Image from 'next/image';
 
 export const TestimonialsSection: React.FC = () => {
   const { t, language } = useTranslation();
+  const content = useSiteContent();
+  const items = content?.testimonials?.length ? content.testimonials : TESTIMONIALS_DATA;
   return (
     <section className="py-20 bg-white relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
@@ -28,9 +31,9 @@ export const TestimonialsSection: React.FC = () => {
       {/* Infinite Scrolling Marquee */}
       <div className="relative w-full overflow-hidden flex">
         <div className="flex gap-6 animate-marquee whitespace-normal hover:[animation-play-state:paused]">
-          {[...TESTIMONIALS_DATA, ...TESTIMONIALS_DATA].map((item, idx) => (
+          {[...items, ...items].map((item, idx) => (
             <div
-              key={idx}
+              key={`${item.id}-${idx}`}
               className="w-80 sm:w-96 shrink-0 bg-slate-50 border border-slate-200/80 p-6 rounded-3xl shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
             >
               <div>
@@ -49,13 +52,19 @@ export const TestimonialsSection: React.FC = () => {
               </div>
 
               <div className="flex items-center gap-3 pt-4 border-t border-slate-200/60">
-                <div className="relative w-11 h-11 rounded-full overflow-hidden shrink-0 border border-brand-200">
-                  <Image src={item.photo} alt={item.name} fill className="object-cover" />
-                </div>
+                {item.photo ? (
+                  <div className="relative w-11 h-11 rounded-full overflow-hidden shrink-0 border border-brand-200">
+                    <Image src={item.photo} alt={item.name} fill className="object-cover" />
+                  </div>
+                ) : (
+                  <div className="w-11 h-11 rounded-full shrink-0 border border-brand-200 bg-brand-100 text-brand-700 font-bold flex items-center justify-center">
+                    {item.name.charAt(0).toUpperCase()}
+                  </div>
+                )}
                 <div>
                   <h4 className="text-sm font-bold text-navy-900">{item.name}</h4>
                   <p className="text-[11px] font-semibold text-brand-600">
-                    {language === 'hi' ? TESTIMONIAL_HI[item.id]?.exam ?? item.exam : item.exam} {item.rank ? `(${item.rank})` : ''} • {item.city}
+                    {language === 'hi' ? TESTIMONIAL_HI[item.id]?.exam ?? item.exam : item.exam} {item.rank ? `(${item.rank})` : ''} {item.city ? `• ${item.city}` : ''}
                   </p>
                 </div>
               </div>

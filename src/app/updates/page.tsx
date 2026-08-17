@@ -50,8 +50,7 @@ export default function UpdatesPage() {
       if (!res.ok) throw new Error('Failed to load posts');
       const data = (await res.json()) as WordPressPost[];
       setPosts(data);
-    } catch (error) {
-      console.error('[UpdatesPage] load error', error);
+    } catch {
       setIsError(true);
     } finally {
       setIsLoading(false);

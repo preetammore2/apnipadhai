@@ -21,8 +21,8 @@ export const CartPersistence: React.FC = () => {
           dispatch(hydrateCart(parsed));
         }
       }
-    } catch (e) {
-      console.error('Failed to load cart from storage', e);
+    } catch {
+      // Ignore unavailable or corrupted storage; the cart can rebuild from state.
     }
     hydrated.current = true;
   }, [dispatch]);
@@ -31,8 +31,8 @@ export const CartPersistence: React.FC = () => {
     if (!hydrated.current) return;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-    } catch (e) {
-      console.error('Failed to save cart to storage', e);
+    } catch {
+      // Ignore storage write failures, such as private browsing quota limits.
     }
   }, [items]);
 

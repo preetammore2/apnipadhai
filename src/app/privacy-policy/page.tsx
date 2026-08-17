@@ -1,5 +1,7 @@
 import React from 'react';
 import { LegalPage } from '@/components/legal/LegalPage';
+import { WpPageView } from '@/components/wp/WpPageView';
+import { getManagedPageOrWp } from '@/lib/db-pages';
 
 export const metadata = {
   title: 'Privacy Policy — Apni Padhai',
@@ -7,7 +9,10 @@ export const metadata = {
     'Privacy policy of Apni Padhai Publication explaining how student data is collected, used, stored and protected.',
 };
 
-export default function PrivacyPolicyPage() {
+export default async function PrivacyPolicyPage() {
+  const wp = await getManagedPageOrWp('ap-privacy-policy');
+  if (wp) return <WpPageView title={wp.title} html={wp.contentHtml} />;
+
   return (
     <LegalPage
       badge="Privacy Policy"

@@ -167,7 +167,7 @@ export default function BookDetailsPage({ params }: { params: Promise<{ id: stri
                     className="flex-1 py-4 bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white font-bold text-sm rounded-2xl shadow-button-glow transition-all flex items-center justify-center gap-2"
                   >
                     <ShoppingCart className="w-5 h-5" />
-                    <span>{t('Buy Now / Add to Cart')}</span>
+                    <span>{t('Add to Cart')}</span>
                   </button>
 
                   {hasSample && (

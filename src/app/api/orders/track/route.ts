@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getOrderById, phoneMatchesOrder } from '@/lib/woocommerce';
+import { getClientIp, rateLimitResponse } from '@/lib/rate-limit';
+import { normalizePhone } from '@/lib/validation';
 
 export const runtime = 'nodejs';
 
@@ -14,8 +16,15 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 export async function GET(req: NextRequest) {
+  const throttled = rateLimitResponse(req, {
+    limit: 20,
+    windowMs: 60 * 60 * 1000,
+    key: `track-order:${getClientIp(req)}`,
+  });
+  if (throttled) return throttled;
+
   const orderIdRaw = req.nextUrl.searchParams.get('orderId')?.trim() ?? '';
-  const phone = req.nextUrl.searchParams.get('phone')?.trim() ?? '';
+  const phone = normalizePhone(req.nextUrl.searchParams.get('phone'));
 
   if (!/^\d+$/.test(orderIdRaw)) {
     return NextResponse.json(
@@ -23,7 +32,7 @@ export async function GET(req: NextRequest) {
       { status: 400 },
     );
   }
-  if (phone.replace(/\D/g, '').length < 10) {
+  if (!phone) {
     return NextResponse.json(
       { success: false, message: 'Please enter a valid 10-digit mobile number.' },
       { status: 400 },

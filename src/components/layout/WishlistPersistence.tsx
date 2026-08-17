@@ -21,8 +21,8 @@ export const WishlistPersistence: React.FC = () => {
           dispatch(hydrateWishlist(parsed));
         }
       }
-    } catch (e) {
-      console.error('Failed to load wishlist from storage', e);
+    } catch {
+      // Ignore unavailable or corrupted storage; wishlist state can continue in memory.
     }
     hydrated.current = true;
   }, [dispatch]);
@@ -31,8 +31,8 @@ export const WishlistPersistence: React.FC = () => {
     if (!hydrated.current) return;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-    } catch (e) {
-      console.error('Failed to save wishlist to storage', e);
+    } catch {
+      // Ignore storage write failures, such as private browsing quota limits.
     }
   }, [items]);
 

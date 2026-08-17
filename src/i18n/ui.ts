@@ -207,7 +207,7 @@ export const HI_UI: Record<string, string> = {
   'Preview Sample PDF': 'सैंपल PDF देखें',
   'Pages': 'पेज',
   'Doorstep Delivery': 'घर तक डिलीवरी',
-  'Buy Now': 'अभी खरीदें',
+  'Buy Now': 'कार्ट में डालें',
   'OFFICIAL PUBLICATION STORE': 'आधिकारिक प्रकाशन स्टोर',
   'Authentic printed books & practice guides written by Rohit Sir & senior faculty. Fast courier doorstep delivery across India.':
     'रोहित सर और वरिष्ठ शिक्षकों द्वारा लिखी गई प्रामाणिक प्रिंटेड किताबें एवं प्रैक्टिस गाइड। पूरे भारत में तेज़ कूरियर घर-घर डिलीवरी।',
@@ -219,7 +219,7 @@ export const HI_UI: Record<string, string> = {
   'Ratings': 'रेटिंग्स',
   'Author:': 'लेखक:',
   'You Save ₹': 'आप बचाते हैं ₹',
-  'Buy Now / Add to Cart': 'अभी खरीदें / कार्ट में डालें',
+  'Buy Now / Add to Cart': 'कार्ट में डालें',
   'Read Sample': 'सैंपल पढ़ें',
   'Express Courier Delivery Across India': 'पूरे भारत में एक्सप्रेस कूरियर डिलीवरी',
   '100% Original Authentic Publication': '100% मूल प्रामाणिक प्रकाशन',

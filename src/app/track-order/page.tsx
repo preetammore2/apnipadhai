@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PackageSearch, PackageCheck, PackageOpen, Truck, Clock, CheckCircle2, XCircle, Loader2, Phone, Hash, ArrowRight, MapPin, CalendarDays, Mail, MessageCircleQuestion } from 'lucide-react';
 import { useTranslation } from '@/i18n/useTranslation';
+import { digitsOnly, isTenDigitPhone } from '@/lib/validation';
 
 interface TrackedOrderResult {
   id: number;
@@ -55,6 +56,10 @@ export default function TrackOrderPage() {
     e.preventDefault();
     setError('');
     setResult(null);
+    if (!orderId || !isTenDigitPhone(phone)) {
+      setError(t('Please enter a valid 10-digit mobile number.'));
+      return;
+    }
     setIsLoading(true);
     try {
       const params = new URLSearchParams({ orderId: orderId.trim(), phone: phone.trim() });
@@ -110,9 +115,10 @@ export default function TrackOrderPage() {
               <input
                 type="text"
                 inputMode="numeric"
+                pattern="[0-9]*"
                 required
                 value={orderId}
-                onChange={(e) => setOrderId(e.target.value)}
+                onChange={(e) => setOrderId(digitsOnly(e.target.value, 12))}
                 placeholder={t('e.g. 12456')}
                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-amber-500 focus:bg-white transition-colors text-navy-900"
               />
@@ -125,9 +131,11 @@ export default function TrackOrderPage() {
               <input
                 type="tel"
                 inputMode="numeric"
+                maxLength={10}
+                pattern="[0-9]{10}"
                 required
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                onChange={(e) => setPhone(digitsOnly(e.target.value, 10))}
                 placeholder={t('10-digit mobile number')}
                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-amber-500 focus:bg-white transition-colors text-navy-900"
               />

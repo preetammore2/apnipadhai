@@ -4,7 +4,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Loader2, Smartphone } from 'lucide-react';
 import { useTranslation } from '@/i18n/useTranslation';
-import { loadPhonePeCheckout } from '@/lib/phonepe-checkout';
 
 type PaymentState = 'loading' | 'cancelled' | 'error';
 
@@ -29,37 +28,8 @@ function PaymentPageContent() {
           return;
         }
 
-        if (!data.embed) {
-          window.location.href = data.redirectUrl;
-          return;
-        }
-
-        let sdk;
-        try {
-          sdk = await loadPhonePeCheckout();
-        } catch {
-          window.location.href = data.redirectUrl;
-          return;
-        }
-
-        try {
-          sdk.transact({
-            tokenUrl: data.redirectUrl,
-            type: 'IFRAME',
-            callback: (response) => {
-              if (response === 'CONCLUDED') {
-                window.location.href = `/payment/status?merchantTransactionId=${data.merchantTransactionId}`;
-              } else {
-                setState('cancelled');
-              }
-            },
-          });
-        } catch {
-          window.location.href = data.redirectUrl;
-          return;
-        }
-      } catch (error) {
-        console.error('[payment] failed to start payment', error);
+        window.location.href = data.redirectUrl;
+      } catch {
         setState('error');
         setMessage(t('Could not start payment. Please try again.'));
       }
