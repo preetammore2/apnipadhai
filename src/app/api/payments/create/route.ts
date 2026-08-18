@@ -254,8 +254,12 @@ export async function POST(request: NextRequest) {
         { status: error.status >= 400 && error.status < 600 ? error.status : 502 },
       );
     }
+    const message =
+      error instanceof Error && error.message.includes('PhonePe')
+        ? error.message
+        : 'Could not start payment. Please try again.';
     return NextResponse.json(
-      { success: false, message: 'Could not start payment. Please try again.' },
+      { success: false, message },
       { status: 500 },
     );
   }

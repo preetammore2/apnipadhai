@@ -104,7 +104,7 @@ export function getPhonePeConfig(): PhonePeConfig {
     return {
       mode,
       apiVersion: 'v2',
-      merchantId,
+      merchantId: merchantId || clientId,
       clientId,
       clientSecret,
       saltKey: '',
@@ -194,7 +194,7 @@ async function getAccessToken(config: PhonePeConfig): Promise<string> {
     return cachedToken.token;
   }
 
-  const res = await fetch(`${config.apiBaseUrl}/pg/v1/oauth/token`, {
+  const res = await fetch(`${config.apiBaseUrl}/v1/oauth/token`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
@@ -230,8 +230,8 @@ function mapPhonePeResponse(
 
   const mapped: PhonePePaymentData = {
     merchantId: toStr(d.merchantId),
-    merchantOrderId: toStr(d.merchantTransactionId) ?? toStr(d.orderId),
-    merchantTransactionId: toStr(d.merchantTransactionId) ?? toStr(d.orderId),
+    merchantOrderId: toStr(d.merchantTransactionId) ?? toStr(d.merchantOrderId) ?? toStr(d.orderId),
+    merchantTransactionId: toStr(d.merchantTransactionId) ?? toStr(d.merchantOrderId) ?? toStr(d.orderId),
     orderId: toStr(d.orderId),
     transactionId: toStr(d.transactionId),
     state: toStr(d.state),
@@ -404,20 +404,18 @@ async function createPaymentV2(
   const accessToken = await getAccessToken(config);
 
   const payload: Record<string, unknown> = {
-    orderId: params.merchantOrderId,
+    merchantOrderId: params.merchantOrderId,
     amount: params.amountPaise,
-    redirectUrl: params.redirectUrl,
-    redirectMode: 'REDIRECT',
-    callbackUrl: params.callbackUrl,
-    paymentModes: ['UPI', 'CARD', 'NB', 'WALLET'],
+    paymentFlow: {
+      type: 'PG_CHECKOUT',
+      message: 'Complete your payment',
+      merchantUrls: {
+        redirectUrl: params.redirectUrl,
+      },
+    },
   };
 
-  // Optional: include phone if provided
-  if (phoneNumber) {
-    payload.mobileNumber = phoneNumber;
-  }
-
-  const apiPath = '/pg/v1/order/create';
+  const apiPath = '/checkout/v2/pay';
 
   let res: Response;
   try {
@@ -426,7 +424,7 @@ async function createPaymentV2(
       headers: {
         'Content-Type': 'application/json',
         accept: 'application/json',
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: `O-Bearer ${accessToken}`,
       },
       body: JSON.stringify(payload),
       cache: 'no-store',
@@ -532,7 +530,7 @@ async function getStatusV2(
   config: PhonePeConfig,
 ): Promise<PhonePePaymentResponse> {
   const accessToken = await getAccessToken(config);
-  const apiPath = `/pg/v1/order/${config.merchantId}/${encodeURIComponent(params.merchantOrderId)}`;
+  const apiPath = `/checkout/v2/order/${encodeURIComponent(params.merchantOrderId)}/status`;
 
   let res: Response;
   try {
@@ -541,7 +539,7 @@ async function getStatusV2(
       headers: {
         'Content-Type': 'application/json',
         accept: 'application/json',
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: `O-Bearer ${accessToken}`,
       },
       cache: 'no-store',
     });
