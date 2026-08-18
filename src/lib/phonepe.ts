@@ -25,6 +25,7 @@ export interface PhonePeConfig {
   saltKey: string;
   saltIndex: string;
   apiBaseUrl: string;
+  authBaseUrl: string;
   signingSecret: string;
 }
 
@@ -55,6 +56,11 @@ export interface PhonePePaymentData {
 const DEFAULT_API_BASE_URLS: Record<Exclude<PhonePeMode, 'mock'>, string> = {
   test: 'https://api-preprod.phonepe.com/apis/pg-sandbox',
   live: 'https://api.phonepe.com/apis/hermes',
+};
+
+const DEFAULT_AUTH_BASE_URLS: Record<Exclude<PhonePeMode, 'mock'>, string> = {
+  test: 'https://api-preprod.phonepe.com/apis/pg-sandbox',
+  live: 'https://api.phonepe.com/apis/identity-manager',
 };
 
 /* ───────── Mock defaults ───────── */
@@ -96,6 +102,7 @@ export function getPhonePeConfig(): PhonePeConfig {
       saltKey: saltKey || MOCK_SALT_KEY,
       saltIndex: saltIndex || MOCK_SALT_INDEX,
       apiBaseUrl: process.env.PHONEPE_API_BASE_URL || DEFAULT_API_BASE_URLS.test,
+      authBaseUrl: process.env.PHONEPE_AUTH_BASE_URL || DEFAULT_AUTH_BASE_URLS.test,
       signingSecret: signingSecret || MOCK_SIGNING_SECRET,
     };
   }
@@ -112,6 +119,9 @@ export function getPhonePeConfig(): PhonePeConfig {
       apiBaseUrl:
         process.env.PHONEPE_API_BASE_URL ||
         DEFAULT_API_BASE_URLS[mode === 'live' ? 'live' : 'test'],
+      authBaseUrl:
+        process.env.PHONEPE_AUTH_BASE_URL ||
+        DEFAULT_AUTH_BASE_URLS[mode === 'live' ? 'live' : 'test'],
       signingSecret,
     };
   }
@@ -134,6 +144,9 @@ export function getPhonePeConfig(): PhonePeConfig {
     apiBaseUrl:
       process.env.PHONEPE_API_BASE_URL ||
       DEFAULT_API_BASE_URLS[mode === 'live' ? 'live' : 'test'],
+    authBaseUrl:
+      process.env.PHONEPE_AUTH_BASE_URL ||
+      DEFAULT_AUTH_BASE_URLS[mode === 'live' ? 'live' : 'test'],
     signingSecret,
   };
 }
@@ -194,26 +207,29 @@ async function getAccessToken(config: PhonePeConfig): Promise<string> {
     return cachedToken.token;
   }
 
-  const res = await fetch(`${config.apiBaseUrl}/v1/oauth/token`, {
+  const clientVersion = process.env.PHONEPE_CLIENT_VERSION || '1';
+  const res = await fetch(`${config.authBaseUrl}/v1/oauth/token`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
-      clientId: config.clientId,
-      clientSecret: config.clientSecret,
-      grantType: 'client_credentials',
+      client_id: config.clientId,
+      client_secret: config.clientSecret,
+      client_version: clientVersion,
+      grant_type: 'client_credentials',
     }).toString(),
     cache: 'no-store',
   });
 
   const body = await res.json().catch(() => null) as Record<string, unknown> | null;
   if (!res.ok || !body) {
-    throw new Error(`PhonePe OAuth2 token request failed (${res.status})`);
+    const detail = body ? JSON.stringify(body) : 'no response body';
+    throw new Error(`PhonePe OAuth2 token request failed (${res.status}): ${detail}`);
   }
 
-  const token = String(body.accessToken ?? '');
-  const expiresIn = Number(body.expiresIn ?? 600);
+  const token = String(body.access_token ?? body.accessToken ?? '');
+  const expiresIn = Number(body.expires_at ?? body.expires_in ?? 600);
   if (!token) {
-    throw new Error('PhonePe OAuth2 token response missing accessToken');
+    throw new Error('PhonePe OAuth2 token response missing access_token');
   }
 
   cachedToken = { token, expiresAt: Date.now() + expiresIn * 1000 };
@@ -226,7 +242,7 @@ function mapPhonePeResponse(
   raw: Record<string, unknown> | null,
 ): PhonePePaymentData | null {
   if (!raw) return null;
-  const d = normalizeData(raw.data);
+  const d = normalizeData(raw.data ?? raw);
 
   const mapped: PhonePePaymentData = {
     merchantId: toStr(d.merchantId),
@@ -252,12 +268,20 @@ function mapPhonePeResponse(
     mapped.redirectUrl = redirectUrl;
   }
 
-  // v2: /pg/v1/order/create may return redirectUrl directly or checkoutUrl
+  // v2: /checkout/v2/pay returns redirectUrl at the top level
   if (!mapped.redirectUrl && typeof d.redirectUrl === 'string' && d.redirectUrl) {
     mapped.redirectUrl = d.redirectUrl;
   }
   if (!mapped.redirectUrl && typeof d.checkoutUrl === 'string' && d.checkoutUrl) {
     mapped.redirectUrl = d.checkoutUrl;
+  }
+
+  // Fallback: check raw top-level fields (v2 checkout response)
+  if (!mapped.redirectUrl && raw.redirectUrl && typeof raw.redirectUrl === 'string') {
+    mapped.redirectUrl = raw.redirectUrl;
+  }
+  if (!mapped.redirectUrl && raw.checkoutUrl && typeof raw.checkoutUrl === 'string') {
+    mapped.redirectUrl = raw.checkoutUrl;
   }
 
   return mapped;
