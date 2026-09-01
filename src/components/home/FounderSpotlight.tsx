@@ -73,18 +73,18 @@ export const FounderSpotlight: React.FC = () => {
             <div className="relative pl-6 border-l border-brand-400/40 space-y-3">
               <Quote className="w-7 h-7 text-brand-400/30 absolute -top-2 -left-3" />
               <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
-                {t('Apni Padhai was established with a singular mission: to eliminate the high barrier of expensive Kota & Jaipur coaching institutes. We bring exam-oriented teaching, high-yield Brahmastra study books, and direct mentor support straight to your mobile screen.')}
+                {t('Apni Padhai was established with a singular mission: to eliminate the high barrier of expensive coaching institutes. We bring exam-oriented teaching, high-yield Brahmastra study books, and direct mentor support straight to your mobile screen.')}
               </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 text-xs text-slate-300">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>{t('Simplifying Rajasthan History & Art-Culture')}</span>
+                <span>{t('Simplifying Rajasthan GK & History')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>{t('Author of Bestselling General Science Guide')}</span>
+                <span>{t('Author of Bestselling General Knowledge Guide')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />

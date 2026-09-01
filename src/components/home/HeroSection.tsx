@@ -132,7 +132,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenCounselorModal }
               <>
                 {t('Comprehensive online live coaching for Rajasthan CET 2026, Sub Inspector (SI), RAS, SSC GD & State Exams. Access bestselling')}{' '}
                 <strong className="text-white font-bold">{t('Brahmastra Study Books')}</strong>
-                {t(', solved PYQs, and daily test series.')}
+                {t('.')}
               </>
             )}
           </motion.p>
@@ -147,7 +147,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenCounselorModal }
               className="group inline-flex items-center justify-center gap-2.5 px-7 sm:px-8 py-3.5 sm:py-4 bg-gradient-to-b from-brand-400 to-brand-600 text-navy-950 font-bold text-sm sm:text-base rounded-xl shadow-[0_8px_30px_-6px_rgba(234,179,8,0.55)] transition-all duration-300 hover:shadow-[0_14px_40px_-6px_rgba(234,179,8,0.7)] hover:-translate-y-0.5 active:scale-[0.97]"
             >
               <BookOpen className="w-5 h-5" />
-              <span>{t('Explore Brahmastra Books')}</span>
+              <span>{t('Explore Books')}</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
 

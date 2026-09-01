@@ -25,6 +25,7 @@ export const YouTubeSection: React.FC = () => {
   const [feed, setFeed] = useState<YouTubeFeed | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
+  const [playLatest, setPlayLatest] = useState(false);
 
   const loadVideos = async () => {
     setIsLoading(true);
@@ -46,6 +47,8 @@ export const YouTubeSection: React.FC = () => {
   }, []);
 
   const videos = feed?.videos ?? [];
+  const latestVideo = videos[0] ?? null;
+  const marqueeVideos = videos.slice(1);
   const channel = feed?.channel ?? { url: 'https://www.youtube.com/@AapniPadhai', handle: '@AapniPadhai' };
 
   const renderVideoCard = (video: YouTubeVideo) => (
@@ -189,15 +192,109 @@ export const YouTubeSection: React.FC = () => {
           </div>
         ) : (
           <>
+            {/* Featured Latest Video */}
+            {latestVideo && (
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5 }}
+                className="mb-14"
+              >
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-red-600 text-white text-[11px] font-black uppercase rounded-full">
+                    <Radio className="w-3 h-3 animate-pulse" /> {t('Latest Upload')}
+                  </span>
+                </div>
+
+                <div className="relative max-w-4xl mx-auto rounded-3xl overflow-hidden bg-navy-950 shadow-2xl">
+                  {playLatest && latestVideo.videoId ? (
+                    <div className="relative aspect-video">
+                      <iframe
+                        src={`https://www.youtube.com/embed/${latestVideo.videoId}?autoplay=1&rel=0`}
+                        title={latestVideo.title}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        className="absolute inset-0 w-full h-full"
+                      />
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setPlayLatest(true)}
+                      className="relative w-full aspect-video group cursor-pointer"
+                    >
+                      {latestVideo.thumbnail ? (
+                        <Image
+                          src={latestVideo.thumbnail}
+                          alt={latestVideo.title}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
+                          sizes="(max-width: 896px) 100vw, 896px"
+                          priority
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-slate-800">
+                          <PlayCircle className="w-20 h-20 text-red-500" />
+                        </div>
+                      )}
+
+                      <div className="absolute inset-0 bg-navy-950/40 group-hover:bg-navy-950/20 transition-colors flex items-center justify-center">
+                        <div className="w-20 h-20 bg-red-600 rounded-full flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform">
+                          <PlayCircle className="w-10 h-10 text-white ml-1" />
+                        </div>
+                      </div>
+
+                      {latestVideo.type === 'live' && (
+                        <span className="absolute top-4 left-4 inline-flex items-center gap-1.5 px-3 py-1 bg-red-600 text-white text-xs font-black uppercase rounded-lg shadow-lg">
+                          <Radio className="w-3.5 h-3.5 animate-pulse" /> LIVE
+                        </span>
+                      )}
+                    </button>
+                  )}
+                </div>
+
+                <div className="max-w-4xl mx-auto mt-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <h3 className="text-lg sm:text-xl font-bold font-heading text-navy-900 line-clamp-2">
+                      {latestVideo.title}
+                    </h3>
+                    <span className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 mt-1.5">
+                      <FaYoutube className="w-3.5 h-3.5 text-red-600" /> {channel.handle}
+                    </span>
+                  </div>
+                  <a
+                    href={latestVideo.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white text-xs font-black rounded-xl shadow-sm transition-all hover:-translate-y-0.5 flex-shrink-0"
+                  >
+                    <FaYoutube className="w-4 h-4" />
+                    <span>{t('Watch on YouTube')}</span>
+                    <ExternalLink className="w-3 h-3 opacity-70" />
+                  </a>
+                </div>
+              </motion.div>
+            )}
+
+            {/* More Videos Label */}
+            {marqueeVideos.length > 0 && (
+              <div className="mb-6">
+                <span className="text-xs font-black text-slate-400 uppercase tracking-widest">
+                  {t('More Videos')}
+                </span>
+              </div>
+            )}
+
             {/* Infinite Marquee Scroller */}
-            <div className="marquee-scroller relative overflow-hidden" style={{ '--marquee-duration': `${Math.max(videos.length * 3, 30)}s` } as React.CSSProperties}>
+            <div className="marquee-scroller relative overflow-hidden" style={{ '--marquee-duration': `${Math.max(marqueeVideos.length * 3, 30)}s` } as React.CSSProperties}>
               {/* Edge Fades */}
               <div className="absolute left-0 top-0 bottom-0 w-10 sm:w-24 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
               <div className="absolute right-0 top-0 bottom-0 w-10 sm:w-24 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
 
               {/* Track (videos duplicated for seamless loop) */}
               <div className="marquee-track flex gap-6 w-max py-2">
-                {[...videos, ...videos].map((video, index) => (
+                {[...marqueeVideos, ...marqueeVideos].map((video, index) => (
                   <div key={`${video.id}-${index}`}>{renderVideoCard(video)}</div>
                 ))}
               </div>

@@ -23,6 +23,7 @@ export const FaqSection: React.FC = () => {
   const categories = content?.faqs?.length
     ? ['All', ...Array.from(new Set(content.faqs.map((faq) => faq.category)))]
     : ['All', ...FAQ_CATEGORIES];
+  const INITIAL_VISIBLE = 2;
   const [activeCategory, setActiveCategory] = useState<string>('All');
   const [openId, setOpenId] = useState<string | null>(faqs[0]?.id ?? null);
 
@@ -30,6 +31,13 @@ export const FaqSection: React.FC = () => {
     activeCategory === 'All'
       ? faqs
       : faqs.filter((faq) => faq.category === activeCategory);
+
+  const visibleFaqs = filtered.slice(0, INITIAL_VISIBLE);
+
+  const handleCategoryChange = (category: string) => {
+    setActiveCategory(category);
+    setOpenId(null);
+  };
 
   return (
     <section className="py-20 bg-white relative overflow-hidden">
@@ -55,7 +63,7 @@ export const FaqSection: React.FC = () => {
             return (
               <button
                 key={category}
-                onClick={() => setActiveCategory(category)}
+                onClick={() => handleCategoryChange(category)}
                 className={`px-4 py-2 rounded-full text-xs font-bold transition-all border ${
                   isActive
                     ? 'bg-navy-900 text-white border-navy-900 shadow-md'
@@ -70,7 +78,7 @@ export const FaqSection: React.FC = () => {
 
         {/* Accordion */}
         <div className="max-w-3xl mx-auto space-y-3">
-          {filtered.map((faq, idx) => {
+          {visibleFaqs.map((faq, idx) => {
             const isOpen = openId === faq.id;
             const meta = CATEGORY_ICONS[faq.category] ?? CATEGORY_ICONS['Orders & Delivery'];
             const Icon = meta.icon;

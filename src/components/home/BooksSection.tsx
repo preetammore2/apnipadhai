@@ -6,13 +6,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { BOOK_HI } from '@/i18n/data';
 import { useTranslation } from '@/i18n/useTranslation';
-import { SamplePdfModal } from '@/components/layout/SamplePdfModal';
-import { Star, ShoppingCart, Eye, ArrowRight, Truck, Loader2, RefreshCw, WifiOff, Search, Heart } from 'lucide-react';
+import { Star, ShoppingCart, ArrowRight, Truck, Loader2, RefreshCw, WifiOff, Search, BadgePercent } from 'lucide-react';
 import { useGetBooksQuery } from '@/redux/api/bookApi';
-import { useAppDispatch, useAppSelector } from '@/redux/hooks';
+import { useAppDispatch } from '@/redux/hooks';
 import { addToCart } from '@/redux/features/cart/cartSlice';
-import { setSelectedPdfBook } from '@/redux/features/ui/uiSlice';
-import { toggleWishlist } from '@/redux/features/wishlist/wishlistSlice';
 import { toast } from 'sonner';
 
 const BOOK_TABS = [
@@ -34,7 +31,6 @@ const BOOK_TABS = [
 export const BooksSection: React.FC = () => {
   const { t, language } = useTranslation();
   const dispatch = useAppDispatch();
-  const wishlistItems = useAppSelector((state) => state.wishlist.items);
   const { data: books = [], isLoading, isError, refetch } = useGetBooksQuery();
   const [activeTab, setActiveTab] = useState('All books');
 
@@ -161,132 +157,77 @@ export const BooksSection: React.FC = () => {
         ) : (
           <>
           {/* Books Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="flex gap-4 sm:gap-6 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide">
             {filteredBooks.slice(0, 8).map((book) => {
               const hi = BOOK_HI[book.id];
               return (
               <motion.div
                 key={book.id}
-                whileHover={{ y: -8 }}
-                className="bg-white rounded-3xl border-2 border-slate-100 hover:border-yellow-300 p-5 shadow-card hover:shadow-card-hover transition-all flex flex-col justify-between group"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4 }}
+                whileHover={{ y: -6 }}
+                className="bg-white rounded-2xl border border-slate-200 hover:border-amber-300 shadow-card hover:shadow-card-hover transition-all overflow-hidden flex flex-col group snap-start shrink-0 w-[45%] sm:w-[30%] lg:w-auto lg:flex-1 lg:min-w-0"
               >
-                <div>
-                  {/* Book Cover Image 3D Frame */}
-                  <div className="relative h-64 w-full bg-slate-50 rounded-2xl overflow-hidden mb-4 border border-slate-200/80 flex items-center justify-center p-4 group-hover:shadow-md transition-all">
-                    {book.discountPercentage > 0 && (
-                      <span className="absolute top-3 left-3 z-10 px-2.5 py-1 bg-yellow-400 text-navy-950 text-[10px] font-black rounded-full shadow-sm">
-                        -{book.discountPercentage}% {t('OFF')}
-                      </span>
-                    )}
-
-                    <button
-                      onClick={() => {
-                        const isWishlisted = wishlistItems.some(
-                          (item) => item.id === book.id && item.type === 'book'
-                        );
-                        dispatch(toggleWishlist({ id: book.id, type: 'book' }));
-                          if (isWishlisted) {
-                            toast.info(t('Removed from wishlist'));
-                          } else {
-                            toast.success(t('Added to wishlist!'));
-                          }
-                      }}
-                      className="absolute top-3 right-3 z-10 p-2 bg-white/95 hover:bg-white rounded-full shadow-sm transition-colors"
-                      title={t('Save to wishlist')}
-                    >
-                      <Heart
-                        className={`w-4 h-4 transition-colors ${
-                          wishlistItems.some((item) => item.id === book.id && item.type === 'book')
-                            ? 'fill-red-500 text-red-500'
-                            : 'text-slate-600'
-                        }`}
-                      />
-                    </button>
-
+                <div className="relative">
+                  <Link href={`/books/${book.id}`} className="relative block h-40 sm:h-52 bg-slate-50 overflow-hidden">
                     {book.coverImage ? (
-                      <div className="relative w-full h-full transform group-hover:scale-105 transition-transform duration-300">
-                        <Image
-                          src={book.coverImage}
-                          alt={language === 'hi' ? hi?.title ?? book.title : book.title}
-                          fill
-                          className="object-contain drop-shadow-lg"
-                        />
-                      </div>
+                      <Image
+                        src={book.coverImage}
+                        alt={language === 'hi' ? hi?.title ?? book.title : book.title}
+                        fill
+                        className="object-contain p-3 group-hover:scale-105 transition-transform duration-500"
+                      />
                     ) : (
-                      <span className="text-xl font-black font-heading text-slate-300 text-center px-4">
+                      <span className="absolute inset-0 flex items-center justify-center text-sm font-black text-slate-300 px-4 text-center">
                         {language === 'hi' ? hi?.title ?? book.title : book.title}
                       </span>
                     )}
-
-                    {/* Hover Quick Action Buttons */}
-                    <div className="absolute inset-0 bg-navy-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3 p-4">
-                      {book.samplePdfUrl && (
-                        <button
-                          onClick={() => dispatch(setSelectedPdfBook(book))}
-                          className="p-3 bg-white text-navy-900 rounded-full shadow-lg hover:bg-yellow-400 hover:text-navy-950 transition-colors"
-                          title={t('Preview Sample PDF')}
-                        >
-                          <Eye className="w-5 h-5" />
-                        </button>
-                      )}
-                      <button
-                        onClick={() => {
-                          dispatch(addToCart({ item: book, type: 'book' }));
-                          toast.success(`${language === 'hi' ? hi?.title ?? book.title : book.title} ${t('added to cart!')}`);
-                        }}
-                        className="p-3 bg-yellow-400 text-navy-950 rounded-full shadow-lg hover:bg-yellow-500 transition-colors font-bold"
-                        title={t('Add to Cart')}
-                      >
-                        <ShoppingCart className="w-5 h-5" />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Info */}
-                  <div className="space-y-1.5">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t(book.category)}</span>
-                    <h3 className="text-base font-bold font-heading text-navy-900 line-clamp-1 group-hover:text-amber-700 transition-colors">
-                      {language === 'hi' ? hi?.title ?? book.title : book.title}
-                    </h3>
-                    {book.subtitle && (
-                      <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
-                        {language === 'hi' ? hi?.subtitle ?? book.subtitle : book.subtitle}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Rating & Details */}
-                  <div className="flex items-center justify-between text-xs text-slate-500 mt-3 pt-3 border-t border-slate-100">
-                    <span className="flex items-center gap-1 font-bold text-navy-900">
-                      <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-500" /> {book.rating ?? t('Best Seller')}
+                  </Link>
+                  {book.discountPercentage > 0 && (
+                    <span className="absolute top-2.5 left-2.5 z-10 px-2 py-1 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center gap-1">
+                      <BadgePercent className="w-3 h-3" /> -{book.discountPercentage}% {t('OFF')}
                     </span>
-                    <span>{book.pages ? `${book.pages} ${t('Pages')}` : t('Paperback')}</span>
-                  </div>
+                  )}
                 </div>
 
-                {/* Price & Action */}
-                <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xl font-black font-heading text-navy-900">₹{book.price}</span>
-                      {book.originalPrice > book.price && (
-                        <span className="text-xs text-slate-400 line-through">₹{book.originalPrice}</span>
-                      )}
-                    </div>
-                    <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-1">
-                      <Truck className="w-3 h-3" /> {t('Doorstep Delivery')}
-                    </span>
+                <div className="p-4 flex flex-col flex-grow">
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{t(book.category)}</span>
+                  <Link href={`/books/${book.id}`}>
+                    <h3 className="text-sm font-bold font-heading text-navy-900 line-clamp-1 group-hover:text-amber-700 transition-colors mt-1">
+                      {language === 'hi' ? hi?.title ?? book.title : book.title}
+                    </h3>
+                  </Link>
+
+                  <div className="flex items-center gap-1.5 text-[11px] text-slate-500 mt-1.5">
+                    <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                    <span className="font-bold text-navy-900">{book.rating ?? t('Best Seller')}</span>
                   </div>
 
-                  <button
-                    onClick={() => {
-                      dispatch(addToCart({ item: book, type: 'book' }));
-                      toast.success(`${language === 'hi' ? hi?.title ?? book.title : book.title} ${t('added to cart!')}`);
-                    }}
-                    className="px-4 py-2 bg-yellow-400 hover:bg-yellow-500 text-navy-950 text-xs font-black rounded-xl transition-all shadow-sm"
-                  >
-                    {t('Add to Cart')}
-                  </button>
+                  <div className="pt-3 mt-3 border-t border-slate-100 flex items-end justify-between gap-2 flex-grow">
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-lg font-black font-heading text-navy-900">₹{book.price}</span>
+                        {book.originalPrice > book.price && (
+                          <span className="text-[10px] text-slate-400 line-through">₹{book.originalPrice}</span>
+                        )}
+                      </div>
+                      <span className="text-[9px] font-bold text-emerald-600 flex items-center gap-1">
+                        <Truck className="w-3 h-3" /> {t('Doorstep Delivery')}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => {
+                        dispatch(addToCart({ item: book, type: 'book' }));
+                        toast.success(`${language === 'hi' ? hi?.title ?? book.title : book.title} ${t('added to cart!')}`);
+                      }}
+                      className="p-2 bg-yellow-400 hover:bg-yellow-500 text-navy-950 rounded-xl transition-all shadow-sm shrink-0"
+                      title={t('Add to Cart')}
+                    >
+                      <ShoppingCart className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               </motion.div>
               );
@@ -306,9 +247,6 @@ export const BooksSection: React.FC = () => {
           </>
         )}
       </div>
-
-      {/* Redux Connected Sample PDF Reader Modal */}
-      <SamplePdfModal />
     </section>
   );
 };

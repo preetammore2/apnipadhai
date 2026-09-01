@@ -251,13 +251,13 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
 
               {/* Download App CTA */}
               <a
-                href="https://play.google.com/store/search?q=apni+padhai&c=apps"
+                href="https://apnipadhai.org/"
                 target="_blank"
                 rel="noreferrer"
                 className="hidden xl:flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-yellow-400 hover:to-amber-500 text-navy-950 font-black text-xs rounded-full shadow-button-glow transition-all transform hover:-translate-y-0.5 shrink-0"
               >
                 <Download className="w-4 h-4" />
-                <span>{t('Download App')}</span>
+                <span>{t('Course')}</span>
               </a>
 
               {/* Mobile Menu Toggle */}
@@ -493,7 +493,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
                 className="mt-5 space-y-2"
               >
                 <a
-                  href="https://play.google.com/store/search?q=apni+padhai&c=apps"
+                  href="https://play.google.com/store/apps/details?id=com.aapni.padhai"
                   target="_blank"
                   rel="noreferrer"
                   onClick={() => setIsMobileMenuOpen(false)}

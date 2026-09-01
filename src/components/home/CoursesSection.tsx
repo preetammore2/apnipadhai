@@ -1,12 +1,10 @@
 'use client';
 
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { BookOpen, PlayCircle, FileCheck2, Clock, Users, ArrowRight, ExternalLink } from 'lucide-react';
+import { BookOpen, PlayCircle, FileCheck2, Clock, Users, ArrowRight, ExternalLink, Loader2 } from 'lucide-react';
 import { useTranslation } from '@/i18n/useTranslation';
-import { useSiteContent } from '@/lib/use-site-content';
 
 interface Course {
   id: string;
@@ -28,7 +26,7 @@ const COURSES: Course[] = [
     description:
       'Complete online course covering the entire Rajasthan GK syllabus with live & recorded lectures, PDF notes, and topic-wise PYQs for RAS, SI, CET and other Rajasthan exams.',
     image: 'https://appx-content-v2.classx.co.in/paid_course3/2025-08-01-0.9018244069855648.png',
-    url: 'https://apnipadhai.org/courses/41-rajasthan-gk-complete-online-batch-20',
+    url: 'https://apnipadhai.org/new-courses/41-rajasthan-gk-complete-online-batch-20',
     type: 'online batch',
     features: ['Live Interactive Classes', 'PDF Notes', 'Topic-wise PYQs', 'Test Series'],
     tag: 'BEST SELLER',
@@ -40,7 +38,7 @@ const COURSES: Course[] = [
     description:
       'Foundation batch covering the full SSC GD syllabus - maths, reasoning, Hindi & English with daily practice sets and full-length mock tests designed by expert faculty.',
     image: 'https://appx-content-v2.classx.co.in/paid_course3/2025-08-03-0.4911749231825595.jpg',
-    url: 'https://apnipadhai.org/courses/15-ssc-gd-foundation-complete-online-course-ssc-gd',
+    url: 'https://apnipadhai.org/new-courses/61-ssc-gd-foundation-complete-online-course-30',
     type: 'foundation course',
     features: ['Daily Practice Sets', 'Full Mock Tests', 'Live Doubt Sessions', 'Study Material'],
     tag: 'NEW BATCH',
@@ -56,19 +54,39 @@ const TEST_SERIES = [
 
 export const CoursesSection: React.FC = () => {
   const { t } = useTranslation();
-  const content = useSiteContent();
-  const remoteCourses: Course[] = (content?.courses ?? []).map((course) => ({
-    id: course.id,
-    title: course.title,
-    tagline: course.tagline ?? '',
-    description: course.description,
-    image: course.image ?? '',
-    url: course.url,
-    type: course.type || 'Online Batch',
-    features: course.features ?? [],
-    tag: course.tag ?? '',
-  }));
-  const courses = remoteCourses.length > 0 ? remoteCourses : COURSES;
+  const [courses, setCourses] = useState<Course[]>(COURSES);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      try {
+        const res = await fetch('/api/courses?per_page=50');
+        const data = await res.json();
+        if (!cancelled && data.courses?.length > 0) {
+          setCourses(
+            data.courses.map((c: Record<string, unknown>) => ({
+              id: c.id as string,
+              title: (c.title as string) ?? '',
+              tagline: (c.tagline as string) ?? '',
+              description: (c.description as string) ?? '',
+              image: (c.image as string) ?? '',
+              url: (c.url as string) ?? '',
+              type: (c.type as string) || 'Online Batch',
+              features: Array.isArray(c.features) ? (c.features as string[]) : [],
+              tag: (c.tag as string) ?? '',
+            }))
+          );
+        }
+      } catch {
+        // keep fallback
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    load();
+    return () => { cancelled = true; };
+  }, []);
 
   return (
     <section id="courses" className="py-20 bg-gradient-to-b from-white via-amber-50/40 to-white relative overflow-hidden">
@@ -87,84 +105,111 @@ export const CoursesSection: React.FC = () => {
           </p>
         </div>
 
-        {/* Online Courses */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {courses.map((course, idx) => (
-            <motion.div
-              key={course.id}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.45, delay: idx * 0.1 }}
-              className="bg-white rounded-3xl border-2 border-slate-100 hover:border-amber-300 shadow-card hover:shadow-card-hover transition-all overflow-hidden flex flex-col group"
-            >
-              <div className="relative h-52 sm:h-56 bg-slate-100 overflow-hidden">
-                {course.image ? (
-                  <Image
-                    src={course.image}
-                    alt={course.title}
-                    fill
-                    className="object-contain p-4 group-hover:scale-105 transition-transform duration-500"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <BookOpen className="w-16 h-16 text-amber-300" />
+        {/* Online Courses — Infinite Loop Scroller */}
+        <style>{`
+          @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+          }
+          .marquee-track {
+            display: flex;
+            width: max-content;
+            animation: marquee 30s linear infinite;
+          }
+          .marquee-track:hover {
+            animation-play-state: paused;
+          }
+        `}</style>
+        <div className="overflow-hidden -mx-4 sm:-mx-6 lg:-mx-8">
+          {loading ? (
+            <div className="flex gap-6 px-3">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="w-[340px] sm:w-[400px] shrink-0 bg-white rounded-3xl border-2 border-slate-100 overflow-hidden animate-pulse">
+                  <div className="h-52 sm:h-56 bg-slate-200" />
+                  <div className="p-6 space-y-3">
+                    <div className="h-5 bg-slate-200 rounded w-3/4" />
+                    <div className="h-3 bg-slate-100 rounded w-1/2" />
+                    <div className="h-10 bg-slate-100 rounded" />
                   </div>
-                )}
-                {course.tag && (
-                  <span className="absolute top-3 left-3 z-10 px-2.5 py-1 bg-yellow-400 text-navy-950 text-[10px] font-black rounded-full shadow-sm">
-                    {t(course.tag)}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="marquee-track gap-6 px-3">
+              {[...courses, ...courses].map((course, idx) => (
+              <div
+                key={`${course.id}-${idx}`}
+                className="w-[340px] sm:w-[400px] shrink-0 bg-white rounded-3xl border-2 border-slate-100 hover:border-amber-300 shadow-card hover:shadow-card-hover transition-all overflow-hidden flex flex-col group"
+              >
+                <div className="relative h-52 sm:h-56 bg-slate-100 overflow-hidden">
+                  {course.image ? (
+                    <Image
+                      src={course.image}
+                      alt={course.title}
+                      fill
+                      className="object-contain p-4 group-hover:scale-105 transition-transform duration-500"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <BookOpen className="w-16 h-16 text-amber-300" />
+                    </div>
+                  )}
+                  {course.tag && (
+                    <span className="absolute top-3 left-3 z-10 px-2.5 py-1 bg-yellow-400 text-navy-950 text-[10px] font-black rounded-full shadow-sm">
+                      {t(course.tag)}
+                    </span>
+                  )}
+                  <span className="absolute top-3 right-3 z-10 px-2.5 py-1 bg-navy-900/90 text-white text-[10px] font-bold rounded-full flex items-center gap-1">
+                    <PlayCircle className="w-3 h-3 text-yellow-400" /> {t(course.type)}
                   </span>
-                )}
-                <span className="absolute top-3 right-3 z-10 px-2.5 py-1 bg-navy-900/90 text-white text-[10px] font-bold rounded-full flex items-center gap-1">
-                  <PlayCircle className="w-3 h-3 text-yellow-400" /> {t(course.type)}
-                </span>
-              </div>
-
-              <div className="p-6 flex flex-col flex-grow">
-                <h3 className="text-lg font-extrabold font-heading text-navy-900 leading-snug">
-                  {t(course.title)}
-                </h3>
-                {course.tagline && (
-                  <p className="text-xs font-bold text-brand-600 mt-1">{t(course.tagline)}</p>
-                )}
-                <p className="text-xs text-slate-500 leading-relaxed mt-3 flex-grow">
-                  {t(course.description)}
-                </p>
-
-                <div className="flex flex-wrap gap-2 mt-4">
-                  {course.features.map((feature) => (
-                    <span
-                      key={feature}
-                      className="px-2.5 py-1 bg-slate-50 border border-slate-200 rounded-full text-[10px] font-bold text-slate-600"
-                    >
-                      {t(feature)}
-                    </span>
-                  ))}
                 </div>
 
-                <div className="pt-5 mt-5 border-t border-slate-100 flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-4 text-[11px] text-slate-500 font-semibold">
-                    <span className="flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5 text-amber-600" /> {t('12 Months Access')}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Users className="w-3.5 h-3.5 text-amber-600" /> 10,000+
-                    </span>
+                <div className="p-6 flex flex-col flex-grow">
+                  <h3 className="text-lg font-extrabold font-heading text-navy-900 leading-snug">
+                    {t(course.title)}
+                  </h3>
+                  {course.tagline && (
+                    <p className="text-xs font-bold text-brand-600 mt-1">{t(course.tagline)}</p>
+                  )}
+                  <p className="text-xs text-slate-500 leading-relaxed mt-3 flex-grow">
+                    {t(course.description)}
+                  </p>
+
+                  <div className="flex flex-wrap gap-2 mt-4">
+                    {course.features.map((feature) => (
+                      <span
+                        key={feature}
+                        className="px-2.5 py-1 bg-slate-50 border border-slate-200 rounded-full text-[10px] font-bold text-slate-600"
+                      >
+                        {t(feature)}
+                      </span>
+                    ))}
                   </div>
-                  <a
-                    href={course.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-yellow-400 hover:bg-yellow-500 text-navy-950 text-xs font-black rounded-xl shadow-sm transition-all hover:-translate-y-0.5 active:scale-[0.97]"
-                  >
-                    {t('Enroll Now')}
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
+
+                  <div className="pt-5 mt-5 border-t border-slate-100 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-4 text-[11px] text-slate-500 font-semibold">
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3.5 h-3.5 text-amber-600" /> {t('12 Months Access')}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Users className="w-3.5 h-3.5 text-amber-600" /> 10,000+
+                      </span>
+                    </div>
+                    <a
+                      href={course.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-yellow-400 hover:bg-yellow-500 text-navy-950 text-xs font-black rounded-xl shadow-sm transition-all hover:-translate-y-0.5 active:scale-[0.97]"
+                    >
+                      {t('Enroll Now')}
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  </div>
                 </div>
               </div>
-            </motion.div>
-          ))}
+            ))}
+            </div>
+          )}
         </div>
 
         {/* Test Series Strip */}

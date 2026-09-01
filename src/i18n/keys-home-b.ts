@@ -78,6 +78,9 @@ export const KEYS_HOME_B: Record<string, string> = {
   'Watch': 'देखें',
   'Explore Brahmastra Books': 'ब्रह्मास्त्र किताबें देखें',
   'View All Videos on YouTube': 'सभी वीडियो YouTube पर देखें',
+  'Latest Upload': 'नवीनतम अपलोड',
+  'Watch on YouTube': 'YouTube पर देखें',
+  'More Videos': 'और वीडियो',
 
   // ---- Books Category Tabs ----
   'On Apni Padhai Books': 'अपनी पढ़ाई की किताबें',

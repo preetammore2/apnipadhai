@@ -53,19 +53,19 @@ export const FeaturesSection: React.FC = () => {
     },
     {
       title: 'Live Interactive Classes',
-      desc: 'Engage with educators in real-time chat, resolve doubts live, and take part in interactive polls.',
+      desc: 'Engage with educators in real-time chat, resolve doubts live.',
       icon: <Tv className="w-6 h-6 text-rose-500" />,
       color: 'border-rose-100 bg-rose-50/50',
     },
     {
       title: 'Doubt Resolution Support',
-      desc: 'Dedicated doubt forums and weekly live doubt clearing sessions for every student.',
+      desc: 'Dedicated doubt forums and on request live doubt clearing sessions for student.',
       icon: <HelpCircle className="w-6 h-6 text-indigo-500" />,
       color: 'border-indigo-100 bg-indigo-50/50',
     },
     {
       title: 'Performance Analytics',
-      desc: 'All-India rank analysis, accuracy tracking, and personalized weakness identification.',
+      desc: 'All-India rank analysis, accuracy tracking.',
       icon: <BarChart2 className="w-6 h-6 text-teal-500" />,
       color: 'border-teal-100 bg-teal-50/50',
     },
@@ -80,12 +80,6 @@ export const FeaturesSection: React.FC = () => {
       desc: 'Monitor syllabus completion percentage, attendance stats, and test score growth graphs.',
       icon: <TrendingUp className="w-6 h-6 text-sky-500" />,
       color: 'border-sky-100 bg-sky-50/50',
-    },
-    {
-      title: 'Course Certificates',
-      desc: 'Receive verified completion certificates upon finishing foundation courses & tests.',
-      icon: <Award className="w-6 h-6 text-orange-500" />,
-      color: 'border-orange-100 bg-orange-50/50',
     },
     {
       title: '12 Months Access Validity',
