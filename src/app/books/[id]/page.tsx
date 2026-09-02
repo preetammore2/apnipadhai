@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { useAppDispatch } from '@/redux/hooks';
 import { addToCart } from '@/redux/features/cart/cartSlice';
+import { isComboBook } from '@/lib/books';
 import { toast } from 'sonner';
 import { useTranslation } from '@/i18n/useTranslation';
 import { BOOK_HI } from '@/i18n/data';
@@ -159,6 +160,7 @@ export default function BookDetailsPage({ params }: { params: Promise<{ id: stri
                 </div>
 
                 <div className="flex flex-wrap gap-3">
+                  {book && !isComboBook(book) && (
                   <button
                     onClick={() => {
                       dispatch(addToCart({ item: book, type: 'book' }));
@@ -169,6 +171,7 @@ export default function BookDetailsPage({ params }: { params: Promise<{ id: stri
                     <ShoppingCart className="w-5 h-5" />
                     <span>{t('Add to Cart')}</span>
                   </button>
+                  )}
 
                   {hasSample && (
                     <button

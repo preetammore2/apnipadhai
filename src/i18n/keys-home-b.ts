@@ -217,8 +217,8 @@ export const KEYS_HOME_B: Record<string, string> = {
   'We accept returns and replacements for broken or damaged products and for product mismatches within 7 days of delivery. Please email a photo of the damage or mismatch to support@apnipadhaipublication.com and our team will arrange a replacement or refund.':
     'हम डिलीवरी के 7 दिनों के भीतर टूटे या क्षतिग्रस्त उत्पादों और उत्पाद बेमेल के लिए रिटर्न और प्रतिस्थापन स्वीकार करते हैं। कृपया क्षति या बेमेल की फोटो support@apnipadhaipublication.com पर ईमेल करें और हमारी टीम प्रतिस्थापन या रिफंड की व्यवस्था करेगी।',
   'Can I order multiple books in a single order?': 'क्या मैं एक ही ऑर्डर में कई किताबें ऑर्डर कर सकता हूं?',
-  'Yes! You can add any number of books to your cart and place a single order. Our Combo (Choose Your Books) option lets you pick multiple books together and save extra on the total price.':
-    'हाँ! आप अपनी कार्ट में कितनी भी किताबें जोड़कर एक ही ऑर्डर कर सकते हैं। हमारा कॉम्बो (अपनी किताबें चुनें) विकल्प आपको एक साथ कई किताबें चुनने और कुल मूल्य पर अतिरिक्त बचत करने देता है।',
+  'Yes! You can add any number of books to your cart and place a single order.':
+    'हाँ! आप अपनी कार्ट में कितनी भी किताबें जोड़कर एक ही ऑर्डर कर सकते हैं।',
   'Are your books updated with the latest exam pattern?':
     'क्या आपकी किताबें नवीनतम परीक्षा पैटर्न के अनुसार अपडेट हैं?',
   'Yes. Every Brahmastra edition is reviewed and revised by Rohit Sir and our senior faculty to match the latest official syllabus and exam pattern, including PYQs and answer keys.':

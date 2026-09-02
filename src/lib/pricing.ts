@@ -19,13 +19,19 @@ export function findActiveCoupon(
   );
 }
 
+const PER_EXTRA_ITEM_DELIVERY_FEE = 15;
+
 export function computeCartTotals(
   subtotal: number,
   settings: StoreSettings | null,
   couponCode?: string | null,
+  totalQuantity = 0,
 ): CartTotals {
   const s = settings ?? STORE_SETTINGS_DEFAULTS;
-  const shipping = s.shipping.amount;
+  const shipping =
+    totalQuantity <= 0
+      ? 0
+      : s.shipping.amount + (totalQuantity - 1) * PER_EXTRA_ITEM_DELIVERY_FEE;
 
   let discount = 0;
   let discountLabel = '';

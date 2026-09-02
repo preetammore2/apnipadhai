@@ -10,6 +10,7 @@ import { BOOK_HI } from '@/i18n/data';
 import { useGetBooksQuery } from '@/redux/api/bookApi';
 import { useAppDispatch } from '@/redux/hooks';
 import { addToCart } from '@/redux/features/cart/cartSlice';
+import { isComboBook } from '@/lib/books';
 import { toast } from 'sonner';
 
 export const BookDealsSection: React.FC = () => {
@@ -20,7 +21,7 @@ export const BookDealsSection: React.FC = () => {
   const deals = useMemo(
     () =>
       books
-        .filter((book) => book.discountPercentage > 0 && book.inStock)
+        .filter((book) => book.discountPercentage > 0 && book.inStock && !isComboBook(book))
         .sort((a, b) => b.discountPercentage - a.discountPercentage)
         .slice(0, 8),
     [books],
@@ -115,6 +116,7 @@ export const BookDealsSection: React.FC = () => {
                         <Truck className="w-3 h-3" /> {t('Doorstep Delivery')}
                       </span>
                     </div>
+                    {!isComboBook(book) && (
                     <button
                       onClick={() => {
                         dispatch(addToCart({ item: book, type: 'book' }));
@@ -125,6 +127,7 @@ export const BookDealsSection: React.FC = () => {
                     >
                       <ShoppingCart className="w-4 h-4" />
                     </button>
+                    )}
                   </div>
                 </div>
               </motion.div>

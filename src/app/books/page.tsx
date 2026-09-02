@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { Star, ShoppingCart, Eye, Search, Truck, ArrowRight, Loader2, RefreshCw, WifiOff } from 'lucide-react';
 import { useAppDispatch } from '@/redux/hooks';
 import { addToCart } from '@/redux/features/cart/cartSlice';
+import { isComboBook } from '@/lib/books';
 import { toast } from 'sonner';
 import { useTranslation } from '@/i18n/useTranslation';
 import { BOOK_HI } from '@/i18n/data';
@@ -22,9 +23,10 @@ export default function BooksPage() {
   const { data: books = [], isLoading, isError, refetch } = useGetBooksQuery();
 
   const filteredBooks = books.filter((book) =>
-    book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    !isComboBook(book) &&
+    (book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     book.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (book.subtitle ?? '').toLowerCase().includes(searchQuery.toLowerCase())
+    (book.subtitle ?? '').toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   return (
@@ -136,6 +138,7 @@ export default function BooksPage() {
                             <Eye className="w-5 h-5" />
                           </button>
                         )}
+                        {!isComboBook(book) && (
                         <button
                           onClick={() => {
                             dispatch(addToCart({ item: book, type: 'book' }));
@@ -146,6 +149,7 @@ export default function BooksPage() {
                         >
                           <ShoppingCart className="w-5 h-5" />
                         </button>
+                        )}
                       </div>
                     </div>
 
@@ -186,6 +190,7 @@ export default function BooksPage() {
                     </div>
 
                     <div className="flex items-center gap-2">
+                      {!isComboBook(book) && (
                       <button
                         onClick={() => {
                           dispatch(addToCart({ item: book, type: 'book' }));
@@ -195,6 +200,7 @@ export default function BooksPage() {
                       >
                         {t('Add to Cart')}
                       </button>
+                      )}
                       <Link
                         href={`/books/${book.id}`}
                         className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors"

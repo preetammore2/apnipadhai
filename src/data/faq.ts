@@ -32,7 +32,7 @@ export const FAQ_DATA: FaqItem[] = [
     category: 'Orders & Delivery',
     question: 'Can I order multiple books in a single order?',
     answer:
-      'Yes! You can add any number of books to your cart and place a single order. Our Combo (Choose Your Books) option lets you pick multiple books together and save extra on the total price.',
+      'Yes! You can add any number of books to your cart and place a single order.',
   },
   {
     id: 'book-editions',

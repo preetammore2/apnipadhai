@@ -8,26 +8,17 @@ import {
   BookOpen,
   CheckCircle2,
   ArrowRight,
-  Phone,
 } from 'lucide-react';
 import { useTranslation } from '@/i18n/useTranslation';
-import { useAppDispatch } from '@/redux/hooks';
-import { setCounselorModalOpen } from '@/redux/features/ui/uiSlice';
 import { useSiteContent } from '@/lib/use-site-content';
 
 interface HeroSectionProps {
   onOpenCounselorModal?: () => void;
 }
 
-export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenCounselorModal }) => {
-  const dispatch = useAppDispatch();
+export const HeroSection: React.FC<HeroSectionProps> = () => {
   const { t } = useTranslation();
   const { hero } = useSiteContent() ?? {};
-
-  const handleCounselorModal = () => {
-    dispatch(setCounselorModalOpen(true));
-    if (onOpenCounselorModal) onOpenCounselorModal();
-  };
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -160,14 +151,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenCounselorModal }
               <Download className="w-5 h-5 text-brand-400" />
               <span>{t('Download App')}</span>
             </a>
-
-            <button
-              onClick={handleCounselorModal}
-              className="inline-flex items-center justify-center gap-2.5 px-7 sm:px-8 py-3.5 sm:py-4 bg-white/[0.06] backdrop-blur border border-white/15 text-white text-sm sm:text-base font-semibold rounded-xl transition-all duration-300 hover:bg-white/[0.12] hover:border-white/25 hover:-translate-y-0.5 active:scale-[0.97] cursor-pointer"
-            >
-              <Phone className="w-5 h-5 text-brand-400" />
-              <span>{t('Talk to Counselor')}</span>
-            </button>
           </motion.div>
 
           {/* Feature Checkmarks */}

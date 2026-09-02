@@ -3,7 +3,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { Smartphone, CheckCircle, QrCode } from 'lucide-react';
+import { Smartphone, CheckCircle, GraduationCap } from 'lucide-react';
 import { useTranslation } from '@/i18n/useTranslation';
 
 export const AppDownloadSection: React.FC = () => {
@@ -53,7 +53,7 @@ export const AppDownloadSection: React.FC = () => {
               </div>
             </div>
 
-            {/* Store Button & QR */}
+            {/* Store Button */}
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-4">
               <a
                 href="https://play.google.com/store/search?q=apni+padhai&c=apps"
@@ -68,15 +68,15 @@ export const AppDownloadSection: React.FC = () => {
                 </div>
               </a>
 
-              <div className="flex items-center gap-3 p-3 bg-white/[0.06] rounded-2xl backdrop-blur-md border border-white/15">
-                <div className="p-2 bg-brand-400 text-navy-950 rounded-xl">
-                  <QrCode className="w-6 h-6" />
-                </div>
-                <div className="text-left text-xs">
-                  <p className="font-extrabold text-white">{t('Scan QR Code')}</p>
-                  <p className="text-[10px] font-semibold text-slate-400">{t('To Install Directly')}</p>
-                </div>
-              </div>
+              <a
+                href="https://apnipadhai.org/"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-3 px-7 py-4 bg-white/[0.06] border border-white/15 text-white rounded-2xl text-sm font-black backdrop-blur transition-all duration-300 hover:bg-white/[0.12] hover:border-brand-400/40 hover:-translate-y-0.5"
+              >
+                <GraduationCap className="w-6 h-6 text-brand-400" />
+                <span>{t('Browse Courses')}</span>
+              </a>
             </div>
           </div>
 
@@ -90,7 +90,7 @@ export const AppDownloadSection: React.FC = () => {
               className="relative w-72 sm:w-80 h-[500px] rounded-3xl overflow-hidden shadow-2xl border border-brand-400/30 bg-white/[0.03]"
             >
               <Image
-                src="/images/Frame 1165043252 (1).png"
+                src="/images/app_ui.png"
                 alt={t('Apni Padhai Mobile App Screens')}
                 fill
                 className="object-cover"

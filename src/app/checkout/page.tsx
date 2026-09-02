@@ -25,6 +25,7 @@ export default function CheckoutPage() {
     cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
     settings,
     couponCode,
+    cart.reduce((sum, item) => sum + item.quantity, 0),
   );
   const [formData, setFormData] = useState({ name: '', phone: '', email: '', address: '', city: '', pincode: '' });
   const [isProcessing, setIsProcessing] = useState(false);

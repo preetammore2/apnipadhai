@@ -8,6 +8,7 @@ import Image from 'next/image';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { setSelectedPdfBook } from '@/redux/features/ui/uiSlice';
 import { addToCart } from '@/redux/features/cart/cartSlice';
+import { isComboBook } from '@/lib/books';
 import { toast } from 'sonner';
 import { useTranslation } from '@/i18n/useTranslation';
 import { BOOK_HI } from '@/i18n/data';
@@ -103,6 +104,7 @@ export const SamplePdfModal: React.FC<SamplePdfModalProps> = ({
 
         {/* Action Buttons */}
         <div className="pt-2 flex flex-col sm:flex-row gap-3">
+          {!isComboBook(book) && (
           <button
             onClick={handleAddToCart}
             className="flex-1 py-3.5 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-yellow-400 hover:to-amber-500 text-navy-950 font-black text-xs rounded-xl shadow-button-glow transition-all flex items-center justify-center gap-2"
@@ -110,6 +112,7 @@ export const SamplePdfModal: React.FC<SamplePdfModalProps> = ({
             <ShoppingCart className="w-4 h-4" />
             <span>{t('Buy Printed Hardcopy (₹{0})', book.price)}</span>
           </button>
+          )}
           
           {book.samplePdfUrl && (
             <a

@@ -10,6 +10,7 @@ import { Star, ShoppingCart, ArrowRight, Truck, Loader2, RefreshCw, WifiOff, Sea
 import { useGetBooksQuery } from '@/redux/api/bookApi';
 import { useAppDispatch } from '@/redux/hooks';
 import { addToCart } from '@/redux/features/cart/cartSlice';
+import { isComboBook } from '@/lib/books';
 import { toast } from 'sonner';
 
 const BOOK_TABS = [
@@ -156,9 +157,9 @@ export const BooksSection: React.FC = () => {
           </div>
         ) : (
           <>
-          {/* Books Grid */}
-          <div className="flex gap-4 sm:gap-6 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide">
-            {filteredBooks.slice(0, 8).map((book) => {
+          {/* Books Grid — horizontal scroll on mobile/tablet, 4-in-row grid on large screens */}
+          <div className="flex gap-4 sm:gap-6 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide lg:grid lg:grid-cols-4 lg:overflow-visible lg:pb-0 lg:snap-none">
+            {filteredBooks.filter((book) => !isComboBook(book)).slice(0, 8).map((book) => {
               const hi = BOOK_HI[book.id];
               return (
               <motion.div
@@ -217,6 +218,7 @@ export const BooksSection: React.FC = () => {
                         <Truck className="w-3 h-3" /> {t('Doorstep Delivery')}
                       </span>
                     </div>
+                    {!isComboBook(book) && (
                     <button
                       onClick={() => {
                         dispatch(addToCart({ item: book, type: 'book' }));
@@ -227,6 +229,7 @@ export const BooksSection: React.FC = () => {
                     >
                       <ShoppingCart className="w-4 h-4" />
                     </button>
+                    )}
                   </div>
                 </div>
               </motion.div>

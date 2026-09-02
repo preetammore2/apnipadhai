@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { addToCart } from '@/redux/features/cart/cartSlice';
+import { isComboBook } from '@/lib/books';
 import { toggleWishlist } from '@/redux/features/wishlist/wishlistSlice';
 import { Heart, ShoppingCart, Trash2, ArrowRight, BookOpen, ArrowLeft, Loader2 } from 'lucide-react';
 import type { Book } from '@/types';
@@ -136,6 +137,7 @@ export default function WishlistPage() {
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
+                      {!isComboBook(book) && (
                       <button
                         onClick={() => handleAddToCart(book)}
                         className="p-2.5 bg-yellow-400 hover:bg-yellow-500 text-navy-950 rounded-xl transition-colors"
@@ -143,6 +145,7 @@ export default function WishlistPage() {
                       >
                         <ShoppingCart className="w-4 h-4" />
                       </button>
+                      )}
                       <Link
                         href={`/books/${book.id}`}
                         className="p-2.5 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-xl transition-colors"

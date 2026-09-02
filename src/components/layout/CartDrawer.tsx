@@ -23,7 +23,8 @@ export const CartDrawer: React.FC = () => {
   const settings = useStoreSettings();
 
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const totals = computeCartTotals(subtotal, settings, couponCode);
+  const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
+  const totals = computeCartTotals(subtotal, settings, couponCode, totalQuantity);
 
   return (
     <AnimatePresence>

@@ -117,7 +117,11 @@ export async function POST(request: NextRequest) {
       },
       0,
     );
-    const totals = computeCartTotals(subtotal, settings, couponCode);
+    const totalQuantity = items.reduce(
+      (sum: number, item: { productId: number; quantity: number }) => sum + item.quantity,
+      0,
+    );
+    const totals = computeCartTotals(subtotal, settings, couponCode, totalQuantity);
 
     const config = getPhonePeConfig();
     const merchantTransactionId = generateMerchantTransactionId();
