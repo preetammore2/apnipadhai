@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { BookOpen, PlayCircle, FileCheck2, Clock, Users, ArrowRight, ExternalLink, Loader2 } from 'lucide-react';
+import { BookOpen, PlayCircle, FileCheck2, Clock, Users, ArrowRight, ExternalLink, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslation } from '@/i18n/useTranslation';
 
 interface Course {
@@ -56,27 +56,76 @@ export const CoursesSection: React.FC = () => {
   const { t } = useTranslation();
   const [courses, setCourses] = useState<Course[]>(COURSES);
   const [loading, setLoading] = useState(true);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const autoScrollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+
+  const SCROLL_AMOUNT = 420;
+
+  const updateScrollButtons = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 2);
+    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 2);
+  }, []);
+
+  const scroll = useCallback((direction: 'left' | 'right') => {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollBy({ left: direction === 'left' ? -SCROLL_AMOUNT : SCROLL_AMOUNT, behavior: 'smooth' });
+  }, []);
+
+  const startAutoScroll = useCallback(() => {
+    stopAutoScroll();
+    autoScrollRef.current = setInterval(() => {
+      const el = scrollRef.current;
+      if (!el) return;
+      if (el.scrollLeft >= el.scrollWidth - el.clientWidth - 2) {
+        el.scrollTo({ left: 0, behavior: 'smooth' });
+      } else {
+        el.scrollBy({ left: 200, behavior: 'smooth' });
+      }
+    }, 2500);
+  }, []);
+
+  function stopAutoScroll() {
+    if (autoScrollRef.current) {
+      clearInterval(autoScrollRef.current);
+      autoScrollRef.current = null;
+    }
+  }
 
   useEffect(() => {
     let cancelled = false;
     async function load() {
       try {
-        const res = await fetch('/api/courses?per_page=50');
-        const data = await res.json();
-        if (!cancelled && data.courses?.length > 0) {
-          setCourses(
-            data.courses.map((c: Record<string, unknown>) => ({
-              id: c.id as string,
-              title: (c.title as string) ?? '',
-              tagline: (c.tagline as string) ?? '',
-              description: (c.description as string) ?? '',
-              image: (c.image as string) ?? '',
-              url: (c.url as string) ?? '',
-              type: (c.type as string) || 'Online Batch',
-              features: Array.isArray(c.features) ? (c.features as string[]) : [],
-              tag: (c.tag as string) ?? '',
-            }))
-          );
+        let allCourses: Course[] = [];
+        let page = 1;
+        let totalPages = 1;
+        while (page <= totalPages && !cancelled) {
+          const res = await fetch(`/api/courses?per_page=50&page=${page}`);
+          const data = await res.json();
+          if (data.courses?.length > 0) {
+            allCourses = allCourses.concat(
+              data.courses.map((c: Record<string, unknown>) => ({
+                id: c.id as string,
+                title: (c.title as string) ?? '',
+                tagline: (c.tagline as string) ?? '',
+                description: (c.description as string) ?? '',
+                image: (c.image as string) ?? '',
+                url: (c.url as string) ?? '',
+                type: (c.type as string) || 'Online Batch',
+                features: Array.isArray(c.features) ? (c.features as string[]) : [],
+                tag: (c.tag as string) ?? '',
+              }))
+            );
+          }
+          totalPages = data.totalPages ?? 1;
+          page++;
+        }
+        if (!cancelled && allCourses.length > 0) {
+          setCourses(allCourses);
         }
       } catch {
         // keep fallback
@@ -87,6 +136,23 @@ export const CoursesSection: React.FC = () => {
     load();
     return () => { cancelled = true; };
   }, []);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    updateScrollButtons();
+    el.addEventListener('scroll', updateScrollButtons, { passive: true });
+    window.addEventListener('resize', updateScrollButtons);
+    return () => {
+      el.removeEventListener('scroll', updateScrollButtons);
+      window.removeEventListener('resize', updateScrollButtons);
+    };
+  }, [courses, updateScrollButtons]);
+
+  useEffect(() => {
+    startAutoScroll();
+    return () => stopAutoScroll();
+  }, [startAutoScroll]);
 
   return (
     <section id="courses" className="py-20 bg-gradient-to-b from-white via-amber-50/40 to-white relative overflow-hidden">
@@ -105,22 +171,31 @@ export const CoursesSection: React.FC = () => {
           </p>
         </div>
 
-        {/* Online Courses — Infinite Loop Scroller */}
-        <style>{`
-          @keyframes marquee {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-          }
-          .marquee-track {
-            display: flex;
-            width: max-content;
-            animation: marquee 30s linear infinite;
-          }
-          .marquee-track:hover {
-            animation-play-state: paused;
-          }
-        `}</style>
-        <div className="overflow-hidden -mx-4 sm:-mx-6 lg:-mx-8">
+        {/* Online Courses — Scrollable with Left/Right Controls */}
+        <div className="relative group/scroll">
+          {/* Left Arrow */}
+          {canScrollLeft && (
+            <button
+              onClick={() => { scroll('left'); stopAutoScroll(); }}
+              className="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white/90 hover:bg-white border border-slate-200 shadow-lg rounded-full flex items-center justify-center transition-all hover:scale-110 opacity-0 group-hover/scroll:opacity-100"
+            >
+              <ChevronLeft className="w-5 h-5 text-navy-900" />
+            </button>
+          )}
+          {/* Right Arrow */}
+          {canScrollRight && (
+            <button
+              onClick={() => { scroll('right'); stopAutoScroll(); }}
+              className="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white/90 hover:bg-white border border-slate-200 shadow-lg rounded-full flex items-center justify-center transition-all hover:scale-110 opacity-0 group-hover/scroll:opacity-100"
+            >
+              <ChevronRight className="w-5 h-5 text-navy-900" />
+            </button>
+          )}
+          {/* Fade edges */}
+          {canScrollLeft && <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />}
+          {canScrollRight && <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />}
+
+          <div className="overflow-hidden -mx-4 sm:-mx-6 lg:-mx-8">
           {loading ? (
             <div className="flex gap-6 px-3">
               {[...Array(4)].map((_, i) => (
@@ -135,8 +210,12 @@ export const CoursesSection: React.FC = () => {
               ))}
             </div>
           ) : (
-            <div className="marquee-track gap-6 px-3">
-              {[...courses, ...courses].map((course, idx) => (
+            <div
+              ref={scrollRef}
+              className="flex gap-6 px-3 overflow-x-auto scroll-smooth scrollbar-hide"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              {courses.map((course, idx) => (
               <div
                 key={`${course.id}-${idx}`}
                 className="w-[340px] sm:w-[400px] shrink-0 bg-white rounded-3xl border-2 border-slate-100 hover:border-amber-300 shadow-card hover:shadow-card-hover transition-all overflow-hidden flex flex-col group"
@@ -210,6 +289,7 @@ export const CoursesSection: React.FC = () => {
             ))}
             </div>
           )}
+        </div>
         </div>
 
         {/* Test Series Strip */}
