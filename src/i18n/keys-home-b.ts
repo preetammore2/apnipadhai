@@ -81,6 +81,8 @@ export const KEYS_HOME_B: Record<string, string> = {
   'Latest Upload': 'नवीनतम अपलोड',
   'Watch on YouTube': 'YouTube पर देखें',
   'More Videos': 'और वीडियो',
+  'View More': 'और देखें',
+  'Show Less': 'कम दिखाएं',
 
   // ---- Books Category Tabs ----
   'On Apni Padhai Books': 'अपनी पढ़ाई की किताबें',

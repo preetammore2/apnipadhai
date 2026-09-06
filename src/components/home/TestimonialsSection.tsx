@@ -1,20 +1,92 @@
 'use client';
 
-import React from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { TESTIMONIALS_DATA } from '@/data/testimonials';
 import { TESTIMONIAL_HI } from '@/i18n/data';
 import { useTranslation } from '@/i18n/useTranslation';
 import { useSiteContent } from '@/lib/use-site-content';
-import { Star, Quote, Heart } from 'lucide-react';
+import { Star, Quote, Heart, ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 
 export const TestimonialsSection: React.FC = () => {
   const { t, language } = useTranslation();
   const content = useSiteContent();
   const items = content?.testimonials?.length ? content.testimonials : TESTIMONIALS_DATA;
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const autoScrollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+
+  const SCROLL_AMOUNT = 380;
+
+  const updateScrollButtons = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 2);
+    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 2);
+  }, []);
+
+  function stopAutoScroll() {
+    if (autoScrollRef.current) {
+      clearInterval(autoScrollRef.current);
+      autoScrollRef.current = null;
+    }
+    if (resumeTimerRef.current) {
+      clearTimeout(resumeTimerRef.current);
+      resumeTimerRef.current = null;
+    }
+  }
+
+  const startAutoScroll = useCallback(() => {
+    stopAutoScroll();
+    autoScrollRef.current = setInterval(() => {
+      const el = scrollRef.current;
+      if (!el) return;
+      if (el.scrollLeft >= el.scrollWidth - el.clientWidth - 2) {
+        el.scrollTo({ left: 0, behavior: 'smooth' });
+      } else {
+        el.scrollBy({ left: 200, behavior: 'smooth' });
+      }
+    }, 2500);
+  }, []);
+
+  const pauseAndResume = useCallback(() => {
+    if (autoScrollRef.current) {
+      clearInterval(autoScrollRef.current);
+      autoScrollRef.current = null;
+    }
+    if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
+    resumeTimerRef.current = setTimeout(() => startAutoScroll(), 5000);
+  }, [startAutoScroll]);
+
+  const scroll = useCallback((direction: 'left' | 'right') => {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollBy({ left: direction === 'left' ? -SCROLL_AMOUNT : SCROLL_AMOUNT, behavior: 'smooth' });
+    pauseAndResume();
+  }, [pauseAndResume]);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    updateScrollButtons();
+    el.addEventListener('scroll', updateScrollButtons, { passive: true });
+    window.addEventListener('resize', updateScrollButtons);
+    return () => {
+      el.removeEventListener('scroll', updateScrollButtons);
+      window.removeEventListener('resize', updateScrollButtons);
+    };
+  }, [items, updateScrollButtons]);
+
+  useEffect(() => {
+    startAutoScroll();
+    return () => stopAutoScroll();
+  }, [startAutoScroll]);
+
   return (
-    <section className="py-20 bg-white relative overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
+    <section className="py-12 bg-white relative overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
         <div className="text-center max-w-2xl mx-auto">
           <span className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-600 uppercase tracking-widest bg-brand-50 px-3.5 py-1.5 rounded-full">
             {t('STUDENTS')} <Heart className="w-3.5 h-3.5 fill-brand-500 text-brand-500" /> APNI PADHAI
@@ -28,12 +100,38 @@ export const TestimonialsSection: React.FC = () => {
         </div>
       </div>
 
-      {/* Infinite Scrolling Marquee */}
-      <div className="relative w-full overflow-hidden flex">
-        <div className="flex gap-6 animate-marquee whitespace-normal hover:[animation-play-state:paused]">
-          {[...items, ...items].map((item, idx) => (
+      {/* Scrollable Testimonials with Left/Right Controls */}
+      <div className="relative group/scroll">
+        {/* Left Arrow */}
+        {canScrollLeft && (
+          <button
+            onClick={() => { scroll('left'); }}
+            className="absolute left-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white/90 hover:bg-white border border-slate-200 shadow-lg rounded-full flex items-center justify-center transition-all hover:scale-110"
+          >
+            <ChevronLeft className="w-5 h-5 text-navy-900" />
+          </button>
+        )}
+        {/* Right Arrow */}
+        {canScrollRight && (
+          <button
+            onClick={() => { scroll('right'); }}
+            className="absolute right-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white/90 hover:bg-white border border-slate-200 shadow-lg rounded-full flex items-center justify-center transition-all hover:scale-110"
+          >
+            <ChevronRight className="w-5 h-5 text-navy-900" />
+          </button>
+        )}
+        {/* Fade edges */}
+        {canScrollLeft && <div className="absolute left-0 top-0 bottom-0 w-14 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />}
+        {canScrollRight && <div className="absolute right-0 top-0 bottom-0 w-14 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />}
+
+        <div
+          ref={scrollRef}
+          className="flex gap-6 overflow-x-auto scroll-smooth px-4 sm:px-6 lg:px-8"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {items.map((item) => (
             <div
-              key={`${item.id}-${idx}`}
+              key={item.id}
               className="w-80 sm:w-96 shrink-0 bg-slate-50 border border-slate-200/80 p-6 rounded-3xl shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
             >
               <div>

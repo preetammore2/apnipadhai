@@ -60,7 +60,7 @@ export const FAQ_DATA: FaqItem[] = [
     category: 'Courses & Test Series',
     question: 'How can I get my doubts cleared?',
     answer:
-      'Every batch includes live doubt sessions with faculty. You can also reach the helpline at +91 7568716768 or request a free callback from the navbar, and our counselors will connect with you.',
+      'Every batch includes live doubt sessions with faculty. You can also reach the helpline at +91 7568716768, and our support team will connect with you.',
   },
   {
     id: 'payment-methods',

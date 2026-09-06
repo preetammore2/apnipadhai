@@ -9,7 +9,7 @@ import { useTranslation } from '@/i18n/useTranslation';
 export const AppDownloadSection: React.FC = () => {
   const { t } = useTranslation();
   return (
-    <section className="py-24 bg-hero-dark text-white relative overflow-hidden border-t border-white/5">
+    <section className="py-12 bg-hero-dark text-white relative overflow-hidden border-t border-white/5">
       {/* Subtle Light Grid Overlay */}
       <div className="absolute inset-0 bg-grid-light pointer-events-none" />
 

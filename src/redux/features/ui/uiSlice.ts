@@ -4,7 +4,6 @@ import { Book } from '@/types';
 export type Language = 'en' | 'hi';
 
 interface UIState {
-  isCounselorModalOpen: boolean;
   selectedPdfBook: Book | null;
   isSearchOpen: boolean;
   searchQuery: string;
@@ -12,7 +11,6 @@ interface UIState {
 }
 
 const initialState: UIState = {
-  isCounselorModalOpen: false,
   selectedPdfBook: null,
   isSearchOpen: false,
   searchQuery: '',
@@ -23,9 +21,6 @@ export const uiSlice = createSlice({
   name: 'ui',
   initialState,
   reducers: {
-    setCounselorModalOpen: (state, action: PayloadAction<boolean>) => {
-      state.isCounselorModalOpen = action.payload;
-    },
     setSelectedPdfBook: (state, action: PayloadAction<Book | null>) => {
       state.selectedPdfBook = action.payload;
     },
@@ -42,7 +37,6 @@ export const uiSlice = createSlice({
 });
 
 export const {
-  setCounselorModalOpen,
   setSelectedPdfBook,
   setSearchOpen,
   setSearchQuery,

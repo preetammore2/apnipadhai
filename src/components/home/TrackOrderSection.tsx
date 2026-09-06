@@ -86,7 +86,7 @@ export const TrackOrderSection: React.FC = () => {
     : -1;
 
   return (
-    <section className="py-20 bg-gradient-to-b from-white via-amber-50/40 to-white relative overflow-hidden">
+    <section className="py-12 bg-gradient-to-b from-white via-amber-50/40 to-white relative overflow-hidden">
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-yellow-200/20 rounded-full blur-3xl pointer-events-none" />
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Header */}

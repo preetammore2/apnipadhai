@@ -40,7 +40,7 @@ export const NewsletterSection: React.FC = () => {
   };
 
   return (
-    <section className="relative overflow-hidden bg-navy-950 py-20">
+    <section className="relative overflow-hidden bg-navy-950 py-12">
       {/* Decorative blobs */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-yellow-400/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -118,7 +118,7 @@ export const NewsletterSection: React.FC = () => {
         </motion.div>
 
         {/* Perks */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-12">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
           {PERKS.map((perk) => {
             const Icon = perk.icon;
             return (

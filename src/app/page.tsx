@@ -1,35 +1,26 @@
 'use client';
 
-import React, { useState } from 'react';
 import { HeroSection } from '@/components/home/HeroSection';
-import { TrustSection } from '@/components/home/TrustSection';
 import { BooksSection } from '@/components/home/BooksSection';
 import { FounderSpotlight } from '@/components/home/FounderSpotlight';
 import { PyqQuickSection } from '@/components/home/PyqQuickSection';
 import { TestimonialsSection } from '@/components/home/TestimonialsSection';
 import { AppDownloadSection } from '@/components/home/AppDownloadSection';
-import { CommunitySection } from '@/components/home/CommunitySection';
 import { YouTubeSection } from '@/components/home/YouTubeSection';
 import { CoursesSection } from '@/components/home/CoursesSection';
-import { UpdatesSection } from '@/components/home/UpdatesSection';
 import { FaqSection } from '@/components/home/FaqSection';
 import { BookDealsSection } from '@/components/home/BookDealsSection';
-import { CounselorModal } from '@/components/layout/CounselorModal';
-import { ArrowRight, Phone, Download, Sparkles } from 'lucide-react';
+import { ArrowRight, Download, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslation } from '@/i18n/useTranslation';
 
 export default function HomePage() {
-  const [isCounselorOpen, setIsCounselorOpen] = useState(false);
   const { t } = useTranslation();
 
   return (
     <div className="space-y-0">
       {/* 1. Hero Section */}
-      <HeroSection onOpenCounselorModal={() => setIsCounselorOpen(true)} />
-
-      {/* 2. Trust Numbers Section */}
-      <TrustSection />
+      <HeroSection />
 
       {/* 3. Brahmastra Books Store */}
       <BooksSection />
@@ -49,23 +40,17 @@ export default function HomePage() {
       {/* 10. Founder's Vision (Rohit Sir) */}
       <FounderSpotlight />
 
-      {/* 11. Community Section (600K+ YouTube Subscribers & 200K+ Telegram Followers) */}
-      <CommunitySection />
-
       {/* 12. App Download Banner */}
       <AppDownloadSection />
 
       {/* 13. Courses / Test Series (from WordPress) */}
       <CoursesSection />
 
-      {/* 14. Blog & Updates (from WordPress) */}
-      <UpdatesSection />
-
       {/* 14b. FAQs (from WordPress FAQ page) */}
       <FaqSection />
 
       {/* 12. Final CTA Banner */}
-      <section className="py-20 bg-navy-950 text-white text-center relative overflow-hidden border-t border-amber-500/20">
+      <section className="py-12 bg-navy-950 text-white text-center relative overflow-hidden border-t border-amber-500/20">
         <div className="absolute top-0 right-0 w-96 h-96 bg-yellow-400/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
 
@@ -100,20 +85,9 @@ export default function HomePage() {
               <Download className="w-4 h-4 text-yellow-400" />
               <span>{t('Install App')}</span>
             </a>
-
-            <button
-              onClick={() => setIsCounselorOpen(true)}
-              className="px-8 py-4 bg-navy-900 hover:bg-black text-slate-200 font-bold text-sm sm:text-base rounded-2xl border border-slate-700 transition-all flex items-center gap-2"
-            >
-              <Phone className="w-4 h-4 text-amber-400" />
-              <span>{t('Talk to Counselor')}</span>
-            </button>
           </div>
         </div>
       </section>
-
-      {/* Counselor Modal */}
-      <CounselorModal isOpen={isCounselorOpen} onClose={() => setIsCounselorOpen(false)} />
     </div>
   );
 }

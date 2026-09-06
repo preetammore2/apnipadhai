@@ -22,7 +22,6 @@ import {
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { setCartOpen } from '@/redux/features/cart/cartSlice';
 import {
-  setCounselorModalOpen,
   setSearchOpen,
   setSearchQuery,
 } from '@/redux/features/ui/uiSlice';
@@ -31,11 +30,7 @@ import { LanguageSwitcher } from './LanguageSwitcher';
 import { BOOK_HI } from '@/i18n/data';
 import { useGetBooksQuery } from '@/redux/api/bookApi';
 
-interface NavbarProps {
-  onOpenCounselorModal?: () => void;
-}
-
-export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
+export const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -63,11 +58,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
   const closeSearch = () => {
     dispatch(setSearchOpen(false));
     dispatch(setSearchQuery(''));
-  };
-
-  const handleCounselorModal = () => {
-    dispatch(setCounselorModalOpen(true));
-    if (onOpenCounselorModal) onOpenCounselorModal();
   };
 
   useEffect(() => {
@@ -133,14 +123,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenCounselorModal }) => {
           </div>
           <div className="flex items-center gap-4 text-slate-300 text-[11px]">
             <span>{t('Helpline:')} <strong className="text-yellow-400 font-bold">+91 7568716768</strong></span>
-            <span>•</span>
-            <button
-              onClick={handleCounselorModal}
-              className="text-yellow-300 hover:text-white font-bold underline flex items-center gap-1 transition-colors"
-            >
-              <Phone className="w-3 h-3 text-yellow-400" />
-              {t('Request Free Callback')}
-            </button>
           </div>
         </div>
       </div>

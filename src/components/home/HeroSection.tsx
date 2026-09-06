@@ -1,48 +1,128 @@
 ﻿'use client';
 
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import Image from 'next/image';
 import Link from 'next/link';
-import {
-  Download,
-  BookOpen,
-  CheckCircle2,
-  ArrowRight,
-} from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { useGetBooksQuery } from '@/redux/api/bookApi';
 import { useTranslation } from '@/i18n/useTranslation';
-import { useSiteContent } from '@/lib/use-site-content';
+import { isComboBook } from '@/lib/books';
+import type { Book } from '@/types';
 
-interface HeroSectionProps {
-  onOpenCounselorModal?: () => void;
-}
+const BOOK_INTERVAL = 900;
 
-export const HeroSection: React.FC<HeroSectionProps> = () => {
+const bookVariants = {
+  enter: (dir: number) => ({
+    opacity: 0,
+    scale: 0.82,
+    y: 64,
+    rotateY: dir > 0 ? -55 : 55,
+    filter: 'blur(8px)',
+    transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] as const },
+  }),
+  center: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    rotateY: 0,
+    filter: 'blur(0px)',
+    transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] as const },
+  },
+  exit: (dir: number) => ({
+    opacity: 0,
+    scale: 0.8,
+    y: -76,
+    rotateY: dir > 0 ? 45 : -45,
+    filter: 'blur(8px)',
+    transition: { duration: 0.45, ease: [0.55, 0, 0.55, 0.2] as const },
+  }),
+};
+
+export const HeroSection: React.FC = () => {
   const { t } = useTranslation();
-  const { hero } = useSiteContent() ?? {};
+  const { data: books = [], isLoading, isError } = useGetBooksQuery();
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.12,
-        delayChildren: 0.1,
-      },
-    },
+  const heroRef = useRef<HTMLElement>(null);
+
+  const [activeIdx, setActiveIdx] = useState(0);
+  const [dir, setDir] = useState(1);
+  const [paused, setPaused] = useState(false);
+  const [inView, setInView] = useState(false);
+  const [reduced, setReduced] = useState(false);
+  const [compact, setCompact] = useState(false);
+
+  const visibleBooks = useMemo(
+    () => books.filter((b) => b.inStock && !isComboBook(b)),
+    [books],
+  );
+
+  useEffect(() => {
+    const handleResize = () => setCompact(window.innerWidth < 1024);
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setReduced(mq.matches);
+    const onChange = () => setReduced(mq.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+
+  useEffect(() => {
+    const heroEl = heroRef.current;
+    if (!heroEl) return;
+    const io = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), {
+      threshold: 0.05,
+    });
+    io.observe(heroEl);
+    return () => io.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const handleVisibility = () => setPaused(document.hidden);
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, []);
+
+  useEffect(() => {
+    setActiveIdx((i) => Math.min(i, Math.max(0, visibleBooks.length - 1)));
+  }, [visibleBooks.length]);
+
+  useEffect(() => {
+    if (reduced || paused || !inView || visibleBooks.length <= 1) return;
+    const id = window.setTimeout(() => {
+      setDir(1);
+      setActiveIdx((i) => (i + 1) % visibleBooks.length);
+    }, BOOK_INTERVAL);
+    return () => window.clearTimeout(id);
+  }, [activeIdx, reduced, paused, inView, visibleBooks.length]);
+
+  const go = (nextRaw: number, direction: number) => {
+    if (visibleBooks.length === 0) return;
+    setDir(direction);
+    setActiveIdx(((nextRaw % visibleBooks.length) + visibleBooks.length) % visibleBooks.length);
   };
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { type: 'spring' as const, stiffness: 260, damping: 22 },
-    },
-  };
+  const active: Book | undefined = visibleBooks[activeIdx];
+  const total = visibleBooks.length;
 
   return (
-    <section className="relative min-h-[85vh] bg-hero-dark overflow-hidden flex items-center pt-8 sm:pt-12 pb-16 sm:pb-24">
-      {/* Background Video */}
+    <section
+      ref={heroRef}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      className="relative min-h-[100svh] overflow-hidden flex items-center justify-center pt-20 pb-10"
+    >
+      {/* sr-only headline for SEO / assistive tech */}
+      <h1 className="sr-only">
+        Learn with Expert Educators & Crack Your Dream Exam — Apni Padhai Publication
+      </h1>
+
+      {/* ---------------- BACKGROUND ---------------- */}
       <video
         className="absolute inset-0 w-full h-full object-cover pointer-events-none"
         src="/images/hero-bg.mp4"
@@ -51,124 +131,119 @@ export const HeroSection: React.FC<HeroSectionProps> = () => {
         loop
         playsInline
       />
-
-      {/* Dark Overlay for readability */}
       <div className="absolute inset-0 bg-slate-950/70 pointer-events-none" />
-
-      {/* Subtle Light Grid Overlay */}
       <div className="absolute inset-0 bg-grid-light pointer-events-none" />
 
-      {/* Soft Gold Glow Accents */}
-      <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[640px] h-[400px] bg-brand-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 right-0 w-[420px] h-[420px] bg-amber-500/[0.06] rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(74vw,740px)] aspect-square rounded-full bg-[radial-gradient(circle,rgba(245,158,11,0.2),rgba(245,158,11,0.05)_52%,transparent_74%)] blur-2xl pointer-events-none" />
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full text-center">
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="space-y-6 sm:space-y-8"
-        >
-          {/* Top Pill Badge */}
-          {/* <motion.div variants={itemVariants} className="inline-block">
-            <div className="inline-flex items-center gap-2.5 px-4 sm:px-5 py-1.5 sm:py-2 bg-white/[0.04] backdrop-blur-md border border-brand-400/30 rounded-full text-[11px] sm:text-xs font-semibold uppercase tracking-[0.18em] text-brand-300 mx-auto max-w-full">
-              <span className="flex h-1.5 w-1.5 relative shrink-0">
-                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-brand-400" />
-              </span>
-              <Sparkles className="w-3.5 h-3.5 text-brand-400 shrink-0" />
-            </div>
-          </motion.div> */}
-
-          {/* Main Headline */}
-          <motion.h1
-            variants={itemVariants}
-            className="text-3xl sm:text-5xl lg:text-6xl font-black font-heading text-white leading-[1.15] tracking-tight max-w-4xl mx-auto px-2"
-          >
-            {hero ? (
-              (() => {
-                const highlight = (hero.highlight ?? '').trim();
-                if (!highlight) return hero.title;
-                const idx = hero.title
-                  .toLowerCase()
-                  .indexOf(highlight.toLowerCase());
-                if (idx === -1) return hero.title;
-                const before = hero.title.slice(0, idx).replace(/\s+$/, '');
-                const after = hero.title.slice(idx + highlight.length).replace(/^\s+/, '');
-                return (
-                  <>
-                    {before && <>{before} </>}
-                    <span className="text-gradient-gold">
-                      {hero.title.slice(idx, idx + highlight.length)}
-                    </span>
-                    {after && <> {after}</>}
-                  </>
-                );
-              })()
-            ) : (
-              <>
-                {t('Learn with Expert Educators & Crack Your')}{' '}
-                <span className="text-gradient-gold">{t('Dream Exam')}</span>
-              </>
-            )}
-          </motion.h1>
-
-          {/* Subtitle */}
-          <motion.p
-            variants={itemVariants}
-            className="text-sm sm:text-lg text-slate-300 leading-relaxed max-w-3xl mx-auto font-medium px-2"
-          >
-            {hero?.subtitle ? (
-              hero.subtitle
-            ) : (
-              <>
-                {t('Comprehensive online live coaching for Rajasthan CET 2026, Sub Inspector (SI), RAS, SSC GD & State Exams. Access bestselling')}{' '}
-                <strong className="text-white font-bold">{t('Brahmastra Study Books')}</strong>
-                {t('.')}
-              </>
-            )}
-          </motion.p>
-
-          {/* CTAs */}
-          <motion.div
-            variants={itemVariants}
-            className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4 pt-2 max-w-md sm:max-w-none mx-auto"
-          >
+      {/* ---------------- STAGE ---------------- */}
+      <div className="relative z-10 w-full max-w-[1300px] px-4 sm:px-8 mx-auto flex flex-col items-center">
+        {isLoading ? (
+          <div className="flex flex-col items-center gap-4 py-28">
+            <Loader2 className="w-10 h-10 text-amber-400 animate-spin" />
+            <p className="text-[11px] uppercase tracking-[0.25em] text-slate-400 font-bold">
+              {t('Loading Publication Store')}…
+            </p>
+          </div>
+        ) : isError ? (
+          <div className="flex flex-col items-center gap-5 py-28 text-center">
+            <p className="text-sm text-slate-300 font-medium max-w-md">
+              {t("We're having trouble loading the latest books. Browse the store directly.")}
+            </p>
             <Link
               href="/books"
-              className="group inline-flex items-center justify-center gap-2.5 px-7 sm:px-8 py-3.5 sm:py-4 bg-gradient-to-b from-brand-400 to-brand-600 text-navy-950 font-bold text-sm sm:text-base rounded-xl shadow-[0_8px_30px_-6px_rgba(234,179,8,0.55)] transition-all duration-300 hover:shadow-[0_14px_40px_-6px_rgba(234,179,8,0.7)] hover:-translate-y-0.5 active:scale-[0.97]"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-500/90 hover:bg-amber-400 text-navy-950 text-xs font-black rounded-xl transition-all"
             >
-              <BookOpen className="w-5 h-5" />
-              <span>{t('Explore Books')}</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              {t('Browse All Books')} <ArrowRight className="w-4 h-4" />
             </Link>
-
-            <a
-              href="https://play.google.com/store/search?q=apni+padhai&c=apps"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center justify-center gap-2.5 px-7 sm:px-8 py-3.5 sm:py-4 bg-white/[0.06] backdrop-blur border border-white/15 text-white text-sm sm:text-base font-semibold rounded-xl transition-all duration-300 hover:bg-white/[0.12] hover:border-white/25 hover:-translate-y-0.5 active:scale-[0.97]"
+          </div>
+        ) : total === 0 ? (
+          <div className="flex flex-col items-center gap-5 py-28 text-center">
+            <p className="text-sm text-slate-300 font-medium">{t('No books available right now.')}</p>
+            <Link
+              href="/books"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-500/90 hover:bg-amber-400 text-navy-950 text-xs font-black rounded-xl transition-all"
             >
-              <Download className="w-5 h-5 text-brand-400" />
-              <span>{t('Download App')}</span>
-            </a>
-          </motion.div>
+              {t('Browse All Books')} <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        ) : (
+          <>
+            {/* Featured book stage */}
+            <div
+              className="w-full max-w-[900px] h-[min(46vh,440px)] sm:h-[min(52vh,500px)] flex items-center justify-center"
+              style={{ perspective: 1300 }}
+              role="region"
+              aria-roledescription="carousel"
+              aria-label={t('Apni Padhai books — featured one by one')}
+            >
+              <div className="relative w-full h-full">
+                {/* Ground shadow */}
+                <div className="absolute left-1/2 bottom-[6%] w-[46%] h-[8%] -translate-x-1/2 rounded-[50%] bg-[radial-gradient(ellipse,rgba(0,0,0,0.55),transparent_70%)] blur-md pointer-events-none" />
 
-          {/* Feature Checkmarks */}
-          <motion.div
-            variants={itemVariants}
-            className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs sm:text-sm font-medium text-slate-300 pt-2"
-          >
-            <span className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" /> {t('100% Updated Exam Syllabus')}
-            </span>
-            <span className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" /> {t('Printed Books Doorstep Delivery')}
-            </span>
-            <span className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" /> {t('Live Teacher Doubts Support')}
-            </span>
-          </motion.div>
-        </motion.div>
+                <button
+                  onClick={() => go(activeIdx - 1, -1)}
+                  aria-label={t('Previous book')}
+                  className="absolute left-0 top-1/2 -translate-y-1/2 z-40 p-3 rounded-full bg-white/10 backdrop-blur border border-white/15 text-white shadow-lg hover:bg-white/20 active:scale-95 transition-all"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => go(activeIdx + 1, 1)}
+                  aria-label={t('Next book')}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 z-40 p-3 rounded-full bg-white/10 backdrop-blur border border-white/15 text-white shadow-lg hover:bg-white/20 active:scale-95 transition-all"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+
+                {/* Featured book (one by one) */}
+                <AnimatePresence initial={false} custom={dir}>
+                  <motion.div
+                    key={active.id}
+                    custom={dir}
+                    variants={bookVariants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-30 will-change-transform"
+                  >
+                    <Link href={`/books/${active.id}`} className="group block" aria-label={active.title}>
+                      <div
+                        className="relative rounded-xl overflow-hidden bg-slate-100 ring-1 ring-white/25 shadow-[0_30px_70px_-18px_rgba(0,0,0,0.75)]"
+                        style={{
+                          width: compact ? 'min(58vw,260px)' : 'clamp(240px, 26vw, 340px)',
+                          aspectRatio: '3 / 4',
+                        }}
+                      >
+                        {active.coverImage ? (
+                          <Image
+                            src={active.coverImage}
+                            alt={active.title}
+                            fill
+                            sizes="400px"
+                            className="object-contain p-2 group-hover:scale-[1.05] transition-transform duration-500"
+                          />
+                        ) : (
+                          <span className="absolute inset-0 flex items-center justify-center text-sm text-slate-500 text-center px-4 font-bold leading-snug">
+                            {active.title}
+                          </span>
+                        )}
+                        <div className="absolute inset-0 ring-1 ring-inset ring-black/10 rounded-xl pointer-events-none" />
+                      </div>
+
+                      {/* Hover overlay */}
+                      <span
+                        className={`absolute inset-x-0 bottom-4 mx-auto w-max px-4 py-2 rounded-full bg-amber-500/95 text-[10px] font-black text-navy-950 shadow-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap inline-flex items-center gap-1.5`}
+                      >
+                        <ArrowRight className="w-3.5 h-3.5" /> {t('VIEW BOOK')}
+                      </span>
+                    </Link>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </section>
   );

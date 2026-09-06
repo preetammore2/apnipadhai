@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { BookOpen, PlayCircle, FileCheck2, Clock, Users, ArrowRight, ExternalLink, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { BookOpen, PlayCircle, ArrowRight, ExternalLink, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslation } from '@/i18n/useTranslation';
 
 interface Course {
@@ -18,43 +18,9 @@ interface Course {
   tag: string;
 }
 
-const COURSES: Course[] = [
-  {
-    id: 'rajasthan-gk-batch',
-    title: 'Rajasthan GK - Complete Online Batch 2.0',
-    tagline: 'Rajasthan GK / History / Art & Culture / Geography',
-    description:
-      'Complete online course covering the entire Rajasthan GK syllabus with live & recorded lectures, PDF notes, and topic-wise PYQs for RAS, SI, CET and other Rajasthan exams.',
-    image: 'https://appx-content-v2.classx.co.in/paid_course3/2025-08-01-0.9018244069855648.png',
-    url: 'https://apnipadhai.org/new-courses/41-rajasthan-gk-complete-online-batch-20',
-    type: 'online batch',
-    features: ['Live Interactive Classes', 'PDF Notes', 'Topic-wise PYQs', 'Test Series'],
-    tag: 'BEST SELLER',
-  },
-  {
-    id: 'ssc-gd-foundation',
-    title: 'SSC GD - Foundation Complete Online Course',
-    tagline: 'SSC GD 2026 / Constable / Capf Exams',
-    description:
-      'Foundation batch covering the full SSC GD syllabus - maths, reasoning, Hindi & English with daily practice sets and full-length mock tests designed by expert faculty.',
-    image: 'https://appx-content-v2.classx.co.in/paid_course3/2025-08-03-0.4911749231825595.jpg',
-    url: 'https://apnipadhai.org/new-courses/61-ssc-gd-foundation-complete-online-course-30',
-    type: 'foundation course',
-    features: ['Daily Practice Sets', 'Full Mock Tests', 'Live Doubt Sessions', 'Study Material'],
-    tag: 'NEW BATCH',
-  },
-];
-
-const TEST_SERIES = [
-  { label: 'RAS Pre Test Series', exam: 'RAS Prelims', icon: FileCheck2, color: 'bg-blue-50 text-blue-600' },
-  { label: 'Rajasthan CET Test Series', exam: 'CET 12th / Grad', icon: FileCheck2, color: 'bg-emerald-50 text-emerald-600' },
-  { label: 'SI & LDC Mock Papers', exam: 'Police SI / LDC', icon: FileCheck2, color: 'bg-purple-50 text-purple-600' },
-  { label: 'SSC GD Mock Tests', exam: 'SSC GD Constable', icon: FileCheck2, color: 'bg-amber-50 text-amber-600' },
-];
-
 export const CoursesSection: React.FC = () => {
   const { t } = useTranslation();
-  const [courses, setCourses] = useState<Course[]>(COURSES);
+  const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
   const autoScrollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -101,6 +67,7 @@ export const CoursesSection: React.FC = () => {
     async function load() {
       try {
         let allCourses: Course[] = [];
+        const seenIds = new Set<string>();
         let page = 1;
         let totalPages = 1;
         while (page <= totalPages && !cancelled) {
@@ -121,7 +88,13 @@ export const CoursesSection: React.FC = () => {
               }))
             );
           }
-          totalPages = data.totalPages ?? 1;
+          const dataWithTotal: { totalPages?: number; courses?: unknown[] } = data;
+          allCourses = allCourses.filter((course) => {
+            if (seenIds.has(course.id)) return false;
+            seenIds.add(course.id);
+            return true;
+          });
+          totalPages = dataWithTotal.totalPages ?? 1;
           page++;
         }
         if (!cancelled && allCourses.length > 0) {
@@ -155,11 +128,11 @@ export const CoursesSection: React.FC = () => {
   }, [startAutoScroll]);
 
   return (
-    <section id="courses" className="py-20 bg-gradient-to-b from-white via-amber-50/40 to-white relative overflow-hidden">
+    <section id="courses" className="py-12 bg-gradient-to-b from-white via-amber-50/40 to-white relative overflow-hidden">
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-yellow-200/20 rounded-full blur-3xl pointer-events-none" />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Header */}
-        <div className="text-center max-w-3xl mx-auto mb-12">
+        <div className="text-center max-w-3xl mx-auto mb-8">
           <span className="text-xs font-black text-amber-800 uppercase tracking-widest bg-yellow-100 px-3.5 py-1.5 rounded-full border border-yellow-300">
             {t('ONLINE CLASSES & TEST SERIES')}
           </span>
@@ -250,9 +223,6 @@ export const CoursesSection: React.FC = () => {
                   {course.tagline && (
                     <p className="text-xs font-bold text-brand-600 mt-1">{t(course.tagline)}</p>
                   )}
-                  <p className="text-xs text-slate-500 leading-relaxed mt-3 flex-grow">
-                    {t(course.description)}
-                  </p>
 
                   <div className="flex flex-wrap gap-2 mt-4">
                     {course.features.map((feature) => (
@@ -265,15 +235,7 @@ export const CoursesSection: React.FC = () => {
                     ))}
                   </div>
 
-                  <div className="pt-5 mt-5 border-t border-slate-100 flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-4 text-[11px] text-slate-500 font-semibold">
-                      <span className="flex items-center gap-1">
-                        <Clock className="w-3.5 h-3.5 text-amber-600" /> {t('12 Months Access')}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Users className="w-3.5 h-3.5 text-amber-600" /> 10,000+
-                      </span>
-                    </div>
+                  <div className="pt-5 mt-5 border-t border-slate-100 flex items-center justify-end gap-3">
                     <a
                       href={course.url}
                       target="_blank"
@@ -290,27 +252,6 @@ export const CoursesSection: React.FC = () => {
             </div>
           )}
         </div>
-        </div>
-
-        {/* Test Series Strip */}
-        <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {TEST_SERIES.map((series) => {
-            const Icon = series.icon;
-            return (
-              <div
-                key={series.label}
-                className="bg-white rounded-2xl border border-slate-200 hover:border-amber-300 p-5 flex items-center gap-3 shadow-card hover:shadow-card-hover transition-all"
-              >
-                <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${series.color}`}>
-                  <Icon className="w-5 h-5" />
-                </div>
-                <div className="min-w-0">
-                  <h4 className="text-sm font-bold font-heading text-navy-900 truncate">{t(series.label)}</h4>
-                  <p className="text-[11px] text-slate-500 font-semibold">{t(series.exam)}</p>
-                </div>
-              </div>
-            );
-          })}
         </div>
 
         {/* CTA */}

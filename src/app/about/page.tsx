@@ -6,6 +6,8 @@ import { useTranslation } from '@/i18n/useTranslation';
 import { CheckCircle2, Heart, ShieldCheck, Target, Send } from 'lucide-react';
 import { FaYoutube } from 'react-icons/fa';
 import { FeaturesSection } from '@/components/home/FeaturesSection';
+import { TrustSection } from '@/components/home/TrustSection';
+import { CommunitySection } from '@/components/home/CommunitySection';
 
 export default function AboutPage() {
   const { t } = useTranslation();
@@ -86,6 +88,9 @@ export default function AboutPage() {
           </div>
         </div>
 
+        {/* Trusted Numbers */}
+        <TrustSection />
+
         {/* Core Values */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-card text-center space-y-3">
@@ -121,6 +126,9 @@ export default function AboutPage() {
 
         {/* Why Over 100,000 Aspirants Choose Us */}
         <FeaturesSection />
+
+        {/* Our Learning Community */}
+        <CommunitySection />
 
       </div>
     </div>

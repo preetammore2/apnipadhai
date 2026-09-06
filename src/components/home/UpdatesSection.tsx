@@ -71,10 +71,10 @@ export const UpdatesSection: React.FC = () => {
   }, [posts, activeCategory]);
 
   return (
-    <section className="py-20 bg-slate-50/80 relative overflow-hidden">
+    <section className="py-12 bg-slate-50/80 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-6">
           <div>
             <span className="text-xs font-black text-amber-800 uppercase tracking-widest bg-yellow-100 px-3.5 py-1.5 rounded-full border border-yellow-300">
               {t('EXAM NEWS & STUDY ARTICLES')}
@@ -97,7 +97,7 @@ export const UpdatesSection: React.FC = () => {
 
         {/* Loading */}
         {isLoading && (
-          <div className="py-16 text-center">
+          <div className="py-8 text-center">
             <Loader2 className="w-8 h-8 text-amber-600 animate-spin mx-auto" />
             <p className="text-xs text-slate-500 mt-2">{t('Loading blog posts from WordPress...')}</p>
           </div>
@@ -105,7 +105,7 @@ export const UpdatesSection: React.FC = () => {
 
         {/* Error */}
         {!isLoading && isError && (
-          <div className="py-16 text-center">
+          <div className="py-8 text-center">
             <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
               <WifiOff className="w-8 h-8" />
             </div>
@@ -125,7 +125,7 @@ export const UpdatesSection: React.FC = () => {
 
         {/* Empty */}
         {!isLoading && !isError && posts.length === 0 && (
-          <div className="py-16 text-center">
+          <div className="py-8 text-center">
             <div className="w-16 h-16 bg-yellow-100 text-amber-700 rounded-full flex items-center justify-center mx-auto mb-4">
               <Newspaper className="w-8 h-8" />
             </div>
@@ -162,7 +162,7 @@ export const UpdatesSection: React.FC = () => {
 
             {/* Cards */}
             {filteredPosts.length === 0 ? (
-              <div className="py-16 text-center">
+              <div className="py-8 text-center">
                 <div className="w-16 h-16 bg-slate-100 text-slate-500 rounded-full flex items-center justify-center mx-auto mb-4">
                   <BookOpen className="w-8 h-8" />
                 </div>
@@ -238,7 +238,7 @@ export const UpdatesSection: React.FC = () => {
             )}
 
             {/* CTA */}
-            <div className="mt-12 text-center">
+            <div className="mt-8 text-center">
               <Link
                 href="/updates"
                 className="group inline-flex items-center gap-2 px-8 py-3.5 bg-yellow-400 hover:bg-yellow-500 text-navy-950 text-sm font-black rounded-xl shadow-sm transition-all hover:-translate-y-0.5 active:scale-[0.97]"

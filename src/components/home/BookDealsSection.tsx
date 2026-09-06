@@ -30,7 +30,7 @@ export const BookDealsSection: React.FC = () => {
   if (isLoading || deals.length === 0) return null;
 
   return (
-    <section className="py-16 bg-gradient-to-b from-slate-50 via-amber-50/60 to-slate-50 relative overflow-hidden">
+    <section className="py-10 bg-gradient-to-b from-slate-50 via-amber-50/60 to-slate-50 relative overflow-hidden">
       <div className="absolute top-0 left-0 w-72 h-72 bg-red-200/20 rounded-full blur-3xl pointer-events-none" />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Header */}

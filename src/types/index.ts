@@ -101,4 +101,5 @@ export interface YouTubeVideo {
   type: 'video' | 'live';
   url: string;
   videoId?: string;
+  publishedAt?: string;
 }

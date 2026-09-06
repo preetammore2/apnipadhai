@@ -90,9 +90,9 @@ export const FeaturesSection: React.FC = () => {
   ];
 
   return (
-    <section className="py-20 bg-slate-50 relative overflow-hidden">
+    <section className="py-12 bg-slate-50 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="text-center max-w-3xl mx-auto mb-16">
+        <div className="text-center max-w-3xl mx-auto mb-8">
           <span className="text-xs font-bold text-brand-600 uppercase tracking-widest bg-brand-100/80 px-3.5 py-1.5 rounded-full">
             {t('WHY APNI PADHAI')}
           </span>
