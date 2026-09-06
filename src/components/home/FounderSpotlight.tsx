@@ -11,7 +11,7 @@ import { useTranslation } from '@/i18n/useTranslation';
 export const FounderSpotlight: React.FC = () => {
   const { t } = useTranslation();
   return (
-    <section className="py-12 bg-hero-dark text-white relative overflow-hidden border-t border-white/5">
+    <section className="hidden md:block py-12 bg-hero-dark text-white relative overflow-hidden border-t border-white/5">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-14 items-center">
 
