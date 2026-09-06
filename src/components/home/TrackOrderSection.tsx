@@ -171,6 +171,7 @@ export const TrackOrderSection: React.FC = () => {
         <AnimatePresence>
           {result && (
             <motion.div
+              key="track-result"
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 16 }}

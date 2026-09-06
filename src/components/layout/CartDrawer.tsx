@@ -28,19 +28,19 @@ export const CartDrawer: React.FC = () => {
 
   return (
     <AnimatePresence>
-      {isCartOpen && (
-        <>
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => dispatch(setCartOpen(false))}
-            className="fixed inset-0 bg-navy-950/60 backdrop-blur-sm z-50"
-          />
-
-          {/* Drawer Panel */}
-          <motion.div
+      {isCartOpen && [
+        // Backdrop
+        <motion.div
+          key="cart-backdrop"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={() => dispatch(setCartOpen(false))}
+          className="fixed inset-0 bg-navy-950/60 backdrop-blur-sm z-50"
+        />,
+        // Drawer Panel
+        <motion.div
+            key="cart-panel"
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
@@ -185,8 +185,8 @@ export const CartDrawer: React.FC = () => {
               </div>
             )}
           </motion.div>
-        </>
-      )}
+        ]
+      }
     </AnimatePresence>
   );
 };
