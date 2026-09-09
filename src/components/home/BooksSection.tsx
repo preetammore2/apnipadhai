@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -13,48 +13,10 @@ import { addToCart } from '@/redux/features/cart/cartSlice';
 import { isComboBook } from '@/lib/books';
 import { toast } from 'sonner';
 
-const BOOK_TABS = [
-  'All books',
-  'Apni Padhai',
-  'General English',
-  'Science Book',
-  'Math Book',
-  'Hindi Book',
-  'Rajasthan Art & Culture',
-  'Rajasthan Geography',
-  'Rajasthan History',
-  'Rajasthan Politics',
-  'Rajasthan Computer',
-  'Rajasthan Sample Papers',
-  'Combo',
-];
-
 export const BooksSection: React.FC = () => {
   const { t, language } = useTranslation();
   const dispatch = useAppDispatch();
   const { data: books = [], isLoading, isError, refetch } = useGetBooksQuery();
-  const [activeTab, setActiveTab] = useState('All books');
-
-  const tabCounts = useMemo(() => {
-    const counts = new Map<string, number>([['All books', books.length]]);
-    for (const tab of BOOK_TABS) {
-      if (tab === 'All books') continue;
-      counts.set(
-        tab,
-        books.filter(
-          (book) => book.categories?.includes(tab) ?? book.category === tab,
-        ).length,
-      );
-    }
-    return counts;
-  }, [books]);
-
-  const filteredBooks = useMemo(() => {
-    if (activeTab === 'All books') return books;
-    return books.filter(
-      (book) => book.categories?.includes(activeTab) ?? book.category === activeTab,
-    );
-  }, [books, activeTab]);
 
   return (
     <section className="py-12 bg-slate-50/80 relative overflow-hidden">
@@ -74,36 +36,6 @@ export const BooksSection: React.FC = () => {
             </p>
           </div>
         </div>
-
-        {/* Category Tabs */}
-        {!isLoading && !isError && books.length > 0 && (
-          <div className="flex gap-2 overflow-x-auto pb-2 mb-6 -mx-4 px-4 sm:mx-0 sm:px-0">
-            {BOOK_TABS.map((tab) => {
-              const count = tabCounts.get(tab) ?? 0;
-              const isActive = activeTab === tab;
-              return (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`flex-shrink-0 px-4 py-2 rounded-full text-xs font-bold transition-all border ${
-                    isActive
-                      ? 'bg-navy-900 text-white border-navy-900 shadow-md'
-                      : 'bg-white text-slate-600 border-slate-200 hover:border-amber-300 hover:text-amber-800'
-                  }`}
-                >
-                  {t(tab)}
-                  <span
-                    className={`ml-1.5 text-[10px] font-black rounded-full px-1.5 py-0.5 ${
-                      isActive ? 'bg-yellow-400 text-navy-950' : 'bg-slate-100 text-slate-500'
-                    }`}
-                  >
-                    {count}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        )}
 
         {/* Loading Spinner */}
         {isLoading ? (
@@ -140,26 +72,16 @@ export const BooksSection: React.FC = () => {
             <Link
               href="/books"
               className="mt-5 px-6 py-3 bg-yellow-400 hover:bg-yellow-500 text-navy-950 text-xs font-black rounded-xl transition-all inline-flex items-center gap-2"
-            >
-              <span>{t('Browse All Books')}</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-        ) : filteredBooks.length === 0 ? (
-          <div className="py-8 text-center">
-            <div className="w-16 h-16 bg-slate-100 text-slate-500 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Search className="w-8 h-8" />
-            </div>
-            <h3 className="text-lg font-bold font-heading text-navy-900">{t('No books in this category yet')}</h3>
-            <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-              {t('New editions in this category are being printed. Explore other categories instead.')}
-            </p>
-          </div>
+>
+            <span>{t('Browse All Books')}</span>
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
         ) : (
           <>
           {/* Books Grid — horizontal scroll on mobile/tablet, 4-in-row grid on large screens */}
           <div className="flex gap-4 sm:gap-6 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide lg:grid lg:grid-cols-4 lg:overflow-visible lg:pb-0 lg:snap-none">
-            {filteredBooks.filter((book) => !isComboBook(book)).slice(0, 8).map((book) => {
+            {books.filter((book) => !isComboBook(book)).slice(0, 8).map((book) => {
               const hi = BOOK_HI[book.id];
               return (
               <motion.div

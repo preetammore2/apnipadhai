@@ -13,6 +13,11 @@ export const KEYS_HOME_A: Record<string, string> = {
   '100% Updated Exam Syllabus': '100% अपडेटेड परीक्षा सिलेबस',
   'Printed Books Doorstep Delivery': 'प्रिंटेड किताबें घर तक डिलीवरी',
   'Live Teacher Doubts Support': 'लाइव टीचर डाउट सपोर्ट',
+  'Apni Padhai promo banners': 'अपनी पढ़ाई प्रमो बैनर',
+  'Previous slide': 'पिछला स्लाइड',
+  'Next slide': 'अगला स्लाइड',
+  'Go to slide': 'स्लाइड पर जाएं',
+  'Scroll to explore': 'नीचे स्क्रॉल करें',
 
   // ---- Trust ----
   'TRUSTED BY ASPIRANTS NATIONWIDE': 'पूरे देश के उम्मीदवारों का भरोसा',
@@ -86,14 +91,19 @@ export const KEYS_HOME_A: Record<string, string> = {
   // ---- App Download ----
   'LEARN ON THE GO': 'कहीं भी सीखें',
   'Download The Apni Padhai Mobile App': 'अपनी पढ़ाई मोबाइल ऐप डाउनलोड करें',
-  'Access offline video downloads, daily live test series, e-books PDF reader, and instant doubt chat support right on your smartphone.':
-    'अपने स्मार्टफोन पर ही ऑफलाइन वीडियो डाउनलोड, दैनिक लाइव टेस्ट सीरीज़, ई-बुक PDF रीडर और इंस्टेंट डाउट चैट सपोर्ट पाएं।',
+  'Access offline video downloads and 24/7 chat support right on your smartphone.':
+    'अपने स्मार्टफोन पर ही ऑफलाइन वीडियो डाउनलोड और 24/7 चैट सपोर्ट पाएं।',
   'Offline Video Download Mode': 'ऑफलाइन वीडियो डाउनलोड मोड',
   'Live Test Series with Rank': 'रैंक के साथ लाइव टेस्ट सीरीज़',
   'Free Daily Current Affairs PDF': 'फ्री दैनिक करेंट अफेयर्स PDF',
   '24/7 Teacher Doubt Chat': '24/7 टीचर डाउट चैट',
   'Install Now From': 'अब इंस्टॉल करें',
   'Google Play Store': 'Google Play Store',
+  'Get it on': 'इसे पाएं',
+  'Download on the': 'से डाउनलोड करें',
+  'Google Play': 'Google Play',
+  'App Store': 'App Store',
+  'Explore': 'खोजें',
   'Scan QR Code': 'QR कोड स्कैन करें',
   'To Install Directly': 'सीधे इंस्टॉल करने के लिए',
   'Apni Padhai Mobile App Screens': 'अपनी पढ़ाई मोबाइल ऐप स्क्रीन',

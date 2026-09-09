@@ -20,28 +20,74 @@ export function isDbConfigured(): boolean {
 
 const globalForMongo = globalThis as unknown as { _apMongoClient?: MongoClient };
 
+function newClient(): MongoClient {
+  return new MongoClient(URI, {
+    serverSelectionTimeoutMS: 5000,
+  });
+}
+
+/** True once the shared client's topology has been torn down (e.g. after a
+ * failed handshake). Reusing such a client fails with "Topology is closed". */
+function isClientDead(client: MongoClient): boolean {
+  const topology = (client as unknown as {
+    topology?: { hasBeenDestroyed?: () => boolean };
+  }).topology;
+  return topology?.hasBeenDestroyed?.() === true;
+}
+
+function recycleClient(): void {
+  const existing = globalForMongo._apMongoClient;
+  globalForMongo._apMongoClient = undefined;
+  if (existing) {
+    existing.close().catch(() => {});
+  }
+}
+
 function getClient(): MongoClient {
   if (!URI) {
     throw new Error('MONGODB_URI is not configured on the server.');
   }
-  if (!globalForMongo._apMongoClient) {
-    globalForMongo._apMongoClient = new MongoClient(URI, {
-      serverSelectionTimeoutMS: 5000,
-    });
+  if (!globalForMongo._apMongoClient || isClientDead(globalForMongo._apMongoClient)) {
+    globalForMongo._apMongoClient = newClient();
   }
   return globalForMongo._apMongoClient;
+}
+
+function isRecoverableTopologyError(error: unknown): boolean {
+  if (!(error instanceof Error)) return false;
+  return (
+    error.name === 'MongoTopologyClosedError' ||
+    error.message.includes('Topology is closed')
+  );
 }
 
 /**
  * Resolve the database. Throws when MongoDB is not configured or unreachable —
  * callers decide how to handle that (admin routes surface an error, public
  * readers fall back to the WordPress source).
+ *
+ * If a connection attempt fails and leaves the shared client's topology closed,
+ * the client is recycled so the next call opens a fresh connection instead of
+ * permanently failing with "Topology is closed".
  */
 export async function getDb(): Promise<Db> {
   if (!isDbConfigured()) {
     throw new Error('MONGODB_URI is not configured on the server.');
   }
-  return getClient().db(DB_NAME);
+
+  try {
+    const client = getClient();
+    await client.connect();
+    return client.db(DB_NAME);
+  } catch (error) {
+    if (isRecoverableTopologyError(error)) {
+      recycleClient();
+      const client = getClient();
+      await client.connect();
+      return client.db(DB_NAME);
+    }
+    throw error;
+  }
 }
 
 export function isValidObjectId(value: string): boolean {

@@ -2,7 +2,8 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { Smartphone, Download, Star, ShieldCheck } from 'lucide-react';
+import { Book } from 'lucide-react';
+import { FaGooglePlay } from 'react-icons/fa';
 import { useTranslation } from '@/i18n/useTranslation';
 
 export default function DownloadAppPage() {
@@ -29,10 +30,26 @@ export default function DownloadAppPage() {
                 href="https://play.google.com/store/search?q=apni+padhai&c=apps"
                 target="_blank"
                 rel="noreferrer"
-                className="px-6 py-4 bg-brand-500 hover:bg-brand-600 text-white font-bold text-sm rounded-2xl shadow-button-glow transition-all flex items-center gap-3"
+                className="inline-flex items-center gap-3 px-6 py-3.5 bg-black hover:bg-black/90 text-white rounded-xl border border-white/20 shadow-lg transition-all duration-300 hover:border-white/40 hover:-translate-y-0.5"
               >
-                <Smartphone className="w-5 h-5" />
-                <span>{t('Install From Google Play Store')}</span>
+                <FaGooglePlay className="w-7 h-7 text-emerald-400" />
+                <div className="text-left leading-tight">
+                  <span className="block text-[9px] uppercase font-bold tracking-wide opacity-80">{t('Get it on')}</span>
+                  <span className="text-base font-black">{t('Google Play')}</span>
+                </div>
+              </a>
+
+              <a
+                href="https://apnipadhai.org/"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-3 px-6 py-3.5 bg-black hover:bg-black/90 text-white rounded-xl border border-white/20 shadow-lg transition-all duration-300 hover:border-white/40 hover:-translate-y-0.5"
+              >
+                <Book className="w-7 h-7 text-white" />
+                <div className="text-left leading-tight">
+                  <span className="block text-[9px] uppercase font-bold tracking-wide opacity-80">{t('Explore')}</span>
+                  <span className="text-base font-black">{t('Courses')}</span>
+                </div>
               </a>
             </div>
           </div>
@@ -46,27 +63,6 @@ export default function DownloadAppPage() {
                 className="object-cover"
               />
             </div>
-          </div>
-        </div>
-
-        {/* Feature List */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-card text-center space-y-3">
-            <Download className="w-8 h-8 text-brand-500 mx-auto" />
-            <h3 className="text-lg font-bold font-heading text-navy-900">{t('Offline Video Downloads')}</h3>
-            <p className="text-xs text-slate-500 leading-relaxed">{t('Save mobile data by downloading HD lecture videos to watch offline without internet.')}</p>
-          </div>
-
-          <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-card text-center space-y-3">
-            <Star className="w-8 h-8 text-amber-500 mx-auto" />
-            <h3 className="text-lg font-bold font-heading text-navy-900">{t('Live Mock Test Series')}</h3>
-            <p className="text-xs text-slate-500 leading-relaxed">{t('Simulate real exam timer environment with instant All-India rank & percentile evaluation.')}</p>
-          </div>
-
-          <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-card text-center space-y-3">
-            <ShieldCheck className="w-8 h-8 text-emerald-500 mx-auto" />
-            <h3 className="text-lg font-bold font-heading text-navy-900">{t('Complimentary E-Books')}</h3>
-            <p className="text-xs text-slate-500 leading-relaxed">{t('Read Brahmastra study guides and daily current affairs PDFs directly on the app built-in reader.')}</p>
           </div>
         </div>
 

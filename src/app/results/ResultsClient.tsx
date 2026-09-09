@@ -20,6 +20,7 @@ interface FolderInfo {
   badge: string;
   category: FolderStudent['category'];
   count: number;
+  image?: string;
 }
 
 export const ResultsClient: React.FC<ResultsClientProps> = ({ rajasthanPolice, reet }) => {
@@ -34,6 +35,7 @@ export const ResultsClient: React.FC<ResultsClientProps> = ({ rajasthanPolice, r
       badge: t('RAJASTHAN POLICE SELECTIONS'),
       category: 'Rajasthan Police',
       count: rajasthanPolice.length,
+      image: 'https://www.jagranimages.com/images/newimg/03092024/03_09_2024-rajasthan_police_23790560.webp',
     },
     {
       key: 'reet',
@@ -42,6 +44,7 @@ export const ResultsClient: React.FC<ResultsClientProps> = ({ rajasthanPolice, r
       badge: t('REET L1/L2 SELECTIONS'),
       category: 'REET L1/L2',
       count: reet.length,
+      image: 'https://c.ndtvimg.com/2024-06/mmkgs8v8_-what-is-reet-exam_625x300_21_June_24.jpg?im=FitAndFill,algorithm=dnn,width=270,height=300',
     },
   ];
 
@@ -105,13 +108,15 @@ export const ResultsClient: React.FC<ResultsClientProps> = ({ rajasthanPolice, r
                   } ${folder.count === 0 ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:-translate-y-1'}`}
                 >
                   <div className={`relative h-48 sm:h-56 overflow-hidden ${isBlue ? 'bg-gradient-to-br from-blue-500 to-blue-700' : 'bg-gradient-to-br from-emerald-500 to-emerald-700'}`}>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      {isBlue ? (
-                        <Shield className="w-24 h-24 text-white/35" strokeWidth={1.5} />
-                      ) : (
-                        <BookOpen className="w-24 h-24 text-white/35" strokeWidth={1.5} />
-                      )}
-                    </div>
+                    {folder.image && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={folder.image}
+                        alt={folder.title}
+                        className="absolute inset-0 w-full h-full object-cover object-[50%_40%]"
+                        draggable={false}
+                      />
+                    )}
                     <div className="absolute inset-0 bg-gradient-to-t from-navy-900/70 via-transparent to-transparent" />
                     <div className="absolute bottom-3 left-4">
                       <span className={`inline-flex items-center gap-1.5 text-white text-xs font-black uppercase tracking-widest px-3 py-1.5 rounded-full shadow-md ${
@@ -129,9 +134,6 @@ export const ResultsClient: React.FC<ResultsClientProps> = ({ rajasthanPolice, r
                         <FolderOpen className={`w-5 h-5 ${isBlue ? 'text-blue-600' : 'text-emerald-600'}`} />
                         {folder.title}
                       </h3>
-                      <p className="text-xs text-slate-500 font-semibold mt-1">
-                        {folder.count} {folder.count === 1 ? t('student') : t('students')}
-                      </p>
                     </div>
                     <span className={`text-sm font-black shrink-0 ${isBlue ? 'text-blue-600' : 'text-emerald-600'} group-hover:translate-x-1 transition-transform`}>
                       {t('Open')} →

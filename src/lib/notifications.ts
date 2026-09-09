@@ -195,6 +195,42 @@ async function sendEmail(
   }
 }
 
+export interface EmailAttachment {
+  filename: string;
+  content: Buffer;
+  contentType?: string;
+}
+
+export async function sendEmailWithAttachment(
+  to: string,
+  subject: string,
+  text: string,
+  html?: string,
+  attachments?: EmailAttachment[],
+): Promise<boolean> {
+  if (!isEmailConfigured()) return false;
+
+  try {
+    await getTransporter().sendMail({
+      from: EMAIL_FROM,
+      to,
+      subject,
+      text,
+      html: html ?? text,
+      attachments: attachments?.map((a) => ({
+        filename: a.filename,
+        content: a.content,
+        contentType: a.contentType,
+      })),
+    });
+    console.log('[notifications/email] sent with attachment', { to, subject });
+    return true;
+  } catch (error) {
+    console.error('[notifications/email] send failed (attachment)', { to, subject, error });
+    return false;
+  }
+}
+
 /* ───────── SMS (MSG91) ───────── */
 
 const MSG91_COUNTRY_CODE = process.env.MSG91_COUNTRY_CODE ?? '91';

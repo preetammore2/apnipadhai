@@ -136,7 +136,7 @@ export const KEYS_HOME_B: Record<string, string> = {
   'Police SI / LDC': 'पुलिस SI / LDC',
   'SSC GD Mock Tests': 'SSC GD मॉक टेस्ट',
   'SSC GD Constable': 'SSC GD कांस्टेबल',
-  'Explore Free PYQs & Mock Papers': 'फ्री PYQs एवं मॉक पेपर देखें',
+  'Explore PYQs & Mock Papers': 'PYQs एवं मॉक पेपर देखें',
 
   // ---- Blog / Updates Section ----
   'Latest Updates & Blogs': 'नवीनतम अपडेट्स एवं ब्लॉग्स',

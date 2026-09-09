@@ -249,7 +249,7 @@ export const YouTubeSection: React.FC = () => {
                   {playingVideo.videoId ? (
                     <div className="relative aspect-video bg-black">
                       <iframe
-                        src={`https://www.youtube.com/embed/${playingVideo.videoId}?autoplay=1&rel=0`}
+                        src={`https://www.youtube.com/embed/${playingVideo.videoId}?autoplay=0&rel=0`}
                         title={playingVideo.title}
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowFullScreen

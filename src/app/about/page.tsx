@@ -9,6 +9,7 @@ import { FaYoutube } from 'react-icons/fa';
 import { FeaturesSection } from '@/components/home/FeaturesSection';
 import { TrustSection } from '@/components/home/TrustSection';
 import { CommunitySection } from '@/components/home/CommunitySection';
+import { PyqQuickSection } from '@/components/home/PyqQuickSection';
 
 export default function AboutPage() {
   const { t } = useTranslation();
@@ -170,6 +171,9 @@ export default function AboutPage() {
             </div>
           </div>
         </section>
+
+        {/* Previous Year Question Papers */}
+        <PyqQuickSection />
 
       </div>
     </div>

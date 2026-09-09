@@ -3,7 +3,6 @@
 import { HeroSection } from '@/components/home/HeroSection';
 import { BooksSection } from '@/components/home/BooksSection';
 import { FounderSpotlight } from '@/components/home/FounderSpotlight';
-import { PyqQuickSection } from '@/components/home/PyqQuickSection';
 import { TestimonialsSection } from '@/components/home/TestimonialsSection';
 import { AppDownloadSection } from '@/components/home/AppDownloadSection';
 import { YouTubeSection } from '@/components/home/YouTubeSection';
@@ -25,9 +24,6 @@ export default function HomePage() {
 
       {/* 4b. Books with Discount (from WordPress books-with-discount page) */}
       <BookDealsSection />
-
-      {/* 6. Solved PYQs Section */}
-      <PyqQuickSection />
 
       {/* 7. Student Love & Testimonials */}
       <TestimonialsSection />

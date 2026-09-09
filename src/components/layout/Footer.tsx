@@ -9,9 +9,8 @@ import {
   Mail,
   Send,
   ArrowUp,
-  ShieldCheck,
 } from 'lucide-react';
-import { FaYoutube, FaInstagram, FaFacebook } from 'react-icons/fa';
+import { FaYoutube, FaInstagram, FaFacebook, FaWhatsapp } from 'react-icons/fa';
 import { toast } from 'sonner';
 import { useTranslation } from '@/i18n/useTranslation';
 
@@ -65,8 +64,22 @@ export const Footer: React.FC = () => {
               </div>
               <div className="flex items-center gap-2.5">
                 <Phone className="w-4 h-4 text-yellow-400 shrink-0" />
+                <span className="text-yellow-200/80 font-medium">For Books:</span>
+                <a href="tel:+917073480809" className="hover:text-white transition-colors font-bold">
+                  +91 70734 80809
+                </a>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <Phone className="w-4 h-4 text-yellow-400 shrink-0" />
+                <span className="text-yellow-200/80 font-medium">For App:</span>
                 <a href="tel:+917568716768" className="hover:text-white transition-colors font-bold">
-                  +91 7568716768
+                  +91 75687 16768
+                </a>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <Mail className="w-4 h-4 text-yellow-400 shrink-0" />
+                <a href="mailto:contact@apnipadhaipublication.com" className="hover:text-white transition-colors">
+                  contact@apnipadhaipublication.com
                 </a>
               </div>
               <div className="flex items-center gap-2.5">
@@ -197,6 +210,15 @@ export const Footer: React.FC = () => {
             {/* Social Media Links */}
             <div className="flex items-center gap-2">
               <a
+                href="https://whatsapp.com/channel/0029Va5Z16HJpe8gacVYFW2q"
+                target="_blank"
+                rel="noreferrer"
+                className="p-2.5 bg-white/10 hover:bg-emerald-600 rounded-xl text-white transition-colors"
+                title="WhatsApp Channel"
+              >
+                <FaWhatsapp className="w-4 h-4" />
+              </a>
+              <a
                 href="https://www.youtube.com/@AapniPadhai"
                 target="_blank"
                 rel="noreferrer"
@@ -241,9 +263,6 @@ export const Footer: React.FC = () => {
           <p>© {new Date().getFullYear()} Apni Padhai Publication. {t('All Rights Reserved.')}</p>
 
           <div className="flex items-center gap-6">
-            <span className="flex items-center gap-1.5 text-emerald-400">
-              <ShieldCheck className="w-4 h-4" /> {t('100% Verified EdTech Platform')}
-            </span>
             <button
               onClick={scrollToTop}
               className="flex items-center gap-1 text-white hover:text-yellow-400 font-bold transition-colors"

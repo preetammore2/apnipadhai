@@ -3,7 +3,8 @@
 import React from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { Smartphone, CheckCircle, GraduationCap } from 'lucide-react';
+import { Book } from 'lucide-react';
+import { FaGooglePlay } from 'react-icons/fa';
 import { useTranslation } from '@/i18n/useTranslation';
 
 export const AppDownloadSection: React.FC = () => {
@@ -30,41 +31,21 @@ export const AppDownloadSection: React.FC = () => {
             </h2>
 
             <p className="text-slate-300 text-sm sm:text-base font-medium leading-relaxed max-w-xl mx-auto lg:mx-0">
-              {t('Access offline video downloads, daily live test series, e-books PDF reader, and instant doubt chat support right on your smartphone.')}
+              {t('Access offline video downloads and 24/7 chat support right on your smartphone.')}
             </p>
 
-            {/* Features Checklist */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm font-medium text-slate-300 max-w-lg mx-auto lg:mx-0 pt-2">
-              <div className="flex items-center gap-2">
-                <CheckCircle className="w-5 h-5 text-emerald-400 shrink-0" />
-                <span>{t('Offline Video Download Mode')}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="w-5 h-5 text-emerald-400 shrink-0" />
-                <span>{t('Live Test Series with Rank')}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="w-5 h-5 text-emerald-400 shrink-0" />
-                <span>{t('Free Daily Current Affairs PDF')}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="w-5 h-5 text-emerald-400 shrink-0" />
-                <span>{t('24/7 Teacher Doubt Chat')}</span>
-              </div>
-            </div>
-
             {/* Store Button */}
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-4">
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 sm:gap-4 pt-4">
               <a
                 href="https://play.google.com/store/search?q=apni+padhai&c=apps"
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-3 px-7 py-4 bg-gradient-to-b from-brand-400 to-brand-600 text-navy-950 rounded-2xl text-xs font-black shadow-[0_8px_30px_-6px_rgba(234,179,8,0.55)] transition-all duration-300 hover:shadow-[0_14px_40px_-6px_rgba(234,179,8,0.7)] hover:-translate-y-0.5"
+                className="inline-flex items-center gap-2 sm:gap-3 px-3 sm:px-6 py-2.5 sm:py-3.5 bg-black hover:bg-navy-950 text-white rounded-xl border border-white/15 shadow-lg transition-all duration-300 hover:border-white/30 hover:-translate-y-0.5"
               >
-                <Smartphone className="w-6 h-6" />
-                <div className="text-left">
-                  <span className="block text-[10px] uppercase font-bold opacity-70">{t('Install Now From')}</span>
-                  <span className="text-sm font-black">{t('Google Play Store')}</span>
+                <FaGooglePlay className="w-5 h-5 sm:w-7 sm:h-7 text-emerald-400 shrink-0" />
+                <div className="text-left leading-tight">
+                  <span className="block text-[8px] sm:text-[9px] uppercase font-bold tracking-wide opacity-80">{t('Get it on')}</span>
+                  <span className="text-sm sm:text-base font-black whitespace-nowrap">{t('Google Play')}</span>
                 </div>
               </a>
 
@@ -72,16 +53,19 @@ export const AppDownloadSection: React.FC = () => {
                 href="https://apnipadhai.org/"
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-3 px-7 py-4 bg-white/[0.06] border border-white/15 text-white rounded-2xl text-sm font-black backdrop-blur transition-all duration-300 hover:bg-white/[0.12] hover:border-brand-400/40 hover:-translate-y-0.5"
+                className="inline-flex items-center gap-2 sm:gap-3 px-3 sm:px-6 py-2.5 sm:py-3.5 bg-black hover:bg-navy-950 text-white rounded-xl border border-white/15 shadow-lg transition-all duration-300 hover:border-white/30 hover:-translate-y-0.5"
               >
-                <GraduationCap className="w-6 h-6 text-brand-400" />
-                <span>{t('Browse Courses')}</span>
+                <Book className="w-5 h-5 sm:w-7 sm:h-7 text-white shrink-0" />
+                <div className="text-left leading-tight">
+                  <span className="block text-[8px] sm:text-[9px] uppercase font-bold tracking-wide opacity-80">{t('Explore')}</span>
+                  <span className="text-sm sm:text-base font-black whitespace-nowrap">{t('Courses')}</span>
+                </div>
               </a>
             </div>
           </div>
 
           {/* Right Visual Image */}
-          <div className="lg:col-span-5 relative flex justify-center">
+          <div className="hidden lg:flex lg:col-span-5 relative justify-center">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}

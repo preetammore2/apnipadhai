@@ -261,7 +261,7 @@ export const CoursesSection: React.FC = () => {
             className="group inline-flex items-center gap-2 px-8 py-3.5 bg-navy-900 hover:bg-brand-600 text-white text-sm font-black rounded-xl shadow-sm transition-all hover:-translate-y-0.5 active:scale-[0.97]"
           >
             <BookOpen className="w-4 h-4 text-yellow-400" />
-            <span>{t('Explore Free PYQs & Mock Papers')}</span>
+            <span>{t('Explore PYQs & Mock Papers')}</span>
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
