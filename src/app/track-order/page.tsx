@@ -265,7 +265,7 @@ export default function TrackOrderPage() {
             <h3 className="text-sm font-bold font-heading text-navy-900">{t('Need more help?')}</h3>
             <p className="text-xs text-slate-500 leading-relaxed mt-1.5">
               {t('Call or WhatsApp')}{' '}
-              <a href="tel:+917568716768" className="font-bold text-amber-700">+91 7568716768</a>{' '}
+              <a href="tel:+917073480809" className="font-bold text-amber-700">+91 70734 80809</a>{' '}
               {t('or email')}{' '}
               <a href="mailto:support@apnipadhaipublication.com" className="font-bold text-amber-700">support@apnipadhaipublication.com</a>.
             </p>

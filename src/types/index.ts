@@ -1,3 +1,15 @@
+export interface ComboBundleItem {
+  id: string;
+  sku?: string;
+  title: string;
+  price: number;
+  originalPrice: number;
+  coverImage: string;
+  inStock: boolean;
+  optional?: boolean;
+  defaultQuantity?: number;
+}
+
 export interface Book {
   id: string;
   title: string;
@@ -20,6 +32,7 @@ export interface Book {
   description?: string;
   tableOfContents?: string[];
   sku?: string;
+  bundleItems?: ComboBundleItem[];
 }
 
 export interface PYQ {

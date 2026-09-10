@@ -150,14 +150,14 @@ export default async function ShippingPolicyPage() {
           content: (
             <p>
               For any inquiries regarding your order or shipment, contact us at{' '}
-              <span className="font-bold text-navy-900">+91 7568716768</span> or email{' '}
+              <span className="font-bold text-navy-900">+91 70734 80809</span> or email{' '}
               <span className="font-bold text-navy-900">support@apnipadhaipublication.com</span>.
             </p>
           ),
           contentHi: (
             <p>
               अपने ऑर्डर या शिपमेंट से संबंधित किसी भी प्रश्न के लिए, हमें{' '}
-              <span className="font-bold text-navy-900">+91 7568716768</span> पर संपर्क करें या ईमेल करें{' '}
+              <span className="font-bold text-navy-900">+91 70734 80809</span> पर संपर्क करें या ईमेल करें{' '}
               <span className="font-bold text-navy-900">support@apnipadhaipublication.com</span> पर।
             </p>
           ),

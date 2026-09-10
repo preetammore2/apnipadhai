@@ -25,9 +25,6 @@ export default function HomePage() {
       {/* 4b. Books with Discount (from WordPress books-with-discount page) */}
       <BookDealsSection />
 
-      {/* 7. Student Love & Testimonials */}
-      <TestimonialsSection />
-
       {/* 9. Free Lectures / YouTube Section */}
       <YouTubeSection />
 
@@ -39,6 +36,9 @@ export default function HomePage() {
 
       {/* 13. Courses / Test Series (from WordPress) */}
       <CoursesSection />
+
+      {/* 7. Student Love & Testimonials */}
+      <TestimonialsSection />
 
       {/* 14b. FAQs (from WordPress FAQ page) */}
       <FaqSection />

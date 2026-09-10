@@ -142,7 +142,7 @@ export const Navbar: React.FC = () => {
             <span className="text-slate-200">{t('🔥 New editions of the Brahmastra book series are now available!')}</span>
           </div>
           <div className="flex items-center gap-4 text-slate-300 text-[11px]">
-            <span>{t('Helpline:')} <strong className="text-yellow-400 font-bold">+91 7568716768</strong></span>
+            <span>{t('Helpline:')} <strong className="text-yellow-400 font-bold">+91 70734 80809</strong></span>
           </div>
         </div>
       </div>
@@ -159,7 +159,7 @@ export const Navbar: React.FC = () => {
           <div className="flex items-center justify-between gap-2 sm:gap-3">
             
             {/* Brand Logo */}
-            <Link href="/" className="flex items-center gap-2 sm:gap-2.5 min-w-0 group shrink-0">
+            <Link href="/" className="flex items-center gap-2 sm:gap-2.5 min-w-0 group">
               <div className="relative w-9 h-9 sm:w-10 sm:h-10 lg:w-11 lg:h-11 rounded-2xl overflow-hidden shadow-md group-hover:scale-105 transition-transform p-0.5 bg-white shrink-0">
                 <Image
                   src="/logo.png"
@@ -206,7 +206,7 @@ export const Navbar: React.FC = () => {
             </nav>
 
             {/* Right Action Icons & Buttons */}
-            <div className="flex items-center gap-1 sm:gap-3">
+            <div className="flex items-center justify-end gap-0.5 sm:gap-3 min-w-0">
               <div className="hidden sm:block">
                 <LanguageSwitcher />
               </div>
@@ -220,10 +220,10 @@ export const Navbar: React.FC = () => {
                 <Search className="w-5 h-5" />
               </button>
 
-              {/* Wishlist */}
+              {/* Wishlist (hidden on mobile) */}
               <Link
                 href="/wishlist"
-                className="relative p-2 sm:p-2.5 text-slate-600 hover:text-amber-600 hover:bg-amber-50 rounded-full transition-colors"
+                className="hidden sm:flex relative p-2 sm:p-2.5 text-slate-600 hover:text-amber-600 hover:bg-amber-50 rounded-full transition-colors"
                 title={t('View Wishlist')}
               >
                 <Heart className="w-5 h-5" />
@@ -248,14 +248,14 @@ export const Navbar: React.FC = () => {
                 )}
               </button>
 
-              {/* Download App CTA */}
+              {/* Course CTA */}
               <a
                 href="https://apnipadhai.org/"
                 target="_blank"
                 rel="noreferrer"
-                className="hidden xl:flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-yellow-400 hover:to-amber-500 text-navy-950 font-black text-xs rounded-full shadow-button-glow transition-all transform hover:-translate-y-0.5 shrink-0"
+                className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-yellow-400 hover:to-amber-500 text-navy-950 font-black text-[11px] sm:text-xs rounded-full shadow-button-glow transition-all transform hover:-translate-y-0.5 shrink-0"
               >
-                <Download className="w-4 h-4" />
+                <Download className="hidden sm:block w-4 h-4" />
                 <span>{t('Course')}</span>
               </a>
 
@@ -509,7 +509,6 @@ export const Navbar: React.FC = () => {
       </AnimatePresence>
 
       {/* Mobile Floating Quick Action Bottom Bar (Small Devices Only) */}
-      {pathname !== '/' && (
       <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-amber-200 shadow-2xl pt-2 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] flex items-center justify-around sm:hidden">
         <Link
           href="/"
@@ -564,7 +563,6 @@ export const Navbar: React.FC = () => {
           <span>{t('Cart')} ({itemCount})</span>
         </button>
       </div>
-      )}
     </>
   );
 };

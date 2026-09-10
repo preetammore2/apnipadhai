@@ -127,7 +127,7 @@ export default async function RefundPolicyPage() {
           content: (
             <p>
               For any refund or return queries, reach out to our support helpline at{' '}
-              <span className="font-bold text-navy-900">+91 7568716768</span> (Monday to Saturday, 9:00 AM –
+              <span className="font-bold text-navy-900">+91 70734 80809</span> (Monday to Saturday, 9:00 AM –
               7:00 PM IST) or email{' '}
               <span className="font-bold text-navy-900">support@apnipadhaipublication.com</span>.
             </p>
@@ -135,7 +135,7 @@ export default async function RefundPolicyPage() {
           contentHi: (
             <p>
               किसी भी रिफंड या रिटर्न संबंधी प्रश्न के लिए, हमारी सहायता हेल्पलाइन{' '}
-              <span className="font-bold text-navy-900">+91 7568716768</span> (सोमवार से शनिवार, सुबह 9:00 बजे –
+              <span className="font-bold text-navy-900">+91 70734 80809</span> (सोमवार से शनिवार, सुबह 9:00 बजे –
               शाम 7:00 बजे IST) पर संपर्क करें या ईमेल करें{' '}
               <span className="font-bold text-navy-900">support@apnipadhaipublication.com</span> पर।
             </p>

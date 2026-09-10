@@ -85,7 +85,7 @@ export const KEYS_HOME_B: Record<string, string> = {
   'Show Less': 'कम दिखाएं',
 
   // ---- Books Category Tabs ----
-  'On Apni Padhai Books': 'अपनी पढ़ाई की किताबें',
+  'On Apni Padhai Store': 'अपनी पढ़ाई की किताबें',
   'All books': 'सभी किताबें',
   'Apni Padhai': 'अपनी पढ़ाई',
   'General English': 'जनरल इंग्लिश',
@@ -232,8 +232,8 @@ export const KEYS_HOME_B: Record<string, string> = {
   'All online batches include 12 months of access with live interactive classes, recorded lectures, PDF notes, topic-wise PYQs, and the full test series for the batch duration.':
     'सभी ऑनलाइन बैच में 12 महीने का एक्सेस शामिल है जिसमें लाइव इंटरैक्टिव क्लासेज, रिकॉर्डेड लेक्चर, PDF नोट्स, टॉपिक-वार PYQs और बैच अवधि के लिए पूरी टेस्ट सीरीज़ शामिल हैं।',
   'How can I get my doubts cleared?': 'मैं अपने संदेह कैसे दूर कर सकता हूं?',
-  'Every batch includes live doubt sessions with faculty. You can also reach the helpline at +91 7568716768 or request a free callback from the navbar, and our counselors will connect with you.':
-    'हर बैच में फैकल्टी के साथ लाइव डाउट सत्र शामिल हैं। आप +91 7568716768 पर हेल्पलाइन से भी संपर्क कर सकते हैं या नेवबार से फ्री कॉलबैक का अनुरोध कर सकते हैं, और हमारे काउंसलर आपसे जुड़ेंगे।',
+  'Every batch includes live doubt sessions with faculty. You can also reach the helpline at +91 70734 80809 or request a free callback from the navbar, and our counselors will connect with you.':
+    'हर बैच में फैकल्टी के साथ लाइव डाउट सत्र शामिल हैं। आप +91 70734 80809 पर हेल्पलाइन से भी संपर्क कर सकते हैं या नेवबार से फ्री कॉलबैक का अनुरोध कर सकते हैं, और हमारे काउंसलर आपसे जुड़ेंगे।',
   'Which payment methods are accepted?': 'कौन-कौन से भुगतान तरीके स्वीकार किए जाते हैं?',
   'We accept all UPI apps (PhonePe, GPay, Paytm), debit and credit cards, and net banking through the PhonePe payment gateway. All payments are 100% secure.':
     'हम PhonePe भुगतान गेटवे के माध्यम से सभी UPI ऐप्स (PhonePe, GPay, Paytm), डेबिट और क्रेडिट कार्ड और नेट बैंकिंग स्वीकार करते हैं। सभी भुगतान 100% सुरक्षित हैं।',
@@ -244,8 +244,8 @@ export const KEYS_HOME_B: Record<string, string> = {
   'The Apni Padhai app is available on the Google Play Store. Search for "Apni Padhai" and install it to access courses, PYQs, test series, and daily exam updates on your phone.':
     'अपनी पढ़ाई ऐप Google Play Store पर उपलब्ध है। "Apni Padhai" खोजें और इसे इंस्टॉल करें ताकि फोन पर कोर्स, PYQs, टेस्ट सीरीज़ और दैनिक परीक्षा अपडेट एक्सेस कर सकें।',
   'How can I contact the Apni Padhai support team?': 'मैं अपनी पढ़ाई सपोर्ट टीम से कैसे संपर्क करूं?',
-  'You can call or WhatsApp us at +91 7568716768, email support@apnipadhaipublication.com, or use the Contact page form. Our team is available to help you with orders, courses, and any other queries.':
-    'आप हमें +91 7568716768 पर कॉल या WhatsApp कर सकते हैं, support@apnipadhaipublication.com पर ईमेल कर सकते हैं, या कॉन्टैक्ट पेज फॉर्म का उपयोग कर सकते हैं। हमारी टीम ऑर्डर, कोर्स और अन्य किसी भी प्रश्न में मदद के लिए उपलब्ध है।',
+  'You can call or WhatsApp us at +91 70734 80809, email support@apnipadhaipublication.com, or use the Contact page form. Our team is available to help you with orders, courses, and any other queries.':
+    'आप हमें +91 70734 80809 पर कॉल या WhatsApp कर सकते हैं, support@apnipadhaipublication.com पर ईमेल कर सकते हैं, या कॉन्टैक्ट पेज फॉर्म का उपयोग कर सकते हैं। हमारी टीम ऑर्डर, कोर्स और अन्य किसी भी प्रश्न में मदद के लिए उपलब्ध है।',
 
   // ---- Track Your Order ----
   'ORDER TRACKING': 'ऑर्डर ट्रैकिंग',

@@ -4,14 +4,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslation } from '@/i18n/useTranslation';
-
-const SLIDES = [
-  { src: '/images/hero/Hero1.png', alt: 'Apni Padhai Hero Banner 1', ratio: 1280 / 611 },
-  { src: '/images/hero/Hero2.png', alt: 'Apni Padhai Hero Banner 2', ratio: 7185 / 3650 },
-  { src: '/images/hero/Hero3.png', alt: 'Apni Padhai Hero Banner 3', ratio: 2356 / 1294 },
-  { src: '/images/hero/Hero4.jpeg', alt: 'Apni Padhai Hero Banner 4', ratio: 1600 / 900 },
-  { src: '/images/hero/Hero5.png', alt: 'Apni Padhai Hero Banner 5', ratio: 2356 / 1382 },
-];
+import { DEFAULT_HERO_RATIO, DEFAULT_HERO_SLIDES, type HeroSlide } from '@/lib/hero-slides';
 
 const SLIDE_INTERVAL = 6000;
 const SWIPE_THRESHOLD = 56;
@@ -51,8 +44,29 @@ export const HeroSection: React.FC = () => {
   const [paused, setPaused] = useState(false);
   const [inView, setInView] = useState(false);
   const [reduced, setReduced] = useState(false);
+  const [slides, setSlides] = useState<HeroSlide[]>(DEFAULT_HERO_SLIDES);
 
-  const total = SLIDES.length;
+  const total = slides.length;
+
+  useEffect(() => {
+    let ignore = false;
+    fetch('/api/hero-slides')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: { slides?: HeroSlide[] } | null) => {
+        if (ignore || !data || !Array.isArray(data.slides) || data.slides.length === 0) return;
+        setSlides(data.slides);
+      })
+      .catch(() => {});
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (activeIdx > slides.length - 1) {
+      setActiveIdx(0);
+    }
+  }, [slides.length, activeIdx]);
 
   const go = useCallback((nextRaw: number, direction: number) => {
     setDir(direction);
@@ -120,7 +134,7 @@ export const HeroSection: React.FC = () => {
     swipeStartX.current = null;
   };
 
-  const slide = SLIDES[activeIdx];
+  const slide = slides[activeIdx];
 
   return (
     <section
@@ -135,7 +149,7 @@ export const HeroSection: React.FC = () => {
       {/* ---------------- SLIDES (Ken Burns) ---------------- */}
       <div
         className="relative w-full sm:absolute sm:inset-0 sm:max-w-[1600px] sm:mx-auto"
-        style={{ aspectRatio: `${slide.ratio}` }}
+        style={{ aspectRatio: `${slide.ratio ?? DEFAULT_HERO_RATIO}` }}
       >
         <AnimatePresence initial={false} custom={dir}>
           <motion.div
@@ -200,7 +214,7 @@ export const HeroSection: React.FC = () => {
         transition={{ delay: 0.3, duration: 0.6 }}
       >
         <div className="flex items-center justify-center gap-2">
-          {SLIDES.map((s, i) => (
+          {slides.map((s, i) => (
             <button
               key={s.src}
               onClick={() => go(i, i > activeIdx ? 1 : -1)}

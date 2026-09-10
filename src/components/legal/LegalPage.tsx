@@ -85,8 +85,8 @@ export const LegalPage: React.FC<LegalPageProps> = ({
                 support@apnipadhaipublication.com
               </a>{' '}
               {t('or call us on')}{' '}
-              <a href="tel:+917568716768" className="text-brand-600 font-bold hover:underline">
-                +91 7568716768
+              <a href="tel:+917073480809" className="text-brand-600 font-bold hover:underline">
+                +91 70734 80809
               </a>
             </p>
             <div className="flex flex-wrap gap-3 pt-2">

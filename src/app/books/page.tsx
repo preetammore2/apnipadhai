@@ -9,7 +9,7 @@ import Link from 'next/link';
 import { Star, ShoppingCart, Eye, Search, Truck, ArrowRight, Loader2, RefreshCw, WifiOff } from 'lucide-react';
 import { useAppDispatch } from '@/redux/hooks';
 import { addToCart } from '@/redux/features/cart/cartSlice';
-import { isComboBook } from '@/lib/books';
+import { isComboBook, sortComboFirst } from '@/lib/books';
 import { toast } from 'sonner';
 import { useTranslation } from '@/i18n/useTranslation';
 import { BOOK_HI } from '@/i18n/data';
@@ -23,11 +23,17 @@ export default function BooksPage() {
   const { data: books = [], isLoading, isError, refetch } = useGetBooksQuery();
 
   const filteredBooks = books.filter((book) =>
-    !isComboBook(book) &&
     (book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     book.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
     (book.subtitle ?? '').toLowerCase().includes(searchQuery.toLowerCase()))
   );
+
+  const comboMinPrice = (book: Book): number => {
+    if (book.bundleItems?.length) {
+      return Math.min(...book.bundleItems.map((i) => i.price));
+    }
+    return book.price;
+  };
 
   return (
     <div className="py-12 bg-slate-50 min-h-screen">
@@ -93,10 +99,11 @@ export default function BooksPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {filteredBooks.map((book) => {
+            {sortComboFirst(filteredBooks).map((book) => {
               const hi = language === 'hi' ? BOOK_HI[book.id] : undefined;
               const title = hi?.title ?? book.title;
               const subtitle = hi?.subtitle ?? book.subtitle;
+              const isCombo = isComboBook(book);
 
               return (
                 <div
@@ -178,9 +185,16 @@ export default function BooksPage() {
 
                   <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between">
                     <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xl font-black font-heading text-navy-900">₹{book.price}</span>
-                        {book.originalPrice > book.price && (
+                      <div className="flex items-baseline gap-1.5">
+                        {isCombo ? (
+                          <>
+                            <span className="text-[10px] font-black text-brand-600 uppercase">From</span>
+                            <span className="text-xl font-black font-heading text-navy-900">₹{comboMinPrice(book)}</span>
+                          </>
+                        ) : (
+                          <span className="text-xl font-black font-heading text-navy-900">₹{book.price}</span>
+                        )}
+                        {!isCombo && book.originalPrice > book.price && (
                           <span className="text-xs text-slate-400 line-through">₹{book.originalPrice}</span>
                         )}
                       </div>
@@ -189,8 +203,16 @@ export default function BooksPage() {
                       </span>
                     </div>
 
+                    {isCombo ? (
+                      <Link
+                        href={`/books/${book.id}`}
+                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl transition-colors shadow-sm shrink-0"
+                      >
+                        {t('Select Books')}
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </Link>
+                    ) : (
                     <div className="flex items-center gap-2">
-                      {!isComboBook(book) && (
                       <button
                         onClick={() => {
                           dispatch(addToCart({ item: book, type: 'book' }));
@@ -200,7 +222,6 @@ export default function BooksPage() {
                       >
                         {t('Add to Cart')}
                       </button>
-                      )}
                       <Link
                         href={`/books/${book.id}`}
                         className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors"
@@ -208,6 +229,7 @@ export default function BooksPage() {
                         <ArrowRight className="w-4 h-4" />
                       </Link>
                     </div>
+                    )}
                   </div>
                 </div>
               );

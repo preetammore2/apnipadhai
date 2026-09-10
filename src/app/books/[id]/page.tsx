@@ -24,6 +24,7 @@ import { toast } from 'sonner';
 import { useTranslation } from '@/i18n/useTranslation';
 import { BOOK_HI } from '@/i18n/data';
 import { useGetBookByIdQuery } from '@/redux/api/bookApi';
+import { ComboBundleBuilder } from '@/components/books/ComboBundleBuilder';
 
 export default function BookDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -49,6 +50,10 @@ export default function BookDetailsPage({ params }: { params: Promise<{ id: stri
   const title = hi?.title ?? book.title;
   const subtitle = hi?.subtitle ?? book.subtitle;
   const hasSample = !!book.samplePdfUrl;
+
+  if (isComboBook(book)) {
+    return <ComboBundleBuilder book={book} />;
+  }
 
   return (
     <div className="py-12 bg-slate-50 min-h-screen">

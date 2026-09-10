@@ -6,34 +6,69 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { BOOK_HI } from '@/i18n/data';
 import { useTranslation } from '@/i18n/useTranslation';
-import { Star, ShoppingCart, ArrowRight, Truck, Loader2, RefreshCw, WifiOff, Search, BadgePercent } from 'lucide-react';
+import { Star, ShoppingCart, ArrowRight, Truck, Loader2, RefreshCw, WifiOff, Search, BadgePercent, Package } from 'lucide-react';
 import { useGetBooksQuery } from '@/redux/api/bookApi';
 import { useAppDispatch } from '@/redux/hooks';
 import { addToCart } from '@/redux/features/cart/cartSlice';
-import { isComboBook } from '@/lib/books';
+import { isComboBook, sortComboFirst } from '@/lib/books';
 import { toast } from 'sonner';
 
 export const BooksSection: React.FC = () => {
   const { t, language } = useTranslation();
   const dispatch = useAppDispatch();
   const { data: books = [], isLoading, isError, refetch } = useGetBooksQuery();
+  const [activeCategory, setActiveCategory] = React.useState<string>('all');
+
+  const nonComboBooks = React.useMemo(
+    () => books.filter((book) => !isComboBook(book)),
+    [books],
+  );
+
+  const categories = React.useMemo(() => {
+    const set = new Set<string>();
+    nonComboBooks.forEach((book) => {
+      if (book.category && book.category !== 'All books') set.add(book.category);
+      (book.categories ?? [])
+        .filter((c) => c !== 'All books')
+        .forEach((c) => set.add(c));
+    });
+    return Array.from(set);
+  }, [nonComboBooks]);
+
+  const visibleBooks = React.useMemo(
+    () =>
+      activeCategory === 'all'
+        ? nonComboBooks
+        : nonComboBooks.filter(
+            (book) =>
+              book.category === activeCategory ||
+              (book.categories ?? []).includes(activeCategory),
+          ),
+    [nonComboBooks, activeCategory],
+  );
+
+  const comboBooks = React.useMemo(() => books.filter(isComboBook), [books]);
+
+  const comboMinPrice = (book: (typeof books)[number]): number => {
+    if (book.bundleItems?.length) {
+      return Math.min(...book.bundleItems.map((i) => i.price));
+    }
+    return book.price;
+  };
 
   return (
     <section className="py-12 bg-slate-50/80 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-6">
+        <div className="flex flex-col items-center text-center md:flex-row md:items-end md:text-left justify-between mb-8 gap-6">
           <div>
-            <span className="text-xs font-black text-amber-800 uppercase tracking-widest bg-yellow-100 px-3.5 py-1.5 rounded-full border border-yellow-300">
+            <span className="inline-flex text-[11px] sm:text-xs font-black text-amber-800 uppercase tracking-wider bg-yellow-100 px-3.5 py-1.5 rounded-full border border-yellow-300">
               {t('APNI PADHAI PUBLICATION')}
             </span>
             <h2 className="text-3xl sm:text-4xl font-extrabold font-heading text-navy-900 mt-3">
-              {t('On Apni Padhai Books')}
+              {t('Books')}
             </h2>
-            <p className="text-slate-600 text-sm sm:text-base mt-2">
-              {t('Authentic study guides, question banks, and model papers trusted by over 2.5 Lakh+ students.')}
-            </p>
           </div>
         </div>
 
@@ -78,11 +113,31 @@ export const BooksSection: React.FC = () => {
           </Link>
         </div>
         ) : (
-          <>
-          {/* Books Grid — horizontal scroll on mobile/tablet, 4-in-row grid on large screens */}
+<>
+          {/* Category Filter Tabs */}
+          {categories.length > 0 && (
+            <div className="mb-6 flex gap-2 overflow-x-auto pb-2 scrollbar-hide snap-x">
+              {['all', ...categories].map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setActiveCategory(cat)}
+                  className={`shrink-0 snap-start px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap ${
+                    activeCategory === cat
+                      ? 'bg-navy-900 text-white shadow-md'
+                      : 'bg-white text-navy-900 border border-slate-200 hover:border-amber-300 hover:text-amber-700'
+                  }`}
+                >
+                  {cat === 'all' ? t('All Books') : t(cat)}
+                </button>
+              ))}
+            </div>
+          )}
+
+{/* Books Grid — horizontal scroll on mobile/tablet, 4-in-row grid on large screens */}
           <div className="flex gap-4 sm:gap-6 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide lg:grid lg:grid-cols-4 lg:overflow-visible lg:pb-0 lg:snap-none">
-            {books.filter((book) => !isComboBook(book)).slice(0, 8).map((book) => {
+{[...sortComboFirst([...comboBooks, ...visibleBooks]).slice(0, 8)].map((book) => {
               const hi = BOOK_HI[book.id];
+              const isCombo = isComboBook(book);
               return (
               <motion.div
                 key={book.id}
@@ -129,18 +184,33 @@ export const BooksSection: React.FC = () => {
                   </div>
 
                   <div className="pt-3 mt-3 border-t border-slate-100 flex items-end justify-between gap-2 flex-grow">
-                    <div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-lg font-black font-heading text-navy-900">₹{book.price}</span>
-                        {book.originalPrice > book.price && (
+                    <div className="min-w-0">
+                      <div className="flex items-baseline gap-1 whitespace-nowrap">
+                        {isCombo ? (
+                          <>
+                            <span className="text-[10px] font-black text-amber-700 uppercase">From</span>
+                            <span className="text-lg font-black font-heading text-navy-900">₹{comboMinPrice(book)}</span>
+                          </>
+                        ) : (
+                          <span className="text-lg font-black font-heading text-navy-900">₹{book.price}</span>
+                        )}
+                        {!isCombo && book.originalPrice > book.price && (
                           <span className="text-[10px] text-slate-400 line-through">₹{book.originalPrice}</span>
                         )}
                       </div>
                       <span className="text-[9px] font-bold text-emerald-600 flex items-center gap-1">
-                        <Truck className="w-3 h-3" /> {t('Doorstep Delivery')}
+                        <Truck className="w-3 h-3 shrink-0" /> {t('Doorstep Delivery')}
                       </span>
                     </div>
-                    {!isComboBook(book) && (
+                    {isCombo ? (
+                    <Link
+                      href={`/books/${book.id}`}
+                      title={t('Select Books')}
+                      className="p-2 inline-flex items-center justify-center bg-navy-900 hover:bg-amber-600 text-white rounded-xl transition-colors shrink-0"
+                    >
+                      <Package className="w-4 h-4" />
+                    </Link>
+                    ) : (
                     <button
                       onClick={() => {
                         dispatch(addToCart({ item: book, type: 'book' }));

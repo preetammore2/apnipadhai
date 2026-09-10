@@ -1,4 +1,4 @@
-import { Book } from '@/types';
+import { Book, ComboBundleItem } from '@/types';
 
 const WOO_URL = process.env.WOO_URL ?? 'https://apnipadhaipublication.com';
 const WOO_CONSUMER_KEY = process.env.WOO_CONSUMER_KEY ?? '';
@@ -7,6 +7,25 @@ const WOO_CONSUMER_SECRET = process.env.WOO_CONSUMER_SECRET ?? '';
 const WOO_API = `${WOO_URL}/wp-json/wc/v3`;
 
 const BOOKS_REVALIDATE_SECONDS = Number(process.env.BOOKS_REVALIDATE_SECONDS ?? '60');
+
+const BOOK_FIELDS = [
+  'id',
+  'name',
+  'slug',
+  'permalink',
+  'type',
+  'sku',
+  'price',
+  'regular_price',
+  'sale_price',
+  'stock_status',
+  'categories',
+  'images',
+  'short_description',
+  'description',
+  'attributes',
+  'meta_data',
+].join(',');
 
 const authHeader =
   'Basic ' +
@@ -102,7 +121,8 @@ export interface BookPayload {
   edition?: string;
   pages?: number;
   examTarget?: string;
-  samplePdfUrl?: string;
+  /** null clears the stored sample PDF; undefined leaves it unchanged. */
+  samplePdfUrl?: string | null;
   features?: string[];
   tableOfContents?: string[];
 }
@@ -146,9 +166,12 @@ export function parseBookPayload(body: unknown): BookPayload {
     edition: typeof b.edition === 'string' ? b.edition.trim() : undefined,
     pages: asNum(b.pages),
     examTarget: typeof b.examTarget === 'string' ? b.examTarget.trim() : undefined,
-    samplePdfUrl: safeHttpUrl(
-      typeof b.samplePdfUrl === 'string' ? b.samplePdfUrl.trim() : undefined,
-    ),
+    samplePdfUrl:
+      typeof b.samplePdfUrl === 'string'
+        ? b.samplePdfUrl.trim() === ''
+          ? null
+          : safeHttpUrl(b.samplePdfUrl.trim())
+        : undefined,
     features: asStringList(b.features),
     tableOfContents: asStringList(b.tableOfContents),
   };
@@ -253,7 +276,7 @@ function mapProduct(product: WoocommerceProduct): Book {
     originalPrice > price
       ? Math.round(((originalPrice - price) / originalPrice) * 100)
       : 0;
-  const isCombo = product.type !== 'simple';
+  const isCombo = COMBO_TYPES.has(product.type);
   const categoryNames = product.categories.map((c) =>
     stripHtml(c.name),
   );
@@ -281,24 +304,7 @@ export async function getBooks(): Promise<Book[]> {
   const params = new URLSearchParams({
     per_page: '100',
     status: 'publish',
-    _fields: [
-      'id',
-      'name',
-      'slug',
-      'permalink',
-      'type',
-      'sku',
-      'price',
-      'regular_price',
-      'sale_price',
-      'stock_status',
-      'categories',
-      'images',
-      'short_description',
-      'description',
-      'attributes',
-      'meta_data',
-    ].join(','),
+    _fields: BOOK_FIELDS,
   });
 
   const products = await request<WoocommerceProduct[]>(
@@ -306,20 +312,120 @@ export async function getBooks(): Promise<Book[]> {
     {},
     { revalidate: BOOKS_REVALIDATE_SECONDS },
   );
-  return products.map(mapProduct);
+  const books = products.map(mapProduct);
+  return attachBundleItems(books, products);
 }
 
 export async function getBookById(id: string): Promise<Book | undefined> {
   if (!/^\d+$/.test(id)) return undefined;
   try {
-    const product = await request<WoocommerceProduct>(`/products/${id}`, {}, { cache: 'no-store' });
-    return mapProduct(product);
+    const product = await request<WoocommerceProduct>(
+      `/products/${id}`,
+      {},
+      { cache: 'no-store' },
+    );
+    const book = mapProduct(product);
+    const bundleMeta = extractBundleMeta(product);
+    if (!bundleMeta?.length) return book;
+    const params = new URLSearchParams({
+      per_page: '100',
+      status: 'publish',
+      _fields: BOOK_FIELDS,
+    });
+    const products = await request<WoocommerceProduct[]>(
+      `/products?${params.toString()}`,
+      {},
+      { cache: 'no-store' },
+    );
+    return attachBundleItems([book], products)[0];
   } catch (error) {
     if (error instanceof WooCommerceError && error.status === 404) {
       return undefined;
     }
     throw error;
   }
+}
+
+interface BundleMetaItem {
+  id: string;
+  sku?: string;
+  quantity: number;
+  optional: boolean;
+}
+
+const COMBO_TYPES = new Set(['woosb', 'bundle', 'grouped']);
+
+/**
+ * Extract WPC Product Bundle (woosb) components from product meta. Handles
+ * both the object form ({ key: { id, sku, qty, optional } }) and the older
+ * "id_quantity" string array form.
+ */
+function extractBundleMeta(product: WoocommerceProduct): BundleMetaItem[] | undefined {
+  const raw = product.meta_data?.find((m) => m.key === 'woosb_ids')?.value;
+  if (!raw) return undefined;
+
+  const items: BundleMetaItem[] = [];
+  if (Array.isArray(raw)) {
+    for (const entry of raw) {
+      const id = typeof entry === 'string' ? entry.split('_')[0] : String((entry as { id?: unknown })?.id ?? '');
+      const qty = typeof entry === 'string' ? Number(entry.split('_')[1]) : Number((entry as { qty?: unknown })?.qty);
+      if (id) items.push({ id, quantity: qty > 0 ? qty : 1, optional: true });
+    }
+  } else if (typeof raw === 'object' && raw !== null) {
+    for (const value of Object.values(raw as Record<string, unknown>)) {
+      if (typeof value !== 'object' || value === null) continue;
+      const v = value as Record<string, unknown>;
+      const id = String(v.id ?? '');
+      if (!id) continue;
+      const qty = Number(v.qty);
+      items.push({
+        id,
+        sku: typeof v.sku === 'string' && v.sku ? v.sku : undefined,
+        quantity: qty > 0 ? qty : 1,
+        optional: v.optional === '1',
+      });
+    }
+  }
+  return items.length > 0 ? items : undefined;
+}
+
+/**
+ * Resolve bundle components (from the full products list) into full book data
+ * and attach them to combo/bundle books.
+ */
+function attachBundleItems(books: Book[], products: WoocommerceProduct[]): Book[] {
+  const byId = new Map<string, WoocommerceProduct>();
+  const bySku = new Map<string, WoocommerceProduct>();
+  for (const p of products) {
+    byId.set(String(p.id), p);
+    if (p.sku) bySku.set(p.sku, p);
+  }
+
+  return books.map((book) => {
+    const product = products.find((p) => String(p.id) === book.id);
+    const bundleMeta = product ? extractBundleMeta(product) : undefined;
+    if (!bundleMeta?.length) return book;
+
+    const items: ComboBundleItem[] = [];
+    for (const meta of bundleMeta) {
+      const component = byId.get(meta.id) ?? (meta.sku ? bySku.get(meta.sku) : undefined);
+      if (!component) continue;
+      const mapped = mapProduct(component);
+      items.push({
+        id: mapped.id,
+        sku: mapped.sku,
+        title: mapped.title,
+        price: mapped.price,
+        originalPrice: mapped.originalPrice,
+        coverImage: mapped.coverImage,
+        inStock: mapped.inStock,
+        optional: meta.optional,
+        defaultQuantity: meta.quantity,
+      });
+    }
+    if (items.length === 0) return book;
+    return { ...book, bundleItems: items };
+  });
 }
 
 async function resolveCategories(names: string[]): Promise<{ id: number }[]> {
@@ -377,7 +483,7 @@ function buildProductBody(
   if (input.edition) meta.push({ key: '_ap_edition', value: input.edition });
   if (typeof input.pages === 'number') meta.push({ key: '_ap_pages', value: String(input.pages) });
   if (input.examTarget) meta.push({ key: '_ap_exam_target', value: input.examTarget });
-  if (input.samplePdfUrl) meta.push({ key: '_ap_sample_pdf_url', value: input.samplePdfUrl });
+  if (typeof input.samplePdfUrl === 'string') meta.push({ key: '_ap_sample_pdf_url', value: input.samplePdfUrl });
   if (input.features?.length) meta.push({ key: '_ap_features', value: input.features.join('\n') });
   if (input.tableOfContents?.length)
     meta.push({ key: '_ap_table_of_contents', value: input.tableOfContents.join('\n') });

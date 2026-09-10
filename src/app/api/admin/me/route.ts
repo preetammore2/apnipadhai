@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ADMIN_SESSION_COOKIE, verifyAdminSession } from '@/lib/admin-auth';
+import { getRequestAdminRole } from '@/lib/auth';
 
 export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
+  const role = getRequestAdminRole(request);
   return NextResponse.json(
-    {
-      authed: verifyAdminSession(request.cookies.get(ADMIN_SESSION_COOKIE)?.value),
-    },
+    { authed: role !== null, role },
     { headers: { 'Cache-Control': 'no-store' } },
   );
 }

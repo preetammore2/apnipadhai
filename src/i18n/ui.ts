@@ -214,8 +214,8 @@ export const HI_UI: Record<string, string> = {
   'Doorstep Delivery': 'घर तक डिलीवरी',
   'Buy Now': 'कार्ट में डालें',
   'OFFICIAL PUBLICATION STORE': 'आधिकारिक प्रकाशन स्टोर',
-  'Authentic printed books & practice guides written by Rohit Sir & senior faculty. Fast courier doorstep delivery across India.':
-    'रोहित सर और वरिष्ठ शिक्षकों द्वारा लिखी गई प्रामाणिक प्रिंटेड किताबें एवं प्रैक्टिस गाइड। पूरे भारत में तेज़ कूरियर घर-घर डिलीवरी।',
+  'Authentic printed books & practice guides written by Rohit Sir & senior faculty. Fast courier doorstep delivery across India. For order support, call or WhatsApp us at +91 70734 80809.':
+    'रोहित सर और वरिष्ठ शिक्षकों द्वारा लिखी गई प्रामाणिक प्रिंटेड किताबें एवं प्रैक्टिस गाइड। पूरे भारत में तेज़ कूरियर घर-घर डिलीवरी। ऑर्डर सहायता के लिए +91 70734 80809 पर कॉल या WhatsApp करें।',
   'Search books (e.g. Science, Hindi, English, Ankganit)...':
     'किताबें खोजें (जैसे विज्ञान, हिंदी, इंग्लिश, अंकगणित)...',
 

@@ -60,7 +60,7 @@ export const FAQ_DATA: FaqItem[] = [
     category: 'Courses & Test Series',
     question: 'How can I get my doubts cleared?',
     answer:
-      'Every batch includes live doubt sessions with faculty. You can also reach the helpline at +91 7568716768, and our support team will connect with you.',
+      'Every batch includes live doubt sessions with faculty. You can also reach the helpline at +91 70734 80809, and our support team will connect with you.',
   },
   {
     id: 'payment-methods',
@@ -88,7 +88,7 @@ export const FAQ_DATA: FaqItem[] = [
     category: 'Account & App',
     question: 'How can I contact the Apni Padhai support team?',
     answer:
-      'You can call or WhatsApp us at +91 7568716768, email support@apnipadhaipublication.com, or use the Contact page form. Our team is available to help you with orders, courses, and any other queries.',
+      'You can call or WhatsApp us at +91 70734 80809, email support@apnipadhaipublication.com, or use the Contact page form. Our team is available to help you with orders, courses, and any other queries.',
   },
 ];
 
