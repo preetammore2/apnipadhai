@@ -8,6 +8,7 @@ import { CartDrawer } from '@/components/layout/CartDrawer';
 import { CartPersistence } from '@/components/layout/CartPersistence';
 import { WishlistPersistence } from '@/components/layout/WishlistPersistence';
 import { LanguagePersistence } from '@/components/layout/LanguagePersistence';
+import { WhatsAppFloat } from '@/components/layout/WhatsAppFloat';
 import { Toaster } from 'sonner';
 
 const inter = Inter({
@@ -70,6 +71,7 @@ export default function RootLayout({
             <main className="flex-grow pb-16 sm:pb-0">{children}</main>
             <Footer />
             <CartDrawer />
+            <WhatsAppFloat />
             <Toaster position="top-right" richColors />
           </div>
         </ReduxProvider>
