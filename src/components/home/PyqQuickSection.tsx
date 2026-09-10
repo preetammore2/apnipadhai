@@ -181,8 +181,6 @@ export const PyqQuickSection: React.FC = () => {
               </button>
             )}
             {/* Fade edges */}
-            {canScrollLeft && <div className="absolute left-0 top-0 bottom-0 w-8 sm:w-12 bg-gradient-to-r from-slate-50 to-transparent z-10 pointer-events-none" />}
-            {canScrollRight && <div className="absolute right-0 top-0 bottom-0 w-8 sm:w-12 bg-gradient-to-l from-slate-50 to-transparent z-10 pointer-events-none" />}
 
             <div className="overflow-hidden -mx-4 sm:-mx-6 lg:-mx-8">
               <div

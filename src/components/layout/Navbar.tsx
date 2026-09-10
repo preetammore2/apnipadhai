@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -43,6 +43,26 @@ export const Navbar: React.FC = () => {
   const isSearchOpen = useAppSelector((state) => state.ui.isSearchOpen);
   const searchQuery = useAppSelector((state) => state.ui.searchQuery);
   const { data: allBooks = [] } = useGetBooksQuery();
+
+  const activeLinkRef = useRef<HTMLAnchorElement>(null);
+  const [pill, setPill] = useState({ left: 0, width: 0 });
+
+  const measurePill = useCallback(() => {
+    const el = activeLinkRef.current;
+    if (!el) return;
+    setPill((prev) => {
+      const left = el.offsetLeft;
+      const width = el.offsetWidth;
+      if (prev.left === left && prev.width === width) return prev;
+      return { left, width };
+    });
+  }, []);
+
+  useEffect(() => {
+    measurePill();
+    window.addEventListener('resize', measurePill);
+    return () => window.removeEventListener('resize', measurePill);
+  }, [measurePill, pathname]);
 
   const normalizedQuery = searchQuery.trim().toLowerCase();
   const searchBooks = normalizedQuery
@@ -160,29 +180,26 @@ export const Navbar: React.FC = () => {
             </Link>
 
             {/* Desktop Navigation Links */}
-            <nav className="hidden lg:flex items-center gap-1 bg-slate-50/80 p-1.5 rounded-full border border-slate-200/80">
+            <nav className="hidden lg:flex relative items-center gap-1 bg-slate-50/80 p-1.5 rounded-full border border-slate-200/80">
+              <motion.span
+                className="absolute inset-y-1 bg-yellow-400 shadow-sm rounded-full"
+                initial={false}
+                animate={{ left: pill.left, width: pill.width }}
+                transition={{ type: 'spring', stiffness: 460, damping: 36, mass: 0.9 }}
+              />
               {navLinks.map((link) => {
                 const isActive = isLinkActive(link.href);
 
                 return (
                   <Link
                     key={link.name}
+                    ref={isActive ? activeLinkRef : undefined}
                     href={link.href}
-                    className={`group relative flex items-center gap-1 px-3 xl:px-4 py-2 rounded-full text-xs font-bold transition-colors ${
+                    className={`group relative z-10 flex items-center gap-1 px-3 xl:px-4 py-2 rounded-full text-xs font-bold transition-colors duration-300 ${
                       isActive ? 'text-navy-900' : 'text-slate-700 hover:text-navy-900'
                     }`}
                   >
-                    <span className="absolute inset-0 rounded-full bg-slate-200/70 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-                    {isActive && (
-                      <motion.span
-                        layoutId="nav-pill"
-                        className="absolute inset-0 bg-yellow-400 shadow-sm rounded-full"
-                        transition={{ type: 'spring', stiffness: 420, damping: 38, mass: 0.8 }}
-                        initial={{ scale: 0.9, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                      />
-                    )}
-                    <span className="relative z-10">{link.name}</span>
+                    <span className="relative transition-colors duration-300">{link.name}</span>
                   </Link>
                 );
               })}
