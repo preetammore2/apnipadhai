@@ -97,7 +97,7 @@ export const FeaturesSection: React.FC = () => {
             {t('WHY APNI PADHAI')}
           </span>
           <h2 className="text-3xl sm:text-4xl font-extrabold font-heading text-navy-900 mt-3">
-            {t('Why Over 100,000 Aspirants Choose Us')}
+            {t('Why Over 1,000,000 Aspirants Choose Us')}
           </h2>
           <p className="text-slate-600 text-sm sm:text-base mt-2">
             {t('Built with modern technology, student-centric pedagogy, and affordable pricing to guarantee your exam success.')}

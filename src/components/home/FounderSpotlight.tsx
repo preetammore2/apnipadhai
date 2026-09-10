@@ -53,7 +53,7 @@ export const FounderSpotlight: React.FC = () => {
                   <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">{t('Selections Guided')}</p>
                 </div>
                 <div className="bg-white/[0.04] border border-white/10 rounded-xl p-2.5 sm:p-3 text-center">
-                  <p className="text-base sm:text-xl font-black font-heading text-brand-300 leading-none">50M+</p>
+                  <p className="text-base sm:text-xl font-black font-heading text-brand-300 leading-none">100M+</p>
                   <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">{t('Lecture Views')}</p>
                 </div>
               </div>
@@ -70,7 +70,7 @@ export const FounderSpotlight: React.FC = () => {
               {t('"Education Should Not Be a Luxury. Every Aspirant Deserves Premium Guidance."')}
             </h2>
 
-            <div className="relative pl-6 border-l border-brand-400/40 space-y-3">
+            <div className="relative pl-6 space-y-3">
               <Quote className="w-7 h-7 text-brand-400/30 absolute -top-2 -left-3" />
               <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
                 {t('Apni Padhai was established with a singular mission: to eliminate the high barrier of expensive coaching institutes. We bring exam-oriented teaching, high-yield Brahmastra study books, and direct mentor support straight to your mobile screen.')}
@@ -88,7 +88,7 @@ export const FounderSpotlight: React.FC = () => {
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>{t('50M+ Views across Educational Lectures')}</span>
+                <span>{t('100M+ Views across Educational Lectures')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />

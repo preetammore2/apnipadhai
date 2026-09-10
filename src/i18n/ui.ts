@@ -84,7 +84,7 @@ export const HI_UI: Record<string, string> = {
 
   // ---- Trust ----
   'TRUSTED BY ASPIRANTS NATIONWIDE': 'पूरे देश के उम्मीदवारों का भरोसा',
-  'A Platform Trusted by over 1 Lakh+ Students': '1 लाख+ से अधिक छात्रों का विश्वसनीय प्लेटफॉर्म',
+  'A Platform Trusted by over 1M+ Students': '1M+ से अधिक छात्रों का विश्वसनीय प्लेटफॉर्म',
   'Active Students': 'सक्रिय छात्र',
   'Brahmastra Books Sold': 'ब्रह्मास्त्र किताबें बिकीं',
   'App Downloads': 'ऐप डाउनलोड',
@@ -93,7 +93,7 @@ export const HI_UI: Record<string, string> = {
 
   // ---- Features ----
   'WHY APNI PADHAI': 'क्यों अपनी पढ़ाई',
-  'Why Over 100,000 Aspirants Choose Us': '1 लाख से अधिक उम्मीदवार हमें क्यों चुनते हैं',
+  'Why Over 1,000,000 Aspirants Choose Us': '10 लाख से अधिक उम्मीदवार हमें क्यों चुनते हैं',
   'Built with modern technology, student-centric pedagogy, and affordable pricing to guarantee your exam success.':
     'आधुनिक तकनीक, छात्र-केंद्रित शिक्षण पद्धति और किफायती मूल्य के साथ आपकी परीक्षा में सफलता की गारंटी।',
   'Expert Subject Teachers': 'विशेषज्ञ विषय शिक्षक',
@@ -298,7 +298,7 @@ export const HI_UI: Record<string, string> = {
     'अपनी पढ़ाई की स्थापना एक ही मिशन के साथ हुई: महंगे कोटा और जयपुर कोचिंग संस्थानों की ऊंची दीवार को खत्म करना। हम परीक्षा-उन्मुख शिक्षण, हाई-यील्ड ब्रह्मास्त्र स्टडी बुक्स और सीधा मेंटर सपोर्ट आपकी मोबाइल स्क्रीन तक लाते हैं।',
   'Simplifying Rajasthan History & Art-Culture': 'राजस्थान इतिहास एवं कला-संस्कृति को सरल बनाना',
   'Author of Bestselling General Science Guide': 'बेस्टसेलिंग सामान्य विज्ञान गाइड के लेखक',
-  '50M+ Views across Educational Lectures': 'शैक्षिक लेक्चर पर 50M+ व्यूज़',
+  '100M+ Views across Educational Lectures': 'शैक्षिक लेक्चर पर 100M+ व्यूज़',
   'Dedicated Live Doubt Sessions': 'समर्पित लाइव डाउट सत्र',
   'Read Full Founder Story': 'पूरी संस्थापक कहानी पढ़ें',
   'Watch Free Lectures on YouTube': 'YouTube पर फ्री लेक्चर देखें',
@@ -337,15 +337,15 @@ export const HI_UI: Record<string, string> = {
   'Apni Padhai YouTube': 'अपनी पढ़ाई YouTube',
   'Apni Padhai Telegram': 'अपनी पढ़ाई Telegram',
   'Apni Padhai Instagram': 'अपनी पढ़ाई Instagram',
-  '600K+ Subscribers': '600K+ सब्सक्राइबर्स',
+  '700K+ Subscribers': '700K+ सब्सक्राइबर्स',
   '200K+ Followers': '200K+ फॉलोअर्स',
   '150K+ Community': '150K+ कम्युनिटी',
 
   // ---- Home final CTA ----
   'READY TO CRACK YOUR DREAM EXAM?': 'क्या आप अपने सपनों की परीक्षा पास करने के लिए तैयार हैं?',
   'Start Your Success Journey With Apni Padhai Today': 'आज ही अपनी पढ़ाई के साथ सफलता की यात्रा शुरू करें',
-  'Join 1,00,000+ students preparing with India\'s smart learning platform. Get instant access to online classes & Brahmastra books.':
-    'भारत के स्मार्ट लर्निंग प्लेटफॉर्म के साथ तैयारी कर रहे 1,00,000+ छात्रों से जुड़ें। ऑनलाइन क्लासेज और ब्रह्मास्त्र किताबों तक तुरंत पहुंच पाएं।',
+  'Join 1,000,000+ students preparing with India\'s smart learning platform. Get instant access to online classes & Brahmastra books.':
+    'भारत के स्मार्ट लर्निंग प्लेटफॉर्म के साथ तैयारी कर रहे 1,000,000+ छात्रों से जुड़ें। ऑनलाइन क्लासेज और ब्रह्मास्त्र किताबों तक तुरंत पहुंच पाएं।',
   'Explore All Batches': 'सभी बैच देखें',
   'Install App': 'ऐप इंस्टॉल करें',
 
@@ -429,7 +429,7 @@ export const HI_UI: Record<string, string> = {
     'रोहित सर ने सरकारी अधिकारी पदों की तैयारी करने वाले ग्रामीण और मध्यम वर्ग के छात्रों की आर्थिक कठिनाई को दूर करने की दृष्टि से अपनी पढ़ाई की स्थापना की। सरलीकृत, विज़ुअल ब्रह्मास्त्र स्टडी गाइड और किफायती ऑनलाइन क्लासेज बनाकर, अपनी पढ़ाई ने 12,500+ सफल रैंकर्स का मार्गदर्शन किया है।',
   'Pioneered visual trick methods for Rajasthan Art & Culture': 'राजस्थान कला एवं संस्कृति के लिए विज़ुअल ट्रिक विधियों का अग्रणी',
   'Mentored Rank 1, 4 & 12 in Rajasthan Competitive Exams': 'राजस्थान प्रतियोगी परीक्षाओं में रैंक 1, 4 और 12 का मार्गदर्शन',
-  'Over 50 Million views across educational YouTube lectures': 'शैक्षिक YouTube लेक्चर पर 50 मिलियन से अधिक व्यूज़',
+  'Over 100 Million views across educational YouTube lectures': 'शैक्षिक YouTube लेक्चर पर 100 मिलियन से अधिक व्यूज़',
   'Our Mission': 'हमारा मिशन',
   'To provide affordable, top-tier exam preparation content, e-books, and live coaching to every student in India regardless of location.':
     'स्थान की परवाह किए बिना भारत के हर छात्र को किफायती, उच्च-स्तरीय परीक्षा तैयारी सामग्री, ई-बुक्स और लाइव कोचिंग प्रदान करना।',

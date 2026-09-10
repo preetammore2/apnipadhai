@@ -64,21 +64,30 @@ export const AppDownloadSection: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Visual Image */}
+          {/* Right Visual Image - Phone Mockup */}
           <div className="hidden lg:flex lg:col-span-5 relative justify-center">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, ease: 'easeOut' }}
-              className="relative w-72 sm:w-80 h-[500px] rounded-3xl overflow-hidden shadow-2xl border border-brand-400/30 bg-white/[0.03]"
+              className="relative w-72 sm:w-80 rounded-[2.8rem] bg-navy-950 px-3 pt-12 pb-4 shadow-2xl border border-white/10"
             >
-              <Image
-                src="/images/app_ui.png"
-                alt={t('Apni Padhai Mobile App Screens')}
-                fill
-                className="object-cover"
-              />
+              {/* Speaker Grille */}
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 w-14 h-1.5 rounded-full bg-white/20 z-10" />
+              {/* Notch / Punch Hole Camera */}
+              <div className="absolute top-7 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-navy-900 border border-white/20 z-10" />
+              {/* Screen */}
+              <div className="relative overflow-hidden rounded-[2rem] bg-black aspect-[1080/2108]">
+                <Image
+                  src="/images/app_screens.png"
+                  alt={t('Apni Padhai Mobile App Screens')}
+                  fill
+                  className="object-contain"
+                />
+              </div>
+              {/* Home Indicator */}
+              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-24 h-1 rounded-full bg-white/30 z-10" />
             </motion.div>
           </div>
 

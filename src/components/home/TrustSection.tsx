@@ -10,8 +10,8 @@ export const TrustSection: React.FC = () => {
   const stats = [
     {
       label: 'Active Students',
-      value: 100,
-      suffix: 'K+',
+      value: 1,
+      suffix: 'M+',
       icon: <Users className="w-6 h-6 text-brand-500" />,
       bg: 'bg-brand-50',
     },
@@ -24,7 +24,7 @@ export const TrustSection: React.FC = () => {
     },
     {
       label: 'App Downloads',
-      value: 150,
+      value: 300,
       suffix: 'K+',
       icon: <Download className="w-6 h-6 text-emerald-500" />,
       bg: 'bg-emerald-50',
@@ -53,7 +53,7 @@ export const TrustSection: React.FC = () => {
             {t('TRUSTED BY ASPIRANTS NATIONWIDE')}
           </span>
           <h2 className="text-2xl sm:text-3xl font-extrabold font-heading text-navy-900 mt-2">
-            {t('A Platform Trusted by over 1 Lakh+ Students')}
+            {t('A Platform Trusted by over 1M+ Students')}
           </h2>
         </div>
 

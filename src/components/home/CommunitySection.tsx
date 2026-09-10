@@ -13,7 +13,7 @@ export const CommunitySection: React.FC = () => {
     {
       id: 'youtube',
       name: 'Apni Padhai YouTube',
-      count: '600K+ Subscribers',
+      count: '700K+ Subscribers',
       icon: <FaYoutube className="w-10 h-10 text-red-600" />,
       bgGradient: 'from-red-50 to-amber-50/50 hover:border-red-300',
       badge: 'FREE LECTURES & TRICKS',
@@ -51,10 +51,6 @@ export const CommunitySection: React.FC = () => {
         
         {/* Section Header */}
         <div className="max-w-3xl mx-auto space-y-3">
-          <span className="text-xs font-black text-amber-800 uppercase tracking-widest bg-yellow-100 px-3.5 py-1.5 rounded-full border border-yellow-300">
-            {t('OUR LEARNING COMMUNITY')}
-          </span>
-
           <h2 className="text-3xl sm:text-5xl font-black font-heading text-navy-900 tracking-tight">
             {t('Join The Apni Padhai Family, Today!')}
           </h2>

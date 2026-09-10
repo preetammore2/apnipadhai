@@ -4,7 +4,7 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useTranslation } from '@/i18n/useTranslation';
-import { CheckCircle2, Heart, ShieldCheck, Target, Send, ArrowRight, Download, Sparkles } from 'lucide-react';
+import { CheckCircle2, Heart, ShieldCheck, Target, Send, ArrowRight, Download } from 'lucide-react';
 import { FaYoutube } from 'react-icons/fa';
 import { FeaturesSection } from '@/components/home/FeaturesSection';
 import { TrustSection } from '@/components/home/TrustSection';
@@ -63,7 +63,7 @@ export default function AboutPage() {
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                <span>{t('Over 50 Million views across educational YouTube lectures')}</span>
+                <span>{t('Over 100 Million views across educational YouTube lectures')}</span>
               </div>
             </div>
 
@@ -138,16 +138,12 @@ export default function AboutPage() {
           <div className="absolute bottom-0 left-0 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
 
           <div className="max-w-4xl mx-auto px-4 relative z-10 space-y-6">
-            <span className="px-4 py-1.5 bg-yellow-400/10 text-yellow-300 border border-yellow-400/20 rounded-full text-xs font-black uppercase tracking-wider inline-flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-yellow-400" /> {t('READY TO CRACK YOUR DREAM EXAM?')}
-            </span>
-
             <h2 className="text-3xl sm:text-5xl font-black font-heading tracking-tight leading-tight text-white">
               {t('Start Your Success Journey With Apni Padhai Today')}
             </h2>
 
             <p className="text-slate-300 text-sm sm:text-base max-w-xl mx-auto">
-              {t("Join 1,00,000+ students preparing with India's smart learning platform. Get instant access to online classes & Brahmastra books.")}
+              {t("Join 1,000,000+ students preparing with India's smart learning platform. Get instant access to online classes & Brahmastra books.")}
             </p>
 
             <div className="flex flex-wrap items-center justify-center gap-4 pt-4">

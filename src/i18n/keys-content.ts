@@ -71,7 +71,7 @@ export const KEYS_CONTENT: Record<string, string> = {
     'रोहित सर ने सरकारी अधिकारी पदों की तैयारी करने वाले ग्रामीण और मध्यम वर्ग के छात्रों की आर्थिक कठिनाई को दूर करने की दृष्टि से अपनी पढ़ाई की स्थापना की। सरलीकृत, विज़ुअल ब्रह्मास्त्र स्टडी गाइड और किफायती ऑनलाइन क्लासेज बनाकर, अपनी पढ़ाई ने 12,500+ सफल रैंकर्स का मार्गदर्शन किया है।',
   'Pioneered visual trick methods for Rajasthan Art & Culture': 'राजस्थान कला एवं संस्कृति के लिए विज़ुअल ट्रिक विधियों का अग्रणी',
   'Mentored Rank 1, 4 & 12 in Rajasthan Competitive Exams': 'राजस्थान प्रतियोगी परीक्षाओं में रैंक 1, 4 और 12 का मार्गदर्शन',
-  'Over 50 Million views across educational YouTube lectures': 'शैक्षिक YouTube लेक्चर पर 50 मिलियन से अधिक व्यूज़',
+  'Over 100 Million views across educational YouTube lectures': 'शैक्षिक YouTube लेक्चर पर 100 मिलियन से अधिक व्यूज़',
   'YouTube Channel': 'YouTube चैनल',
   'Telegram Community': 'Telegram कम्युनिटी',
   'Our Mission': 'हमारा मिशन',

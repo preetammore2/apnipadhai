@@ -14,7 +14,7 @@ export const FACULTY_DATA: Faculty[] = [
     achievements: [
       'Authored bestselling Brahmastra book series',
       'Guided Rank 1, Rank 4, Rank 12 in Rajasthan Competitive Exams',
-      'Over 50 Million views across educational YouTube lectures'
+      'Over 100 Million views across educational YouTube lectures'
     ],
     socialLinks: {
       youtube: 'https://www.youtube.com/@AapniPadhai',
