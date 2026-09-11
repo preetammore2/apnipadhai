@@ -1,6 +1,6 @@
 /**
  * Feedbacks (student reviews). Entries managed through the admin portal are
- * stored in MongoDB; when none exist yet the public reader falls back to the
+ * stored in Firebase; when none exist yet the public reader falls back to the
  * WordPress `ap-feedback` page so existing content keeps rendering.
  */
 
@@ -72,7 +72,7 @@ export async function getApprovedFeedback(): Promise<FeedbackItem[]> {
     const items = await listFeedback();
     if (items.length > 0) return items;
   } catch (error) {
-    console.error('[feedback] MongoDB unavailable, using WordPress', error);
+    console.error('[feedback] Firebase unavailable, using WordPress', error);
   }
 
   const page = await getWordPressPage(FEEDBACK_PAGE_SLUG);

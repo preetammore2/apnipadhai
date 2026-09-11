@@ -28,7 +28,7 @@ export async function GET() {
   try {
     managed = await listPublishedPosts();
   } catch (error) {
-    console.error('[api/posts] MongoDB unavailable, using WordPress', error);
+    console.error('[api/posts] Firebase unavailable, using WordPress', error);
   }
 
   try {

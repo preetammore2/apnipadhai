@@ -257,7 +257,7 @@ function mapManagedCourse(item: CourseSectionValue, index: number) {
   };
 }
 
-/** MongoDB-managed courses (edited via the admin portal / seeded defaults). */
+/** Firebase-managed courses (edited via the admin portal / seeded defaults). */
 async function fetchManagedCourses(): Promise<ReturnType<typeof mapManagedCourse>[]> {
   try {
     const value = await getSectionValue<CourseSectionValue[]>('courses');

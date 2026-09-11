@@ -13,7 +13,7 @@ export async function GET() {
   try {
     const [books, samples] = await Promise.all([getBooks(), getBookSamples()]);
     const result = enrichBooksWithSamples(books, samples);
-    // Keep the MongoDB mirror fresh (best-effort, never blocks the response).
+    // Keep the Firebase mirror fresh (best-effort, never blocks the response).
     void mirrorBooksSafe(() => replaceMirroredBooks(result));
     return NextResponse.json(result);
   } catch (error) {

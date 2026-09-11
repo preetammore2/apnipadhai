@@ -119,7 +119,7 @@ export async function PUT(
 
 /**
  * Turn an admin/moderator-supplied cover image into a URL that WooCommerce can
- * use as images[].src. Data URLs (client uploads) are stored in MongoDB and
+ * use as images[].src. Data URLs (client uploads) are stored in Firebase and
  * served back through /api/book-covers/:id so a real https URL is always sent
  * to the store.
  */

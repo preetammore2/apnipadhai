@@ -33,14 +33,14 @@ const ALL_TILES: Tile[] = [
   {
     href: '/admin/books',
     title: 'Books Management',
-    desc: 'Add, edit or delete books — synced to your WooCommerce store and mirrored to MongoDB.',
+    desc: 'Add, edit or delete books — synced to your WooCommerce store and mirrored to Firebase.',
     icon: <BookOpen className={TILE_ICON} />,
     bg: 'bg-brand-100 text-brand-700',
   },
   {
     href: '/admin/content',
     title: 'Site Content',
-    desc: 'Edit the hero, testimonials, FAQs and courses shown on the site. Saved to MongoDB and picked up automatically.',
+    desc: 'Edit the hero, testimonials, FAQs and courses shown on the site. Saved to Firebase and picked up automatically.',
     icon: <Settings2 className={TILE_ICON} />,
     bg: 'bg-navy-100 text-navy-700',
   },
@@ -61,14 +61,14 @@ const ALL_TILES: Tile[] = [
   {
     href: '/admin/results',
     title: 'Results & Selections',
-    desc: 'Manage rankers and selections — MongoDB entries merged with the WordPress photo-wall.',
+    desc: 'Manage rankers and selections — Firebase entries merged with the WordPress photo-wall.',
     icon: <ImageIcon className={TILE_ICON} />,
     bg: 'bg-blue-100 text-blue-700',
   },
   {
     href: '/admin/pyqs',
     title: 'Previous Year Papers',
-    desc: 'Add, edit or delete PYQ PDFs — MongoDB entries merged with the WordPress download list.',
+    desc: 'Add, edit or delete PYQ PDFs — Firebase entries merged with the WordPress download list.',
     icon: <Download className={TILE_ICON} />,
     bg: 'bg-rose-100 text-rose-700',
   },

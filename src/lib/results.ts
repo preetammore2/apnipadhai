@@ -1,6 +1,6 @@
 /**
  * Results (Selections). Entries managed through the admin portal are stored in
- * MongoDB; when none exist yet the public reader falls back to the WordPress
+ * Firebase; when none exist yet the public reader falls back to the WordPress
  * `ap-results` page (and /results further falls back to the photo folders).
  */
 
@@ -109,7 +109,7 @@ function toFolderStudents(items: ResultInput[]): FolderStudent[] {
   }));
 }
 
-/** Public (unauthenticated) read of the managed results (MongoDB-first). */
+/** Public (unauthenticated) read of the managed results (Firebase-first). */
 export async function getManagedResults(): Promise<ResultGroup> {
   const group: ResultGroup = { rajasthanPolice: [], reet: [] };
 
@@ -122,11 +122,11 @@ export async function getManagedResults(): Promise<ResultGroup> {
       group.reet = toFolderStudents(items.filter((i) => i.category === 'REET L1/L2'));
     }
   } catch (error) {
-    console.error('[results] MongoDB unavailable, using WordPress only', error);
+    console.error('[results] Firebase unavailable, using WordPress only', error);
   }
 
   // Merge the WordPress ap-results page so images come from BOTH stores.
-  // MongoDB entries win; WordPress adds any students not already present.
+  // Firebase entries win; WordPress adds any students not already present.
   try {
     const page = await getWordPressPage(RESULTS_PAGE_SLUG);
     if (page) {
@@ -135,7 +135,7 @@ export async function getManagedResults(): Promise<ResultGroup> {
       group.reet = mergeGroups(group.reet, wp.reet);
     }
   } catch (error) {
-    console.error('[results] WordPress unavailable, using MongoDB only', error);
+    console.error('[results] WordPress unavailable, using Firebase only', error);
   }
 
   return group;

@@ -117,7 +117,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('[api/admin/content] list error', error);
     return NextResponse.json(
-      { success: false, message: 'Failed to load site content from MongoDB' },
+      { success: false, message: 'Failed to load site content from Firebase' },
       { status: 502 },
     );
   }
@@ -165,6 +165,6 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ success: true, section: saved });
   } catch (error) {
     console.error('[api/admin/content] save error', error);
-    return NextResponse.json({ success: false, message: 'Failed to save content to MongoDB' }, { status: 502 });
+    return NextResponse.json({ success: false, message: 'Failed to save content to Firebase' }, { status: 502 });
   }
 }

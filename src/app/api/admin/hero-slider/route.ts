@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('[api/admin/hero-slider] list error', error);
     return NextResponse.json(
-      { success: false, message: 'Failed to load hero slides from MongoDB' },
+      { success: false, message: 'Failed to load hero slides from Firebase' },
       { status: 502 },
     );
   }
@@ -64,7 +64,7 @@ export async function PUT(request: NextRequest) {
   } catch (error) {
     console.error('[api/admin/hero-slider] save error', error);
     return NextResponse.json(
-      { success: false, message: 'Failed to save hero slides to MongoDB' },
+      { success: false, message: 'Failed to save hero slides to Firebase' },
       { status: 502 },
     );
   }

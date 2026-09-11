@@ -41,9 +41,9 @@ interface SectionReport {
 type ReportSections = ContentSection | 'updates' | 'pyqs';
 
 /**
- * Import content from WordPress into MongoDB so both stores stay in sync.
+ * Import content from WordPress into Firebase so both stores stay in sync.
  *
- * This is additive only: WordPress items that are already present in MongoDB
+ * This is additive only: WordPress items that are already present in Firebase
  * (matched by name / question / title) are skipped, so admin edits are never
  * overwritten. The public readers merge both stores, so anything WordPress-only
  * is still visible even before this import runs.
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
 
   if (!isDbConfigured()) {
     return NextResponse.json(
-      { success: false, message: 'MongoDB is not configured on this server' },
+      { success: false, message: 'Firebase is not configured on this server' },
       { status: 502 },
     );
   }

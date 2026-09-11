@@ -5,7 +5,7 @@ export const runtime = 'nodejs';
 
 /**
  * Serves book cover images that admins/moderators uploaded through the books
- * manager (stored in MongoDB). Public because these are product covers and the
+ * manager (stored in Firebase). Public because these are product covers and the
  * storefront renders them directly; only authenticated back-office users can
  * write them.
  */

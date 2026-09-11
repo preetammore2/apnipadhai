@@ -9,35 +9,33 @@ export interface BookCover {
 
 export interface BookCoverDoc {
   id: string;
-  data: Buffer;
+  dataBase64: string;
   contentType: string;
   updatedAt: Date;
 }
 
 /**
  * Stores moderator-uploaded book cover images that are not hosted elsewhere.
- * The image is stored raw in MongoDB and served back through
+ * The image is stored as base64 in Firestore and served back through
  * /api/book-covers/:id so WooCommerce can reference a real https URL.
  */
 export async function setBookCover(id: string, data: Buffer, contentType: string): Promise<void> {
-  const db = await getDb();
-  await db.collection<BookCoverDoc>(COVER_COLLECTION).updateOne(
-    { id },
-    { $set: { id, data, contentType, updatedAt: new Date() } },
-    { upsert: true },
-  );
+  await getDb().collection(COVER_COLLECTION).doc(id).set({
+    id,
+    dataBase64: data.toString('base64'),
+    contentType,
+    updatedAt: new Date(),
+  });
 }
 
 export async function getBookCover(id: string): Promise<BookCover | null> {
-  const db = await getDb();
-  const doc = await db
-    .collection<BookCoverDoc>(COVER_COLLECTION)
-    .findOne({ id }, { projection: { _id: 0, data: 1, contentType: 1 } });
-  if (!doc || !doc.data) return null;
-  return { data: Buffer.from(doc.data as unknown as Uint8Array), contentType: doc.contentType };
+  const doc = await getDb().collection(COVER_COLLECTION).doc(id).get();
+  if (!doc.exists) return null;
+  const data = doc.data() as BookCoverDoc | undefined;
+  if (!data?.dataBase64) return null;
+  return { data: Buffer.from(data.dataBase64, 'base64'), contentType: data.contentType };
 }
 
 export async function deleteBookCover(id: string): Promise<void> {
-  const db = await getDb();
-  await db.collection<BookCoverDoc>(COVER_COLLECTION).deleteOne({ id });
+  await getDb().collection(COVER_COLLECTION).doc(id).delete();
 }

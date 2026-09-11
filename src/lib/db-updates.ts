@@ -1,5 +1,5 @@
-import { ObjectId } from 'mongodb';
-import { COLLECTIONS, getDb } from '@/lib/db';
+import { COLLECTIONS, getDb, toJsDate } from '@/lib/db';
+import type { CollectionReference, DocumentData } from 'firebase-admin/firestore';
 
 export type PostStatus = 'publish' | 'draft' | 'pending' | 'future' | 'private' | 'trash';
 
@@ -35,7 +35,9 @@ export interface PostInput {
   author?: string;
 }
 
-type PostWithId = PostDoc & { _id: ObjectId };
+function postsColl(): CollectionReference<DocumentData> {
+  return getDb().collection(COLLECTIONS.updates);
+}
 
 function slugify(text: string): string {
   return text
@@ -47,15 +49,16 @@ function slugify(text: string): string {
     .replace(/^-+|-+$/g, '') || 'post';
 }
 
-async function uniqueSlug(coll: { findOne: (filter: Record<string, unknown>) => Promise<PostDoc | null> }, base: string): Promise<string> {
+async function uniqueSlug(base: string): Promise<string> {
   const slug = slugify(base);
   let candidate = slug;
   let suffix = 2;
-  while (await coll.findOne({ slug: candidate })) {
+  while (true) {
+    const existing = await postsColl().where('slug', '==', candidate).limit(1).get();
+    if (existing.empty) return candidate;
     candidate = `${slug}-${suffix}`;
     suffix += 1;
   }
-  return candidate;
 }
 
 function stripHtml(html: string | undefined): string {
@@ -76,50 +79,48 @@ function embedImage(content: string, imageUrl?: string): string {
   return `<img src="${url.replace(/"/g, '&quot;')}" alt="" />\n${content}`;
 }
 
-function toStoredPost(doc: PostWithId): StoredPost {
-  const { _id, ...rest } = doc;
-  return { ...rest, id: _id.toString() };
+function toStoredPost(id: string, data: DocumentData): StoredPost {
+  const doc = data as PostDoc;
+  return {
+    ...doc,
+    id,
+    createdAt: toJsDate(doc.createdAt),
+    updatedAt: toJsDate(doc.updatedAt),
+  };
 }
 
-const LIST_FILTER: Record<string, unknown> = { status: { $ne: 'trash' } };
+function sortByCreatedDesc(posts: StoredPost[]): StoredPost[] {
+  return posts.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+}
 
 export async function listPosts(): Promise<StoredPost[]> {
-  const db = await getDb();
-  const docs = await db
-    .collection<PostDoc>(COLLECTIONS.updates)
-    .find(LIST_FILTER)
-    .sort({ createdAt: -1 })
-    .toArray();
-  return docs.map((doc) => toStoredPost(doc as PostWithId));
+  const snap = await postsColl().get();
+  const posts = snap.docs
+    .map((doc) => toStoredPost(doc.id, doc.data()))
+    .filter((post) => post.status !== 'trash');
+  return sortByCreatedDesc(posts);
 }
 
 export async function listPublishedPosts(): Promise<StoredPost[]> {
-  const db = await getDb();
-  const docs = await db
-    .collection<PostDoc>(COLLECTIONS.updates)
-    .find({ status: 'publish' })
-    .sort({ createdAt: -1 })
-    .toArray();
-  return docs.map((doc) => toStoredPost(doc as PostWithId));
+  const snap = await postsColl().get();
+  const posts = snap.docs
+    .map((doc) => toStoredPost(doc.id, doc.data()))
+    .filter((post) => post.status === 'publish');
+  return sortByCreatedDesc(posts);
 }
 
 export async function getPost(id: string): Promise<StoredPost | null> {
-  const db = await getDb();
-  const doc = await db.collection<PostDoc>(COLLECTIONS.updates).findOne({
-    _id: new ObjectId(id),
-  });
-  return doc ? toStoredPost(doc as PostWithId) : null;
+  const doc = await postsColl().doc(id).get();
+  return doc.exists ? toStoredPost(doc.id, doc.data() as DocumentData) : null;
 }
 
 export async function getPostBySlug(slug: string): Promise<StoredPost | null> {
-  const db = await getDb();
-  const doc = await db.collection<PostDoc>(COLLECTIONS.updates).findOne({ slug });
-  return doc ? toStoredPost(doc as PostWithId) : null;
+  const snap = await postsColl().where('slug', '==', slug).limit(1).get();
+  const doc = snap.docs[0];
+  return doc ? toStoredPost(doc.id, doc.data()) : null;
 }
 
 export async function createPost(input: PostInput): Promise<StoredPost> {
-  const db = await getDb();
-  const coll = db.collection<PostDoc>(COLLECTIONS.updates);
   const now = new Date();
   const title = input.title.trim().slice(0, 300);
   const categories = (input.categories ?? [])
@@ -127,7 +128,7 @@ export async function createPost(input: PostInput): Promise<StoredPost> {
     .filter(Boolean)
     .slice(0, 3);
   const content = input.content ?? '';
-  const slug = await uniqueSlug(coll, title);
+  const slug = await uniqueSlug(title);
   const doc: PostDoc = {
     slug,
     title,
@@ -143,15 +144,12 @@ export async function createPost(input: PostInput): Promise<StoredPost> {
     createdAt: now,
     updatedAt: now,
   };
-  const result = await coll.insertOne(doc);
-  return toStoredPost({ ...doc, _id: result.insertedId });
+  const ref = await postsColl().add(doc);
+  return toStoredPost(ref.id, doc as unknown as DocumentData);
 }
 
 export async function updatePost(id: string, input: PostInput): Promise<StoredPost | null> {
-  const db = await getDb();
-  const coll = db.collection<PostDoc>(COLLECTIONS.updates);
-  const _id = new ObjectId(id);
-  const existing = await coll.findOne({ _id });
+  const existing = await getPost(id);
   if (!existing) return null;
 
   const title = input.title.trim().slice(0, 300);
@@ -163,12 +161,17 @@ export async function updatePost(id: string, input: PostInput): Promise<StoredPo
 
   let slug = existing.slug;
   if (title && title !== existing.title) {
-    slug = await uniqueSlug(coll, title);
+    const candidate = slugify(title);
+    const clash = await postsColl().where('slug', '==', candidate).limit(1).get();
+    if (clash.empty || clash.docs[0]?.id === id) {
+      slug = candidate;
+    } else {
+      slug = await uniqueSlug(title);
+    }
   }
 
   const now = new Date();
   const doc: PostDoc = {
-    ...existing,
     slug,
     title: title || existing.title,
     excerpt:
@@ -179,11 +182,14 @@ export async function updatePost(id: string, input: PostInput): Promise<StoredPo
     categories: categories.length > 0 ? categories : existing.categories,
     imageUrl:
       input.imageUrl !== undefined ? (input.imageUrl ?? '').trim() : existing.imageUrl,
+    author: existing.author,
+    date: existing.date,
     modified: now.toISOString(),
+    createdAt: existing.createdAt,
     updatedAt: now,
   };
-  await coll.updateOne({ _id }, { $set: doc });
-  return toStoredPost({ ...doc, _id });
+  await postsColl().doc(id).set(doc);
+  return toStoredPost(id, doc as unknown as DocumentData);
 }
 
 export async function setPostStatus(id: string, status: PostStatus): Promise<StoredPost | null> {
@@ -233,8 +239,6 @@ export interface ImportedPostInput {
 
 /** Import a post from WordPress, preserving its slug/date/html. Upserts by slug. */
 export async function upsertImportedPost(input: ImportedPostInput): Promise<StoredPost> {
-  const db = await getDb();
-  const coll = db.collection<PostDoc>(COLLECTIONS.updates);
   const now = new Date();
   const categories = (input.categories ?? [])
     .map((c) => c.trim().slice(0, 60))
@@ -256,11 +260,12 @@ export async function upsertImportedPost(input: ImportedPostInput): Promise<Stor
     createdAt: now,
     updatedAt: now,
   };
-  const existing = await coll.findOne({ slug: doc.slug });
+  const existing = await getPostBySlug(doc.slug);
   if (existing) {
-    await coll.updateOne({ _id: existing._id }, { $set: { ...doc, _id: existing._id } });
-    return toStoredPost({ ...doc, _id: existing._id });
+    const updated: PostDoc = { ...doc, createdAt: existing.createdAt };
+    await postsColl().doc(existing.id).set(updated as unknown as DocumentData);
+    return toStoredPost(existing.id, updated as unknown as DocumentData);
   }
-  const result = await coll.insertOne(doc);
-  return toStoredPost({ ...doc, _id: result.insertedId });
+  const ref = await postsColl().add(doc as unknown as DocumentData);
+  return toStoredPost(ref.id, doc as unknown as DocumentData);
 }

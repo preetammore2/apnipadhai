@@ -425,8 +425,8 @@ function mergeByKey<T>(
 }
 
 /**
- * Merge MongoDB-managed testimonials with the WordPress ap_testimonial items so
- * images come from BOTH stores. MongoDB entries win; WordPress adds any
+ * Merge Firebase-managed testimonials with the WordPress ap_testimonial items so
+ * images come from BOTH stores. Firebase entries win; WordPress adds any
  * students not already present (matched by name).
  */
 function normalizeManagedFaqs(items: FaqSectionValue[] | null): SiteFaq[] | null {
@@ -462,7 +462,7 @@ function normalizeManagedCourses(items: CourseSectionValue[] | null): SiteCourse
 
 /**
  * Read site content. Sections edited through the admin portal (stored in
- * MongoDB) win; any section with no managed content falls back to the
+ * Firebase) win; any section with no managed content falls back to the
  * WordPress source so the site keeps showing existing content until it is
  * migrated.
  */
@@ -473,7 +473,7 @@ export async function getSiteContent(): Promise<SiteContent> {
     if (!managed.hero) missing.push('hero');
 
     // Testimonials, FAQs and courses are always fetched from WordPress as well
-    // so they can be MERGED with the MongoDB entries (both stores contribute).
+    // so they can be MERGED with the Firebase entries (both stores contribute).
     const wpSections: (keyof SiteContent)[] = [
       ...new Set<keyof SiteContent>(['testimonials', 'faqs', 'courses', ...missing]),
     ];
@@ -503,7 +503,7 @@ export async function getSiteContent(): Promise<SiteContent> {
       ),
     };
   } catch (error) {
-    console.error('[site-content] MongoDB unavailable, using WordPress', error);
+    console.error('[site-content] Firebase unavailable, using WordPress', error);
     const [hero, testimonials, faqs, courses] = await Promise.all([
       computeWpSection('hero'),
       computeWpSection('testimonials'),

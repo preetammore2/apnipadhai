@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('[api/admin/feedback] list error', error);
     return NextResponse.json(
-      { success: false, message: 'Failed to load feedback from MongoDB' },
+      { success: false, message: 'Failed to load feedback from Firebase' },
       { status: 502 },
     );
   }
@@ -78,6 +78,6 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ success: true, items: saved });
   } catch (error) {
     console.error('[api/admin/feedback] save error', error);
-    return NextResponse.json({ success: false, message: 'Failed to save feedback to MongoDB' }, { status: 502 });
+    return NextResponse.json({ success: false, message: 'Failed to save feedback to Firebase' }, { status: 502 });
   }
 }

@@ -16,6 +16,7 @@ import {
   XCircle,
 } from 'lucide-react';
 import LogoutButton from '@/app/admin/components/LogoutButton';
+import ImageUploader from '@/app/admin/components/ImageUploader';
 
 interface Course {
   title: string;
@@ -129,8 +130,8 @@ export default function AdminCoursesPage() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
         {!configured && !loading && (
           <div className="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 mb-6 text-sm text-amber-900">
-            MongoDB is not configured yet. Set{' '}
-            <code className="font-mono text-xs bg-amber-100 px-1.5 py-0.5 rounded">MONGODB_URI</code>{' '}
+            Firebase is not configured yet. Set{' '}
+            <code className="font-mono text-xs bg-amber-100 px-1.5 py-0.5 rounded">FIREBASE_SERVICE_ACCOUNT</code>{' '}
             to manage courses from here.
           </div>
         )}
@@ -248,12 +249,14 @@ export default function AdminCoursesPage() {
                         className="input-field"
                       />
                     </div>
-                    <input
-                      value={item.image ?? ''}
-                      onChange={(e) => update(index, { ...item, image: e.target.value })}
-                      placeholder="Image URL (https://…)"
-                      className="input-field font-mono text-xs"
-                    />
+                    <div>
+                      <label className="block text-xs font-bold text-navy-900 mb-1.5">Image</label>
+                      <ImageUploader
+                        value={item.image ?? ''}
+                        onChange={(image) => update(index, { ...item, image })}
+                        label="Upload course image"
+                      />
+                    </div>
                     <textarea
                       value={(item.features ?? []).join('\n')}
                       onChange={(e) =>

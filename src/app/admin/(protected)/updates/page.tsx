@@ -242,7 +242,7 @@ export default function AdminUpdatesPage() {
               <h1 className="text-lg font-black font-heading leading-none">
                 Updates & Blog
               </h1>
-              <p className="text-xs text-white/60 mt-1">Managed in MongoDB</p>
+              <p className="text-xs text-white/60 mt-1">Managed in Firebase</p>
             </div>
           </div>
           <LogoutButton />
@@ -252,9 +252,9 @@ export default function AdminUpdatesPage() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
         {!configured && !loading && (
           <div className="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 mb-6 text-sm text-amber-900">
-            MongoDB is not configured yet. Set{' '}
+            Firebase is not configured yet. Set{' '}
             <code className="font-mono text-xs bg-amber-100 px-1.5 py-0.5 rounded">
-              MONGODB_URI
+              FIREBASE_SERVICE_ACCOUNT
             </code>{' '}
             on the server to manage posts from here.
           </div>

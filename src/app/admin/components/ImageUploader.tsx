@@ -9,7 +9,7 @@ interface ImageUploaderProps {
   label?: string;
 }
 
-/** Downscale + compress an image client-side so it fits in MongoDB as a data URL. */
+/** Downscale + compress an image client-side so it fits in Firebase as a data URL. */
 function fileToResizedDataUrl(file: File, maxWidth = 1200, quality = 0.82): Promise<string> {
   return new Promise((resolve, reject) => {
     if (file.size > 10 * 1024 * 1024) {

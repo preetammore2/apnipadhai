@@ -39,29 +39,24 @@ export type SectionValueMap = {
   courses: CourseSectionValue[];
 };
 
-interface ContentDoc {
-  section: string;
-  value: unknown;
-  updatedAt: Date;
-}
-
 export const CONTENT_SECTIONS: ContentSection[] = ['hero', 'testimonials', 'faqs', 'courses'];
 
+/**
+ * Site content lives in the `siteContent` collection with one document per
+ * section (doc ID = section name). Each doc stores `{ section, value, updatedAt }`.
+ */
 export async function getSectionValue<T>(section: ContentSection): Promise<T | null> {
-  const db = await getDb();
-  const doc = await db
-    .collection<ContentDoc>(COLLECTIONS.content)
-    .findOne({ section }, { projection: { _id: 0, section: 1, value: 1 } });
-  return doc && doc.value != null ? (doc.value as T) : null;
+  const doc = await getDb().collection(COLLECTIONS.content).doc(section).get();
+  if (!doc.exists) return null;
+  const value = doc.data()?.value;
+  return value != null ? (value as T) : null;
 }
 
 export async function setSectionValue(section: ContentSection, value: unknown): Promise<void> {
-  const db = await getDb();
-  await db.collection<ContentDoc>(COLLECTIONS.content).updateOne(
-    { section },
-    { $set: { section, value, updatedAt: new Date() } },
-    { upsert: true },
-  );
+  await getDb()
+    .collection(COLLECTIONS.content)
+    .doc(section)
+    .set({ section, value, updatedAt: new Date() }, { merge: true });
 }
 
 export type ReadAllSections = {
@@ -73,13 +68,15 @@ export type ReadAllSections = {
 
 /** Read every section at once (used by the public site-content reader). */
 export async function readAllSections(): Promise<ReadAllSections> {
-  const db = await getDb();
-  const docs = await db
-    .collection<ContentDoc>(COLLECTIONS.content)
-    .find({ section: { $in: CONTENT_SECTIONS } }, { projection: { _id: 0, section: 1, value: 1 } })
-    .toArray();
+  const refs = CONTENT_SECTIONS.map((section) =>
+    getDb().collection(COLLECTIONS.content).doc(section),
+  );
+  const docs = await getDb().getAll(...refs);
+  const bySection = new Map<string, unknown>();
+  for (const doc of docs) {
+    if (doc.exists) bySection.set(doc.id, doc.data()?.value);
+  }
 
-  const bySection = new Map(docs.map((doc) => [doc.section, doc.value]));
   return {
     hero: (bySection.get('hero') as HeroSectionValue | undefined) ?? null,
     testimonials: (bySection.get('testimonials') as TestimonialSectionValue[] | undefined) ?? null,

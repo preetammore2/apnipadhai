@@ -1,57 +1,28 @@
 #!/usr/bin/env node
 /**
- * Seed default content into the admin MongoDB so the portal and public site
+ * Seed default content into the admin Firestore so the portal and public site
  * have something to show. Only writes when a collection/section is empty —
  * never overwrites existing content.
  *
  * Usage: node scripts/seed-admin-content.mjs
  */
-import fs from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { MongoClient } from 'mongodb';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const ROOT = path.resolve(__dirname, '..');
-
-function loadEnv(file) {
-  const env = {};
-  if (!fs.existsSync(file)) return env;
-  for (const line of fs.readFileSync(file, 'utf8').split(/\r?\n/)) {
-    const match = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*?)\s*$/);
-    if (!match) continue;
-    let value = match[2];
-    if (
-      (value.startsWith('"') && value.endsWith('"')) ||
-      (value.startsWith("'") && value.endsWith("'"))
-    ) {
-      value = value.slice(1, -1);
-    }
-    env[match[1]] = value;
-  }
-  return env;
-}
+import { getFirestoreDb } from './lib/firebase.mjs';
 
 function avatarDataUrl(initial, color) {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="400"><rect width="300" height="400" fill="${color}"/><text x="150" y="225" font-size="90" fill="#ffffff" text-anchor="middle" font-family="Arial, sans-serif" font-weight="bold">${initial}</text></svg>`;
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
 
-const env = loadEnv(path.join(ROOT, '.env.local'));
-const URI =
-  env.MONGODB_DIRECT_URI ||
-  process.env.MONGODB_DIRECT_URI ||
-  env.MONGODB_URI ||
-  process.env.MONGODB_URI;
-const DB_NAME = env.MONGODB_DB || process.env.MONGODB_DB || 'apni_padhai';
-
-if (!URI) {
-  console.error('MONGODB_URI not found in .env.local — nothing to seed.');
-  process.exit(1);
-}
-
 const now = new Date();
 const iso = now.toISOString();
+
+const DEFAULT_HERO_SLIDES = [
+  { src: '/images/hero/Hero1.png', alt: 'Apni Padhai Hero Banner 1', ratio: 1280 / 611 },
+  { src: '/images/hero/Hero2.png', alt: 'Apni Padhai Hero Banner 2', ratio: 7185 / 3650 },
+  { src: '/images/hero/Hero3.png', alt: 'Apni Padhai Hero Banner 3', ratio: 2356 / 1294 },
+  { src: '/images/hero/Hero4.jpeg', alt: 'Apni Padhai Hero Banner 4', ratio: 1600 / 900 },
+  { src: '/images/hero/Hero5.png', alt: 'Apni Padhai Hero Banner 5', ratio: 2356 / 1382 },
+];
 
 const SECTIONS = {
   hero: {
@@ -60,6 +31,7 @@ const SECTIONS = {
     subtitle:
       'Apni Padhai helps you prepare for Rajasthan Police, RAS, REET and other state exams with expert faculty, quality books and personal mentorship.',
   },
+  'hero-slides': DEFAULT_HERO_SLIDES,
   courses: [
     {
       title: 'RAS Foundation Course',
@@ -188,59 +160,54 @@ const WELCOME_POST = {
 };
 
 async function main() {
-  const client = new MongoClient(URI, { serverSelectionTimeoutMS: 15000 });
+  const db = getFirestoreDb({ label: 'seed' });
   const report = [];
-  try {
-    await client.connect();
-    const db = client.db(DB_NAME);
-    const content = db.collection('siteContent');
-    const feedback = db.collection('feedback');
-    const results = db.collection('results');
-    const updates = db.collection('updates');
 
-    for (const [section, value] of Object.entries(SECTIONS)) {
-      const existing = await content.findOne({ section });
-      if (!existing) {
-        await content.insertOne({ section, value, updatedAt: now });
-        report.push(`siteContent: seeded "${section}"`);
-      } else {
-        report.push(`siteContent: skipped "${section}" (already has content)`);
-      }
-    }
+  const content = db.collection('siteContent');
+  const feedback = db.collection('feedback');
+  const results = db.collection('results');
+  const updates = db.collection('updates');
 
-    const feedbackCount = await feedback.countDocuments({});
-    if (feedbackCount === 0) {
-      await feedback.insertMany(
-        FEEDBACK.map((item, index) => ({ ...item, order: index + 1 })),
-      );
-      report.push(`feedback: seeded ${FEEDBACK.length} entries`);
+  for (const [section, value] of Object.entries(SECTIONS)) {
+    const doc = await content.doc(section).get();
+    if (!doc.exists) {
+      await content.doc(section).set({ section, value, updatedAt: now });
+      report.push(`siteContent: seeded "${section}"`);
     } else {
-      report.push(`feedback: skipped (already has ${feedbackCount} entries)`);
+      report.push(`siteContent: skipped "${section}" (already has content)`);
     }
-
-    const resultsCount = await results.countDocuments({});
-    if (resultsCount === 0) {
-      await results.insertMany(
-        RESULTS.map((item, index) => ({ ...item, order: index + 1 })),
-      );
-      report.push(`results: seeded ${RESULTS.length} entries`);
-    } else {
-      report.push(`results: skipped (already has ${resultsCount} entries)`);
-    }
-
-    const updatesCount = await updates.countDocuments({});
-    if (updatesCount === 0) {
-      await updates.insertOne(WELCOME_POST);
-      report.push('updates: seeded welcome blog post');
-    } else {
-      report.push(`updates: skipped (already has ${updatesCount} posts)`);
-    }
-
-    console.log(`Seeded database "${DB_NAME}" at ${URI.split('@')[1] ?? URI}`);
-    for (const line of report) console.log(`  - ${line}`);
-  } finally {
-    await client.close();
   }
+
+  const feedbackSnap = await feedback.get();
+  if (feedbackSnap.empty) {
+    await Promise.all(
+      FEEDBACK.map((item, index) => feedback.add({ ...item, order: index + 1 })),
+    );
+    report.push(`feedback: seeded ${FEEDBACK.length} entries`);
+  } else {
+    report.push(`feedback: skipped (already has ${feedbackSnap.size} entries)`);
+  }
+
+  const resultsSnap = await results.get();
+  if (resultsSnap.empty) {
+    await Promise.all(
+      RESULTS.map((item, index) => results.add({ ...item, order: index + 1 })),
+    );
+    report.push(`results: seeded ${RESULTS.length} entries`);
+  } else {
+    report.push(`results: skipped (already has ${resultsSnap.size} entries)`);
+  }
+
+  const updatesSnap = await updates.get();
+  if (updatesSnap.empty) {
+    await updates.add(WELCOME_POST);
+    report.push('updates: seeded welcome blog post');
+  } else {
+    report.push(`updates: skipped (already has ${updatesSnap.size} posts)`);
+  }
+
+  console.log(`Seeded Firestore database "${db.databaseId || 'default'}"`);
+  for (const line of report) console.log(`  - ${line}`);
 }
 
 main().catch((error) => {

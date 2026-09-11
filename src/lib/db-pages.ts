@@ -7,17 +7,21 @@ export interface ManagedPage {
   contentHtml: string;
 }
 
-/** Read a managed page from MongoDB. */
+/** Read a managed page from Firestore (doc ID = slug). */
 export async function getManagedPage(slug: string): Promise<ManagedPage | null> {
-  const db = await getDb();
-  const doc = await db
-    .collection<ManagedPage & { updatedAt?: Date }>(COLLECTIONS.pages)
-    .findOne({ slug }, { projection: { _id: 0, slug: 1, title: 1, contentHtml: 1 } });
-  return doc ?? null;
+  const doc = await getDb().collection(COLLECTIONS.pages).doc(slug).get();
+  if (!doc.exists) return null;
+  const data = doc.data();
+  if (!data) return null;
+  return {
+    slug: data.slug,
+    title: data.title,
+    contentHtml: data.contentHtml,
+  };
 }
 
 /**
- * Public reader: prefer MongoDB, fall back to the WordPress `ap-*` page so
+ * Public reader: prefer Firestore, fall back to the WordPress `ap-*` page so
  * existing WordPress-managed content keeps rendering until it is migrated.
  */
 export async function getManagedPageOrWp(slug: string): Promise<ManagedPage | null> {
@@ -32,17 +36,16 @@ export async function getManagedPageOrWp(slug: string): Promise<ManagedPage | nu
 }
 
 export async function upsertManagedPage(slug: string, title: string, contentHtml: string): Promise<ManagedPage> {
-  const db = await getDb();
-  await db.collection(COLLECTIONS.pages).updateOne(
-    { slug },
-    { $set: { slug, title, contentHtml, updatedAt: new Date() } },
-    { upsert: true },
+  await getDb().collection(COLLECTIONS.pages).doc(slug).set(
+    { slug, title, contentHtml, updatedAt: new Date() },
+    { merge: true },
   );
   return { slug, title, contentHtml };
 }
 
 export async function deleteManagedPage(slug: string): Promise<boolean> {
-  const db = await getDb();
-  const result = await db.collection(COLLECTIONS.pages).deleteOne({ slug });
-  return result.deletedCount > 0;
+  const doc = await getDb().collection(COLLECTIONS.pages).doc(slug).get();
+  if (!doc.exists) return false;
+  await doc.ref.delete();
+  return true;
 }

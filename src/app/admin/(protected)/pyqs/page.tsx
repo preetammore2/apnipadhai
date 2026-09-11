@@ -132,8 +132,8 @@ export default function AdminPyqsPage() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
         {!configured && !loading && (
           <div className="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 mb-6 text-sm text-amber-900">
-            MongoDB is not configured yet. Set{' '}
-            <code className="font-mono text-xs bg-amber-100 px-1.5 py-0.5 rounded">MONGODB_URI</code>{' '}
+            Firebase is not configured yet. Set{' '}
+            <code className="font-mono text-xs bg-amber-100 px-1.5 py-0.5 rounded">FIREBASE_SERVICE_ACCOUNT</code>{' '}
             on the server to manage PYQs from here.
           </div>
         )}
@@ -141,7 +141,7 @@ export default function AdminPyqsPage() {
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6">
           <div className="flex-1">
             <p className="text-sm text-slate-500">
-              Papers managed here are merged with the WordPress download list on /pyqs (MongoDB
+              Papers managed here are merged with the WordPress download list on /pyqs (Firebase
               entries first). Create, edit, reorder and delete directly from here.
             </p>
           </div>

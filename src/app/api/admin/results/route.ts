@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('[api/admin/results] list error', error);
     return NextResponse.json(
-      { success: false, message: 'Failed to load results from MongoDB' },
+      { success: false, message: 'Failed to load results from Firebase' },
       { status: 502 },
     );
   }
@@ -86,6 +86,6 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ success: true, items: saved });
   } catch (error) {
     console.error('[api/admin/results] save error', error);
-    return NextResponse.json({ success: false, message: 'Failed to save results to MongoDB' }, { status: 502 });
+    return NextResponse.json({ success: false, message: 'Failed to save results to Firebase' }, { status: 502 });
   }
 }

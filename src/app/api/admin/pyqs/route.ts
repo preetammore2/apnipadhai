@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('[api/admin/pyqs] list error', error);
     return NextResponse.json(
-      { success: false, message: 'Failed to load PYQs from MongoDB' },
+      { success: false, message: 'Failed to load PYQs from Firebase' },
       { status: 502 },
     );
   }
@@ -109,7 +109,7 @@ export async function PUT(request: NextRequest) {
   } catch (error) {
     console.error('[api/admin/pyqs] save error', error);
     return NextResponse.json(
-      { success: false, message: 'Failed to save PYQs to MongoDB' },
+      { success: false, message: 'Failed to save PYQs to Firebase' },
       { status: 502 },
     );
   }

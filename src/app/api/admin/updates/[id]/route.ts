@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
-import { isValidObjectId } from '@/lib/db';
+import { isValidDocId } from '@/lib/db';
 import {
   getPost,
   setPostStatus,
@@ -35,7 +35,7 @@ function toAdminPost(post: StoredPost) {
 
 async function resolveId(params: Promise<{ id: string }>): Promise<string | null> {
   const { id } = await params;
-  return isValidObjectId(id) ? id : null;
+  return isValidDocId(id) ? id : null;
 }
 
 function cleanCategories(value: unknown): string[] | undefined {

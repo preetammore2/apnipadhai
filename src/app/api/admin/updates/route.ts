@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('[api/admin/updates] list error', error);
     return NextResponse.json(
-      { success: false, message: 'Failed to load posts from MongoDB' },
+      { success: false, message: 'Failed to load posts from Firebase' },
       { status: 502 },
     );
   }
@@ -125,7 +125,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('[api/admin/updates] create error', error);
     return NextResponse.json(
-      { success: false, message: 'Failed to create post in MongoDB' },
+      { success: false, message: 'Failed to create post in Firebase' },
       { status: 502 },
     );
   }

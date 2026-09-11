@@ -289,12 +289,11 @@ export default function BookFormModal({
               />
             </div>
             <div>
-              <label className={labelClass}>Cover Image URL</label>
-              <input
-                className={inputClass}
+              <label className={labelClass}>Cover Image</label>
+              <ImageUploader
                 value={form.coverImage}
-                onChange={(e) => update('coverImage', e.target.value)}
-                placeholder="https://..."
+                onChange={(coverImage) => update('coverImage', coverImage)}
+                label="Upload cover image"
               />
             </div>
             <div>

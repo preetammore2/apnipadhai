@@ -145,8 +145,8 @@ export default function AdminPagesPage() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
         {!configured && !loading && (
           <div className="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 mb-6 text-sm text-amber-900">
-            MongoDB is not configured yet. Set{' '}
-            <code className="font-mono text-xs bg-amber-100 px-1.5 py-0.5 rounded">MONGODB_URI</code>{' '}
+            Firebase is not configured yet. Set{' '}
+            <code className="font-mono text-xs bg-amber-100 px-1.5 py-0.5 rounded">FIREBASE_SERVICE_ACCOUNT</code>{' '}
             on the server to edit pages from here.
           </div>
         )}

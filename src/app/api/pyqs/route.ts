@@ -9,7 +9,7 @@ export async function GET() {
   try {
     managed = await listPyqs();
   } catch (error) {
-    console.error('[api/pyqs] MongoDB unavailable, using WordPress', error);
+    console.error('[api/pyqs] Firebase unavailable, using WordPress', error);
   }
 
   try {

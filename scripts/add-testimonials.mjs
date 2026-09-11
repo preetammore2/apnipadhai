@@ -1,36 +1,42 @@
 #!/usr/bin/env node
 /**
- * Add real student testimonials to the admin MongoDB (siteContent -> testimonials).
+ * Add real student testimonials to Firestore (siteContent -> testimonials).
  *
+ * Images are read from public/images and stored as base64 data URLs directly
+ * in Firestore so the site has zero dependency on the public/images folder.
  * Upserts by name so running it more than once never creates duplicates.
- * The public home page merges these with the WordPress ap_testimonial items.
  *
  * Usage: node scripts/add-testimonials.mjs
  */
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { MongoClient } from 'mongodb';
+import { getFirestoreDb } from './lib/firebase.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
 
-function loadEnv(file) {
-  const env = {};
-  if (!fs.existsSync(file)) return env;
-  for (const line of fs.readFileSync(file, 'utf8').split(/\r?\n/)) {
-    const match = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*?)\s*$/);
-    if (!match) continue;
-    let value = match[2];
-    if (
-      (value.startsWith('"') && value.endsWith('"')) ||
-      (value.startsWith("'") && value.endsWith("'"))
-    ) {
-      value = value.slice(1, -1);
-    }
-    env[match[1]] = value;
+const MIME_MAP = {
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.png': 'image/png',
+  '.webp': 'image/webp',
+  '.heif': 'image/heif',
+  '.heic': 'image/heic',
+  '.avif': 'image/avif',
+};
+
+function toBase64DataUrl(localPath) {
+  try {
+    const decoded = decodeURIComponent(localPath);
+    const fullPath = path.join(ROOT, 'public', decoded.startsWith('/') ? decoded.slice(1) : decoded);
+    const ext = path.extname(fullPath).toLowerCase();
+    const mime = MIME_MAP[ext] || 'application/octet-stream';
+    const buf = fs.readFileSync(fullPath);
+    return `data:${mime};base64,${buf.toString('base64')}`;
+  } catch {
+    return localPath;
   }
-  return env;
 }
 
 const TESTIMONIALS = [
@@ -61,54 +67,37 @@ const TESTIMONIALS = [
 ];
 
 async function main() {
-  const env = loadEnv(path.join(ROOT, '.env.local'));
-  const URI =
-    env.MONGODB_DIRECT_URI ||
-    process.env.MONGODB_DIRECT_URI ||
-    env.MONGODB_URI ||
-    process.env.MONGODB_URI;
-  const DB_NAME = env.MONGODB_DB || process.env.MONGODB_DB || 'apni_padhai';
+  const db = getFirestoreDb({ label: 'testimonials' });
+  const content = db.collection('siteContent');
 
-  if (!URI) {
-    console.error('MONGODB_URI not found in .env.local — nothing to add.');
-    process.exit(1);
-  }
+  const testimonialsRef = content.doc('testimonials');
+  const existing = await testimonialsRef.get();
+  const items = Array.isArray(existing.data()?.value) ? existing.data().value : [];
+  const now = new Date();
 
-  const client = new MongoClient(URI, { serverSelectionTimeoutMS: 15000 });
-  try {
-    await client.connect();
-    const db = client.db(DB_NAME);
-    const content = db.collection('siteContent');
+  let added = 0;
+  let updated = 0;
+  for (const testimonial of TESTIMONIALS) {
+    const photo = toBase64DataUrl(testimonial.photo);
+    const entry = { ...testimonial, photo };
 
-    const existing = await content.findOne({ section: 'testimonials' });
-    const items = Array.isArray(existing?.value) ? existing.value : [];
-    const now = new Date();
-
-    let added = 0;
-    let updated = 0;
-    for (const testimonial of TESTIMONIALS) {
-      const found = items.find((item) => (item.name ?? '').trim().toLowerCase() === testimonial.name.toLowerCase());
-      if (found) {
-        Object.assign(found, testimonial, { updatedAt: now });
-        updated++;
-      } else {
-        items.push({ ...testimonial, createdAt: now, updatedAt: now });
-        added++;
-      }
-    }
-
-    await content.updateOne(
-      { section: 'testimonials' },
-      { $set: { value: items, updatedAt: now } },
-      { upsert: true },
+    const found = items.find(
+      (item) => (item.name ?? '').trim().toLowerCase() === testimonial.name.toLowerCase(),
     );
-
-    console.log(`Testimonials updated in "${DB_NAME}" at ${URI.split('@')[1] ?? URI}`);
-    console.log(`  - added: ${added}, updated: ${updated}, total: ${items.length}`);
-    for (const item of items) console.log(`  - ${item.name} (${item.city})`);
-  } finally {
-    await client.close();
+    if (found) {
+      Object.assign(found, entry, { updatedAt: now });
+      updated++;
+    } else {
+      items.push({ ...entry, createdAt: now, updatedAt: now });
+      added++;
+    }
   }
+
+  await testimonialsRef.set({ section: 'testimonials', value: items, updatedAt: now });
+
+  console.log(`Testimonials updated in Firestore "${db.databaseId || 'default'}"`);
+  console.log(`  - added: ${added}, updated: ${updated}, total: ${items.length}`);
+  for (const item of items) console.log(`  - ${item.name} (${item.city}) photo: ${item.photo.startsWith('data:') ? 'base64' : 'path'}`);
 }
 
 main().catch((error) => {

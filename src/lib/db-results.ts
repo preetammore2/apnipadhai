@@ -16,21 +16,18 @@ export interface StoredResult extends ResultInput {
 }
 
 export async function listResults(): Promise<ResultInput[]> {
-  const db = await getDb();
-  const docs = await db
-    .collection<StoredResult>(COLLECTIONS.results)
-    .find({}, { projection: { _id: 0, order: 1, name: 1, district: 1, photo: 1, category: 1 } })
-    .sort({ order: 1 })
-    .toArray();
-  return docs.map(({ order: _order, ...item }) => item);
+  const snap = await getDb().collection(COLLECTIONS.results).orderBy('order', 'asc').get();
+  return snap.docs.map((doc) => {
+    const { order: _order, ...item } = doc.data() as StoredResult;
+    return item;
+  });
 }
 
-/** Replace the whole list (delete + re-insert) in a single ordered write. */
+/** Replace the whole list (delete + re-insert) preserving order. */
 export async function replaceResults(items: ResultInput[]): Promise<void> {
-  const db = await getDb();
+  const col = getDb().collection(COLLECTIONS.results);
+  const existing = await col.get();
+  await Promise.all(existing.docs.map((doc) => doc.ref.delete()));
   const docs: StoredResult[] = items.map((item, index) => ({ ...item, order: index + 1 }));
-  await db.collection<StoredResult>(COLLECTIONS.results).deleteMany({});
-  if (docs.length > 0) {
-    await db.collection<StoredResult>(COLLECTIONS.results).insertMany(docs);
-  }
+  await Promise.all(docs.map((doc) => col.add(doc)));
 }

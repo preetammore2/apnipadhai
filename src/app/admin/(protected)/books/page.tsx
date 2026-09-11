@@ -116,7 +116,7 @@ export default function AdminBooksPage() {
               <p className="text-xs text-white/60 mt-1">
                 {isModerator && roleLoaded
                   ? 'Moderator — cover images only'
-                  : 'Synced to WooCommerce store & MongoDB'}
+                  : 'Synced to WooCommerce store & Firebase'}
               </p>
             </div>
           </div>

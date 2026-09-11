@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('[api/admin/pages] list error', error);
     return NextResponse.json(
-      { success: false, message: 'Failed to load pages from MongoDB' },
+      { success: false, message: 'Failed to load pages from Firebase' },
       { status: 502 },
     );
   }
@@ -116,7 +116,7 @@ export async function PUT(request: NextRequest) {
     });
   } catch (error) {
     console.error('[api/admin/pages] save error', error);
-    return NextResponse.json({ success: false, message: 'Failed to save page to MongoDB' }, { status: 502 });
+    return NextResponse.json({ success: false, message: 'Failed to save page to Firebase' }, { status: 502 });
   }
 }
 
