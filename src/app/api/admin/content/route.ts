@@ -62,24 +62,18 @@ function cleanCourses(value: unknown): CourseSectionValue[] | null {
   const items: CourseSectionValue[] = value
     .map((raw) => {
       const item = (raw ?? {}) as Record<string, unknown>;
-      const features = Array.isArray(item.features)
-        ? item.features
-            .map((f) => (typeof f === 'string' ? f.trim() : ''))
-            .filter(Boolean)
-            .slice(0, 20)
-        : undefined;
-      return {
-        title: typeof item.title === 'string' ? item.title.trim().slice(0, 300) : '',
-        description: typeof item.description === 'string' ? item.description.trim().slice(0, 2000) : '',
-        url: typeof item.url === 'string' ? item.url.trim() : '',
-        image: typeof item.image === 'string' ? item.image.trim() : undefined,
-        tag: typeof item.tag === 'string' ? item.tag.trim().slice(0, 100) : undefined,
-        tagline: typeof item.tagline === 'string' ? item.tagline.trim().slice(0, 300) : undefined,
-        type: typeof item.type === 'string' ? item.type.trim().slice(0, 100) : undefined,
-        features: features && features.length > 0 ? features : undefined,
+      const title = typeof item.title === 'string' ? item.title.trim().slice(0, 300) : '';
+      if (!title) return null;
+      const course: CourseSectionValue = {
+        title,
+        url: typeof item.url === 'string' ? item.url.trim().slice(0, 2000) : '',
       };
+      if (typeof item.image === 'string' && item.image.trim()) {
+        course.image = item.image.trim();
+      }
+      return course;
     })
-    .filter((item) => item.title);
+    .filter((item): item is CourseSectionValue => item != null);
   return items.length > 0 ? items : null;
 }
 

@@ -23,9 +23,9 @@ export interface FaqSectionValue {
 
 export interface CourseSectionValue {
   title: string;
-  description: string;
   url: string;
   image?: string;
+  description?: string;
   tag?: string;
   tagline?: string;
   type?: string;
@@ -52,11 +52,29 @@ export async function getSectionValue<T>(section: ContentSection): Promise<T | n
   return value != null ? (value as T) : null;
 }
 
+/** Remove `undefined` values before writing (Firestore rejects them as values). */
+function stripUndefined(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value
+      .map(stripUndefined)
+      .filter((entry) => entry !== undefined);
+  }
+  if (value && typeof value === 'object') {
+    const cleaned: Record<string, unknown> = {};
+    for (const [key, entry] of Object.entries(value as Record<string, unknown>)) {
+      const result = stripUndefined(entry);
+      if (result !== undefined) cleaned[key] = result;
+    }
+    return cleaned;
+  }
+  return value;
+}
+
 export async function setSectionValue(section: ContentSection, value: unknown): Promise<void> {
   await getDb()
     .collection(COLLECTIONS.content)
     .doc(section)
-    .set({ section, value, updatedAt: new Date() }, { merge: true });
+    .set({ section, value: stripUndefined(value), updatedAt: new Date() }, { merge: true });
 }
 
 export type ReadAllSections = {

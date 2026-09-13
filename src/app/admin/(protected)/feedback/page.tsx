@@ -21,12 +21,12 @@ import ImageUploader from '@/app/admin/components/ImageUploader';
 interface FeedbackItem {
   name: string;
   exam: string;
-  date: string;
+  date?: string;
   message: string;
   photo: string;
 }
 
-const EMPTY_ITEM: FeedbackItem = { name: '', exam: '', date: '', message: '', photo: '' };
+const EMPTY_ITEM: FeedbackItem = { name: '', exam: '', message: '', photo: '' };
 
 export default function AdminFeedbackPage() {
   const [items, setItems] = useState<FeedbackItem[]>([]);
@@ -203,7 +203,7 @@ export default function AdminFeedbackPage() {
                     </button>
                   </div>
 
-                  <div className="grid sm:grid-cols-3 gap-3 pr-8">
+                  <div className="grid sm:grid-cols-2 gap-3 pr-8">
                     <input
                       value={item.name}
                       onChange={(e) => update(index, { ...item, name: e.target.value })}
@@ -214,12 +214,6 @@ export default function AdminFeedbackPage() {
                       value={item.exam}
                       onChange={(e) => update(index, { ...item, exam: e.target.value })}
                       placeholder="Exam, e.g. RAS Mains 2024"
-                      className="input-field"
-                    />
-                    <input
-                      value={item.date}
-                      onChange={(e) => update(index, { ...item, date: e.target.value })}
-                      placeholder="Date, e.g. Aug 2025"
                       className="input-field"
                     />
                   </div>

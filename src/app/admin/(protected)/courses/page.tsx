@@ -20,16 +20,11 @@ import ImageUploader from '@/app/admin/components/ImageUploader';
 
 interface Course {
   title: string;
-  description: string;
   url: string;
   image?: string;
-  tag?: string;
-  tagline?: string;
-  type?: string;
-  features?: string[];
 }
 
-const EMPTY_ITEM: Course = { title: '', description: '', url: '' };
+const EMPTY_ITEM: Course = { title: '', url: '' };
 
 export default function AdminCoursesPage() {
   const [items, setItems] = useState<Course[]>([]);
@@ -213,7 +208,7 @@ export default function AdminCoursesPage() {
                     <input
                       value={item.title}
                       onChange={(e) => update(index, { ...item, title: e.target.value })}
-                      placeholder="Course title *"
+                      placeholder="Course title"
                       className="input-field"
                     />
                     <input

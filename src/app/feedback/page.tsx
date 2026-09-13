@@ -1,6 +1,7 @@
 import { MessageSquareQuote } from 'lucide-react';
 import { getApprovedFeedback } from '@/lib/feedback';
 import { FeedbackWall } from './FeedbackWall';
+import { FeedbackForm } from './FeedbackForm';
 
 export const metadata = {
   title: 'Student Feedback — Apni Padhai',
@@ -27,6 +28,8 @@ export default async function FeedbackPage() {
         </div>
 
         <FeedbackWall items={items} />
+
+        <FeedbackForm />
       </div>
     </div>
   );
