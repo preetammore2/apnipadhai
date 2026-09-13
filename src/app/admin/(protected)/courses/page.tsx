@@ -216,39 +216,12 @@ export default function AdminCoursesPage() {
                       placeholder="Course title *"
                       className="input-field"
                     />
-                    <textarea
-                      value={item.description}
-                      onChange={(e) => update(index, { ...item, description: e.target.value })}
-                      rows={2}
-                      placeholder="Short description"
-                      className="input-field resize-y"
-                    />
                     <input
                       value={item.url}
                       onChange={(e) => update(index, { ...item, url: e.target.value })}
                       placeholder="Enrollment URL (https://…)"
                       className="input-field font-mono text-xs"
                     />
-                    <div className="grid sm:grid-cols-3 gap-3">
-                      <input
-                        value={item.tag ?? ''}
-                        onChange={(e) => update(index, { ...item, tag: e.target.value })}
-                        placeholder="Tag (e.g. NEW BATCH)"
-                        className="input-field"
-                      />
-                      <input
-                        value={item.type ?? ''}
-                        onChange={(e) => update(index, { ...item, type: e.target.value })}
-                        placeholder="Type (e.g. Online Batch)"
-                        className="input-field"
-                      />
-                      <input
-                        value={item.tagline ?? ''}
-                        onChange={(e) => update(index, { ...item, tagline: e.target.value })}
-                        placeholder="Tagline"
-                        className="input-field"
-                      />
-                    </div>
                     <div>
                       <label className="block text-xs font-bold text-navy-900 mb-1.5">Image</label>
                       <ImageUploader
@@ -257,21 +230,6 @@ export default function AdminCoursesPage() {
                         label="Upload course image"
                       />
                     </div>
-                    <textarea
-                      value={(item.features ?? []).join('\n')}
-                      onChange={(e) =>
-                        update(index, {
-                          ...item,
-                          features: e.target.value
-                            .split('\n')
-                            .map((f) => f.trim())
-                            .filter(Boolean),
-                        })
-                      }
-                      rows={2}
-                      placeholder="Features, one per line (e.g. Daily Practice Sets)"
-                      className="input-field resize-y"
-                    />
                   </div>
                 </div>
               ))}
