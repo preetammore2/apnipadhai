@@ -12,6 +12,7 @@ import { BOOK_HI } from '@/i18n/data';
 import { useStoreSettings } from '@/lib/use-store-settings';
 import { computeCartTotals, findActiveCoupon } from '@/lib/pricing';
 import { digitsOnly, isSixDigitPincode, isTenDigitPhone } from '@/lib/validation';
+import { COUNTRIES, INDIAN_STATES } from '@/lib/locations';
 
 export default function CheckoutPage() {
   const { t, language } = useTranslation();
@@ -27,7 +28,16 @@ export default function CheckoutPage() {
     couponCode,
     cart.reduce((sum, item) => sum + item.quantity, 0),
   );
-  const [formData, setFormData] = useState({ name: '', phone: '', email: '', address: '', city: '', pincode: '' });
+  const [formData, setFormData] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    address: '',
+    city: '',
+    pincode: '',
+    country: 'IN',
+    state: '',
+  });
   const [isProcessing, setIsProcessing] = useState(false);
   const [couponInput, setCouponInput] = useState('');
   const [couponError, setCouponError] = useState('');
@@ -92,6 +102,14 @@ export default function CheckoutPage() {
       toast.error(t('Please complete shipping details'));
       return;
     }
+    if (!formData.country) {
+      toast.error(t('Please select your country / region'));
+      return;
+    }
+    if (!formData.state) {
+      toast.error(t('Please select your state / county'));
+      return;
+    }
     if (!isTenDigitPhone(formData.phone.trim())) {
       toast.error(t('Please enter a valid 10-digit phone number'));
       return;
@@ -101,7 +119,7 @@ export default function CheckoutPage() {
       return;
     }
     if (!formData.city.trim()) {
-      toast.error(t('Please enter your city'));
+      toast.error(t('Please enter your district'));
       return;
     }
     if (!isSixDigitPincode(formData.pincode.trim())) {
@@ -126,6 +144,8 @@ export default function CheckoutPage() {
           address: formData.address,
           city: formData.city,
           postcode: formData.pincode,
+          country: formData.country,
+          state: formData.state,
         },
       };
 
@@ -210,6 +230,51 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-navy-900 mb-1">{t('Country / Region *')}</label>
+                    <select
+                      required
+                      value={formData.country}
+                      onChange={(e) => setFormData({ ...formData, country: e.target.value, state: '' })}
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-500 text-navy-900"
+                    >
+                      {COUNTRIES.map((country) => (
+                        <option key={country.code} value={country.code}>
+                          {country.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-navy-900 mb-1">{t('State / County *')}</label>
+                    {formData.country === 'IN' ? (
+                      <select
+                        required
+                        value={formData.state}
+                        onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-500 text-navy-900"
+                      >
+                        <option value="">{t('Select State / County')}</option>
+                        {INDIAN_STATES.map((state) => (
+                          <option key={state.code} value={state.code}>
+                            {state.name}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        type="text"
+                        required
+                        placeholder={t('Enter State / County')}
+                        value={formData.state}
+                        onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-500 text-navy-900"
+                      />
+                    )}
+                  </div>
+                </div>
+
                 <div>
                   <label className="block text-xs font-bold text-navy-900 mb-1">{t('Email *')}</label>
                   <input
@@ -223,7 +288,9 @@ export default function CheckoutPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-navy-900 mb-1">{t('Delivery Address *')}</label>
+                  <label className="block text-xs font-bold text-navy-900 mb-1">
+                    {t('House No. / Building Name / Street Name / Full Address *')}
+                  </label>
                   <textarea
                     rows={3}
                     required
@@ -236,7 +303,7 @@ export default function CheckoutPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-navy-900 mb-1">{t('City / District *')}</label>
+                    <label className="block text-xs font-bold text-navy-900 mb-1">{t('District *')}</label>
                     <input
                       type="text"
                       required
@@ -247,7 +314,7 @@ export default function CheckoutPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-navy-900 mb-1">{t('Pincode *')}</label>
+                    <label className="block text-xs font-bold text-navy-900 mb-1">{t('Postcode / ZIP *')}</label>
                     <input
                       type="text"
                       inputMode="numeric"

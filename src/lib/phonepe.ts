@@ -608,6 +608,8 @@ export interface OrderTokenPayload {
     address: string;
     city: string;
     pincode: string;
+    country: string;
+    state: string;
   };
   exp: number;
 }

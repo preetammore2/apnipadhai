@@ -547,6 +547,8 @@ export interface CreateOrderInput {
     address?: string;
     city?: string;
     postcode?: string;
+    country?: string;
+    state?: string;
     phone?: string;
     email?: string;
   };
@@ -601,6 +603,8 @@ export async function createOrder(input: CreateOrderInput): Promise<WoocommerceO
       address_1: input.billing.address,
       city: input.billing.city,
       postcode: input.billing.postcode,
+      country: input.billing.country,
+      state: input.billing.state,
       phone: input.billing.phone,
       email: input.billing.email,
     };

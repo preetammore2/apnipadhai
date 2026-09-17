@@ -94,9 +94,19 @@ export async function POST(request: NextRequest) {
       typeof customer.address === 'string' ? customer.address.trim().slice(0, 300) : '';
     const city = typeof customer.city === 'string' ? customer.city.trim().slice(0, 100) : '';
     const pincode = normalizePincode(customer.postcode);
+    const country =
+      typeof customer.country === 'string' ? customer.country.trim().slice(0, 2).toUpperCase() : '';
+    const state =
+      typeof customer.state === 'string' ? customer.state.trim().slice(0, 100) : '';
     if (!address || !city) {
       return NextResponse.json(
         { success: false, message: 'Address and city are required' },
+        { status: 400 },
+      );
+    }
+    if (!country || !state) {
+      return NextResponse.json(
+        { success: false, message: 'Country and state are required' },
         { status: 400 },
       );
     }
@@ -135,6 +145,8 @@ export async function POST(request: NextRequest) {
         address: address || undefined,
         city: city || undefined,
         postcode: pincode,
+        country: country || undefined,
+        state: state || undefined,
       },
       shippingAmount: totals.shipping,
       shippingLabel: settings.shipping.label,
@@ -226,6 +238,8 @@ export async function POST(request: NextRequest) {
           address,
           city,
           pincode,
+          country,
+          state,
         },
         exp: Date.now() + ORDER_TOKEN_TTL_MS,
       },
