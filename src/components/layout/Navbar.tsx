@@ -250,7 +250,7 @@ export const Navbar: React.FC = () => {
 
               {/* Course CTA */}
               <a
-                href="https://apnipadhai.org/"
+                href="https://apnipadhai.org/login"
                 target="_blank"
                 rel="noreferrer"
                 className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-yellow-400 hover:to-amber-500 text-navy-950 font-black text-[11px] sm:text-xs rounded-full shadow-button-glow transition-all transform hover:-translate-y-0.5 shrink-0"
