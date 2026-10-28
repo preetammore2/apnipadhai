@@ -9,6 +9,8 @@ export const CHANNEL_HANDLE = '@AapniPadhai';
 const PLAYLIST_URL = `https://www.youtube.com/playlist?list=UU${CHANNEL_ID.slice(2)}`;
 const RSS_URL = `https://www.youtube.com/feeds/videos.xml?channel_id=${CHANNEL_ID}`;
 const CACHE_TTL_MS = 30 * 60 * 1000;
+/** Newest uploads shown on the site; the full archive is linked on YouTube. */
+export const MAX_VIDEOS = 48;
 
 const API_KEY = process.env.YOUTUBE_API_KEY ?? '';
 
@@ -117,7 +119,7 @@ async function fetchFromApi(): Promise<YouTubeVideo[]> {
 
   do {
     const params = new URLSearchParams({
-      part: 'snippet',
+      part: 'snippet,contentDetails',
       playlistId,
       maxResults: '50',
       key: API_KEY,
@@ -153,7 +155,7 @@ async function fetchFromApi(): Promise<YouTubeVideo[]> {
     }
 
     nextPageToken = data.nextPageToken ?? '';
-  } while (nextPageToken);
+  } while (nextPageToken && videos.length < MAX_VIDEOS);
 
   return videos;
 }
@@ -188,13 +190,22 @@ function extractInitialData(html: string): string | null {
   return null;
 }
 
+interface ScrapedVideo {
+  id: string;
+  title: string;
+  thumb: string;
+  dateText: string;
+  /** Scheduled premiere / live stream that cannot be watched yet. */
+  upcoming: boolean;
+}
+
 /**
  * Walk the innertube response and collect video entries (new `lockupViewModel`
  * layout) plus the next continuation token.
  */
 function collectFromResponse(
   node: unknown,
-  videos: Map<string, { id: string; title: string; thumb: string; dateText: string }>,
+  videos: Map<string, ScrapedVideo>,
   tokens: string[],
 ): void {
   if (!node || typeof node !== 'object') return;
@@ -233,6 +244,7 @@ function collectFromResponse(
       title: meta.title?.content ?? '',
       thumb: thumb.split('?')[0],
       dateText,
+      upcoming: rowTexts.some((text) => /^(scheduled for|premieres)/i.test(text)),
     });
   }
 
@@ -290,8 +302,9 @@ function relativeToIso(dateText: string): string | undefined {
 }
 
 /**
- * Scrape the channel's uploads playlist and follow continuations until the whole
- * upload history is collected (newest first, ~1.2k videos). No API key required.
+ * Scrape the channel's uploads playlist (newest first), following continuations
+ * only until MAX_VIDEOS are collected — the first page usually has enough. No
+ * API key required.
  * A playlist is used because the channel's "Videos" tab HTML is a stale
  * popular-videos snapshot that omits recent uploads.
  */
@@ -305,7 +318,7 @@ async function fetchFromPlaylist(): Promise<YouTubeVideo[]> {
   const initialJson = extractInitialData(html);
   if (!initialJson) throw new Error('Could not locate ytInitialData on playlist page');
 
-  const videos = new Map<string, { id: string; title: string; thumb: string; dateText: string }>();
+  const videos = new Map<string, ScrapedVideo>();
   const tokens: string[] = [];
 
   const firstResponse = JSON.parse(initialJson) as unknown;
@@ -316,7 +329,7 @@ async function fetchFromPlaylist(): Promise<YouTubeVideo[]> {
   let token = tokens[0] ?? '';
 
   // Follow continuations up to a safety cap (channel has ~1.2k videos; ~13 pages of 100).
-  for (let round = 0; token && round < 40; round += 1) {
+  for (let round = 0; token && round < 40 && videos.size < MAX_VIDEOS + 10; round += 1) {
     await sleep(250);
     const res = await fetch('https://www.youtube.com/youtubei/v1/browse', {
       method: 'POST',
@@ -342,7 +355,7 @@ async function fetchFromPlaylist(): Promise<YouTubeVideo[]> {
     if (videos.size === before) break;
   }
 
-  return [...videos.values()].map((video) => ({
+  return [...videos.values()].filter((video) => !video.upcoming).map((video) => ({
     id: video.id,
     videoId: video.id,
     type: 'video' as const,
@@ -351,6 +364,23 @@ async function fetchFromPlaylist(): Promise<YouTubeVideo[]> {
     publishedAt: relativeToIso(video.dateText),
     url: `https://www.youtube.com/watch?v=${video.id}`,
   }));
+}
+
+/**
+ * The playlist page no longer shows upload dates, so take them from the RSS
+ * feed (latest ~15 uploads). Older videos keep their playlist order.
+ */
+async function withRssDates(videos: YouTubeVideo[]): Promise<YouTubeVideo[]> {
+  try {
+    const rss = await fetchFromRss();
+    const dates = new Map(rss.map((video) => [video.videoId, video.publishedAt]));
+    return videos.map((video) =>
+      video.publishedAt ? video : { ...video, publishedAt: dates.get(video.videoId) },
+    );
+  } catch (error) {
+    console.error('[youtube] could not load RSS dates', error);
+    return videos;
+  }
 }
 
 export async function getChannelVideos(): Promise<YouTubeVideo[]> {
@@ -366,8 +396,9 @@ export async function getChannelVideos(): Promise<YouTubeVideo[]> {
     if (API_KEY) {
       videos = await fetchFromApi();
     } else {
-      videos = await fetchFromPlaylist();
+      videos = await withRssDates(await fetchFromPlaylist());
     }
+    videos = videos.slice(0, MAX_VIDEOS);
     if (videos.length > 0) {
       cachedFeed = { data: videos, fetchedAt: Date.now() };
       return videos;

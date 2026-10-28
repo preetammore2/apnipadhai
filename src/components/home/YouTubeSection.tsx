@@ -10,6 +10,7 @@ import { YouTubeVideo } from '@/types';
 
 const INITIAL_VIDEO_COUNT = 8; // 2 rows on desktop (4 cols)
 const VIDEOS_PER_LOAD = 8; // 2 more rows added per "View More" click
+const MOBILE_VIDEO_COUNT = 12; // horizontal scroll on phones; rest via "View All on YouTube"
 
 interface ChannelInfo {
   id: string;
@@ -72,9 +73,9 @@ export const YouTubeSection: React.FC = () => {
   const sortedVideos = videos();
   const allVideos = sortedVideos;
   const showAll = visibleCount >= allVideos.length;
-  // On phone show every video in the horizontal scroll without any button; on
-  // tablet/desktop keep the incremental 2-rows-per-click behavior.
-  const visibleVideos = isMobile ? allVideos : allVideos.slice(0, visibleCount);
+  // On phone show the newest videos in a horizontal scroll without any button;
+  // on tablet/desktop keep the incremental 2-rows-per-click behavior.
+  const visibleVideos = allVideos.slice(0, isMobile ? MOBILE_VIDEO_COUNT : visibleCount);
 
   useEffect(() => {
     if (playingVideo === null && allVideos.length > 0) {
