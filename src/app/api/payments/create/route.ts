@@ -5,7 +5,7 @@ import type { StoreCoupon } from '@/lib/store-settings';
 import { getStoreSettings } from '@/lib/db-store-settings';
 import { getClientIp, rateLimitResponse } from '@/lib/rate-limit';
 import { readJsonBody } from '@/lib/request-security';
-import { normalizePhone, normalizePincode } from '@/lib/validation';
+import { normalizeEmail, normalizePhone, normalizePincode } from '@/lib/validation';
 import {
   createPhonePePayment,
   generateMerchantTransactionId,
@@ -82,9 +82,9 @@ export async function POST(request: NextRequest) {
     });
     if (phoneThrottled) return phoneThrottled;
 
-    const email =
-      typeof customer.email === 'string' ? customer.email.trim().slice(0, 254) : '';
-    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    const rawEmail = typeof customer.email === 'string' ? customer.email.trim() : '';
+    const email = rawEmail ? normalizeEmail(rawEmail) ?? '' : '';
+    if (rawEmail && !email) {
       return NextResponse.json(
         { success: false, message: 'Please enter a valid email address' },
         { status: 400 },

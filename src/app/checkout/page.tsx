@@ -11,7 +11,7 @@ import { useTranslation } from '@/i18n/useTranslation';
 import { BOOK_HI } from '@/i18n/data';
 import { useStoreSettings } from '@/lib/use-store-settings';
 import { computeCartTotals } from '@/lib/pricing';
-import { digitsOnly, isSixDigitPincode, isTenDigitPhone } from '@/lib/validation';
+import { digitsOnly, isSixDigitPincode, isTenDigitPhone, normalizeEmail } from '@/lib/validation';
 import { COUNTRIES, INDIAN_STATES } from '@/lib/locations';
 
 export default function CheckoutPage() {
@@ -124,9 +124,14 @@ export default function CheckoutPage() {
       toast.error(t('Please enter a valid 10-digit phone number'));
       return;
     }
-    if (!formData.email.trim().match(/^\S+@\S+\.\S+$/)) {
+    const email = normalizeEmail(formData.email);
+    if (!email) {
       toast.error(t('Please enter a valid email address'));
       return;
+    }
+    if (email !== formData.email) {
+      // Show the cleaned-up address (e.g. trailing "." from the mobile keyboard removed).
+      setFormData((prev) => ({ ...prev, email }));
     }
     if (!formData.city.trim()) {
       toast.error(t('Please enter your district'));
@@ -150,7 +155,7 @@ export default function CheckoutPage() {
           name: formData.name,
           firstName: formData.name,
           phone: formData.phone,
-          email: formData.email,
+          email,
           address: formData.address,
           city: formData.city,
           postcode: formData.pincode,
@@ -289,6 +294,11 @@ export default function CheckoutPage() {
                   <label className="block text-xs font-bold text-navy-900 mb-1">{t('Email *')}</label>
                   <input
                     type="email"
+                    inputMode="email"
+                    autoComplete="email"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck={false}
                     required
                     placeholder="rahul@example.com"
                     value={formData.email}

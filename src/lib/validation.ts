@@ -39,6 +39,31 @@ export function normalizePincode(value: unknown): string | null {
   return isSixDigitPincode(digits) ? digits : null;
 }
 
+/**
+ * Clean and validate an email the way WordPress's is_email() does, because
+ * WooCommerce rejects the whole order ("Invalid parameter(s): billing") for any
+ * email it considers invalid. Strips spaces and the trailing "." that mobile
+ * keyboards add on double-space, and lowercases. Returns null when invalid.
+ */
+export function normalizeEmail(value: unknown): string | null {
+  if (typeof value !== 'string') return null;
+  const email = value.replace(/\s+/g, '').replace(/\.+$/, '').toLowerCase();
+  if (email.length < 6 || email.length > 254) return null;
+
+  const parts = email.split('@');
+  if (parts.length !== 2) return null;
+  const [local, domain] = parts;
+  if (!local || !/^[a-z0-9!#$%&'*+/=?^_`{|}~.-]+$/.test(local)) return null;
+  if (!domain || domain.includes('..') || domain.startsWith('.')) return null;
+
+  const labels = domain.split('.');
+  if (labels.length < 2) return null;
+  for (const label of labels) {
+    if (!/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(label)) return null;
+  }
+  return email;
+}
+
 /** Merchant transaction IDs follow the format AP-<timestamp>-<12-hex>. */
 export function isMerchantTransactionId(value: string): boolean {
   return /^AP-\d{10,14}-[A-F0-9]{12}$/.test(value);
