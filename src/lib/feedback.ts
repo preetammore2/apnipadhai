@@ -18,7 +18,6 @@ function stripHtml(html: string): string {
     .replace(/\s+/g, ' ')
     .trim();
 }
-
 function decodeEntities(text: string): string {
   return text
     .replace(/&amp;/g, '&')
