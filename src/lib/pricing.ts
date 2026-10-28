@@ -8,8 +8,6 @@ export interface CartTotals {
   total: number;
 }
 
-const PER_EXTRA_ITEM_DELIVERY_FEE = 15;
-
 export function computeCartTotals(
   subtotal: number,
   settings: StoreSettings | null,
@@ -20,7 +18,7 @@ export function computeCartTotals(
   const shipping =
     totalQuantity <= 0
       ? 0
-      : s.shipping.amount + (totalQuantity - 1) * PER_EXTRA_ITEM_DELIVERY_FEE;
+      : s.shipping.amount + (totalQuantity - 1) * s.shipping.perExtraItem;
 
   let discount = 0;
   let discountLabel = '';

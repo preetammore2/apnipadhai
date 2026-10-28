@@ -17,6 +17,7 @@ import {
   Settings2,
   ShieldCheck,
   Tag,
+  Truck,
 } from 'lucide-react';
 import LogoutButton from '@/app/admin/components/LogoutButton';
 
@@ -44,6 +45,13 @@ const ALL_TILES: Tile[] = [
     desc: 'Create, edit or delete discount codes — saved as WooCommerce coupons and used at checkout.',
     icon: <Tag className={TILE_ICON} />,
     bg: 'bg-lime-100 text-lime-700',
+  },
+  {
+    href: '/admin/delivery',
+    title: 'Delivery Charges',
+    desc: 'Set the base delivery charge and the extra charge for each additional book.',
+    icon: <Truck className={TILE_ICON} />,
+    bg: 'bg-sky-100 text-sky-700',
   },
   {
     href: '/admin/content',

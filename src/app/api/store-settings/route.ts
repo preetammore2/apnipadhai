@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { getStoreSettings, STORE_SETTINGS_DEFAULTS } from '@/lib/store-settings';
+import { STORE_SETTINGS_DEFAULTS } from '@/lib/store-settings';
+import { getStoreSettings } from '@/lib/db-store-settings';
 
 export const runtime = 'nodejs';
 

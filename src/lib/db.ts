@@ -10,6 +10,7 @@ export const COLLECTIONS = {
   pages: 'pages',
   books: 'books',
   pyqs: 'pyqs',
+  storeSettings: 'storeSettings',
 } as const;
 
 /**

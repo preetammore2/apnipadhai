@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createOrder, findCouponForCart, getBooks, WooCommerceError } from '@/lib/woocommerce';
 import { computeCartTotals } from '@/lib/pricing';
-import { getStoreSettings, type StoreCoupon } from '@/lib/store-settings';
+import type { StoreCoupon } from '@/lib/store-settings';
+import { getStoreSettings } from '@/lib/db-store-settings';
 import { getClientIp, rateLimitResponse } from '@/lib/rate-limit';
 import { readJsonBody } from '@/lib/request-security';
 import { normalizePhone, normalizePincode } from '@/lib/validation';

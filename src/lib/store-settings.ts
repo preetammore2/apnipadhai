@@ -15,7 +15,8 @@ export interface StoreCoupon {
 }
 
 export interface StoreSettings {
-  shipping: { amount: number; label: string };
+  /** Delivery = amount for the first book + perExtraItem for every further copy. */
+  shipping: { amount: number; perExtraItem: number; label: string };
   discount: {
     enabled: boolean;
     type: 'flat' | 'percent';
@@ -25,7 +26,7 @@ export interface StoreSettings {
 }
 
 export const STORE_SETTINGS_DEFAULTS: StoreSettings = {
-  shipping: { amount: 40, label: 'Delivery Charges' },
+  shipping: { amount: 40, perExtraItem: 15, label: 'Delivery Charges' },
   discount: { enabled: false, type: 'percent', value: 0, label: 'Discount' },
 };
 
@@ -42,7 +43,12 @@ function toEnabled(value: unknown): boolean {
   return value === true || value === '1' || value === 1;
 }
 
-export async function getStoreSettings(): Promise<StoreSettings> {
+/**
+ * Settings from the WordPress "Apni Padhai Store" plugin page (or defaults).
+ * Server code should call getStoreSettings() from db-store-settings, which
+ * layers the delivery charges saved in the admin panel on top of this.
+ */
+export async function getWpStoreSettings(): Promise<StoreSettings> {
   try {
     return await fetchSettings();
   } catch {
@@ -63,6 +69,7 @@ async function fetchSettings(): Promise<StoreSettings> {
   return {
     shipping: {
       amount: toNumber(shipping.amount, STORE_SETTINGS_DEFAULTS.shipping.amount),
+      perExtraItem: toNumber(shipping.perExtraItem, STORE_SETTINGS_DEFAULTS.shipping.perExtraItem),
       label: toLabel(shipping.label, STORE_SETTINGS_DEFAULTS.shipping.label),
     },
     discount: {
