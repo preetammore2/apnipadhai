@@ -49,6 +49,7 @@ export const KEYS_ACCOUNT: Record<string, string> = {
   'This coupon has reached its usage limit': 'यह कूपन अपनी उपयोग सीमा तक पहुँच गया है',
   'Could not check the coupon. Please try again.': 'कूपन की जाँच नहीं हो सकी। कृपया फिर से प्रयास करें।',
   'Delivery Charges': 'डिलीवरी शुल्क',
+  'Prices in your cart were updated to the latest prices.': 'आपकी कार्ट की कीमतें नवीनतम कीमतों पर अपडेट कर दी गई हैं।',
   "After paying, wait until you are brought back to our website. Don't close this page or the PhonePe app, or your order may not be confirmed.":
     'भुगतान के बाद, हमारी वेबसाइट पर वापस आने तक प्रतीक्षा करें। यह पेज या PhonePe ऐप बंद न करें, वरना आपका ऑर्डर कन्फ़र्म नहीं हो पाएगा।',
   'FREE': 'मुफ्त',

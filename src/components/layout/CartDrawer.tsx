@@ -14,6 +14,7 @@ import {
 import { useTranslation } from '@/i18n/useTranslation';
 import { BOOK_HI } from '@/i18n/data';
 import { useStoreSettings } from '@/lib/use-store-settings';
+import { useCartPriceSync } from '@/lib/use-cart-price-sync';
 import { computeCartTotals } from '@/lib/pricing';
 
 export const CartDrawer: React.FC = () => {
@@ -21,6 +22,7 @@ export const CartDrawer: React.FC = () => {
   const { t, language } = useTranslation();
   const { items, isCartOpen, coupon } = useAppSelector((state) => state.cart);
   const settings = useStoreSettings();
+  useCartPriceSync(isCartOpen);
 
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);

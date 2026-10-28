@@ -73,6 +73,19 @@ export const cartSlice = createSlice({
     hydrateCart: (state, action: PayloadAction<CartItem[]>) => {
       state.items = action.payload;
     },
+    /** Overwrite cart prices with the current WooCommerce prices. */
+    syncCartPrices: (
+      state,
+      action: PayloadAction<{ id: string; price: number; originalPrice: number }[]>,
+    ) => {
+      for (const latest of action.payload) {
+        const item = state.items.find((i) => i.id === latest.id);
+        if (!item) continue;
+        item.price = latest.price;
+        item.originalPrice = latest.originalPrice;
+        item.itemData = { ...item.itemData, price: latest.price, originalPrice: latest.originalPrice };
+      }
+    },
     applyCoupon: (state, action: PayloadAction<StoreCoupon>) => {
       state.coupon = action.payload;
     },
@@ -89,6 +102,7 @@ export const {
   clearCart,
   setCartOpen,
   hydrateCart,
+  syncCartPrices,
   applyCoupon,
   clearCoupon,
 } = cartSlice.actions;

@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { useTranslation } from '@/i18n/useTranslation';
 import { BOOK_HI } from '@/i18n/data';
 import { useStoreSettings } from '@/lib/use-store-settings';
+import { useCartPriceSync } from '@/lib/use-cart-price-sync';
 import { computeCartTotals } from '@/lib/pricing';
 import { digitsOnly, isSixDigitPincode, isTenDigitPhone, normalizeEmail } from '@/lib/validation';
 import { COUNTRIES, INDIAN_STATES } from '@/lib/locations';
@@ -22,6 +23,7 @@ export default function CheckoutPage() {
   const coupon = useAppSelector((state) => state.cart.coupon);
   const settings = useStoreSettings();
   const settingsLoaded = settings !== null;
+  useCartPriceSync(true);
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const totals = computeCartTotals(
     subtotal,
