@@ -58,6 +58,12 @@ const DEFAULT_API_BASE_URLS: Record<Exclude<PhonePeMode, 'mock'>, string> = {
   live: 'https://api.phonepe.com/apis/hermes',
 };
 
+// v2 Standard Checkout lives under /apis/pg in production (hermes is v1 only).
+const DEFAULT_V2_API_BASE_URLS: Record<Exclude<PhonePeMode, 'mock'>, string> = {
+  test: 'https://api-preprod.phonepe.com/apis/pg-sandbox',
+  live: 'https://api.phonepe.com/apis/pg',
+};
+
 const DEFAULT_AUTH_BASE_URLS: Record<Exclude<PhonePeMode, 'mock'>, string> = {
   test: 'https://api-preprod.phonepe.com/apis/pg-sandbox',
   live: 'https://api.phonepe.com/apis/identity-manager',
@@ -118,7 +124,7 @@ export function getPhonePeConfig(): PhonePeConfig {
       saltIndex: '',
       apiBaseUrl:
         process.env.PHONEPE_API_BASE_URL ||
-        DEFAULT_API_BASE_URLS[mode === 'live' ? 'live' : 'test'],
+        DEFAULT_V2_API_BASE_URLS[mode === 'live' ? 'live' : 'test'],
       authBaseUrl:
         process.env.PHONEPE_AUTH_BASE_URL ||
         DEFAULT_AUTH_BASE_URLS[mode === 'live' ? 'live' : 'test'],
@@ -227,12 +233,18 @@ async function getAccessToken(config: PhonePeConfig): Promise<string> {
   }
 
   const token = String(body.access_token ?? body.accessToken ?? '');
-  const expiresIn = Number(body.expires_at ?? body.expires_in ?? 600);
   if (!token) {
     throw new Error('PhonePe OAuth2 token response missing access_token');
   }
 
-  cachedToken = { token, expiresAt: Date.now() + expiresIn * 1000 };
+  // expires_at is an absolute epoch timestamp in seconds, not a duration.
+  const expiresAtSec = Number(body.expires_at);
+  const expiresInSec = Number(body.expires_in);
+  const expiresAt = Number.isFinite(expiresAtSec) && expiresAtSec > 0
+    ? expiresAtSec * 1000
+    : Date.now() + (Number.isFinite(expiresInSec) && expiresInSec > 0 ? expiresInSec : 600) * 1000;
+
+  cachedToken = { token, expiresAt };
   return token;
 }
 
