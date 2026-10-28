@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Book } from '@/types';
+import type { StoreCoupon } from '@/lib/store-settings';
 
 export interface CartItem {
   id: string;
@@ -15,15 +16,14 @@ export interface CartItem {
 interface CartState {
   items: CartItem[];
   isCartOpen: boolean;
-  couponCode: string | null;
-  discountAmount: number;
+  /** Coupon validated by /api/coupons/validate; re-checked on order creation. */
+  coupon: StoreCoupon | null;
 }
 
 const initialState: CartState = {
   items: [],
   isCartOpen: false,
-  couponCode: null,
-  discountAmount: 0,
+  coupon: null,
 };
 
 export const cartSlice = createSlice({
@@ -65,8 +65,7 @@ export const cartSlice = createSlice({
     },
     clearCart: (state) => {
       state.items = [];
-      state.couponCode = null;
-      state.discountAmount = 0;
+      state.coupon = null;
     },
     setCartOpen: (state, action: PayloadAction<boolean>) => {
       state.isCartOpen = action.payload;
@@ -74,12 +73,11 @@ export const cartSlice = createSlice({
     hydrateCart: (state, action: PayloadAction<CartItem[]>) => {
       state.items = action.payload;
     },
-    applyCoupon: (state, action: PayloadAction<string>) => {
-      state.couponCode = action.payload.trim();
+    applyCoupon: (state, action: PayloadAction<StoreCoupon>) => {
+      state.coupon = action.payload;
     },
     clearCoupon: (state) => {
-      state.couponCode = null;
-      state.discountAmount = 0;
+      state.coupon = null;
     },
   },
 });

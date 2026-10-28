@@ -1,4 +1,4 @@
-import { STORE_SETTINGS_DEFAULTS, StoreSettings } from './store-settings';
+import { STORE_SETTINGS_DEFAULTS, StoreCoupon, StoreSettings } from './store-settings';
 
 export interface CartTotals {
   subtotal: number;
@@ -8,23 +8,12 @@ export interface CartTotals {
   total: number;
 }
 
-export function findActiveCoupon(
-  settings: StoreSettings | null,
-  couponCode: string | null | undefined,
-) {
-  const code = (couponCode ?? '').trim().toUpperCase();
-  if (!code) return undefined;
-  return (settings?.coupons ?? []).find(
-    (coupon) => coupon.active && coupon.code.trim().toUpperCase() === code,
-  );
-}
-
 const PER_EXTRA_ITEM_DELIVERY_FEE = 15;
 
 export function computeCartTotals(
   subtotal: number,
   settings: StoreSettings | null,
-  couponCode?: string | null,
+  coupon?: StoreCoupon | null,
   totalQuantity = 0,
 ): CartTotals {
   const s = settings ?? STORE_SETTINGS_DEFAULTS;
@@ -36,11 +25,12 @@ export function computeCartTotals(
   let discount = 0;
   let discountLabel = '';
 
-  const coupon = findActiveCoupon(s, couponCode);
   if (coupon && coupon.value > 0 && subtotal > 0) {
     discountLabel = coupon.label || 'Discount';
     if (coupon.type === 'flat') {
       discount = Math.min(coupon.value, subtotal);
+    } else if (coupon.type === 'flat_per_item') {
+      discount = Math.min(coupon.value * totalQuantity, subtotal);
     } else {
       discount = Math.round((subtotal * coupon.value) / 100);
     }

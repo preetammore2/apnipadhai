@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createOrder, getBooks, WooCommerceError } from '@/lib/woocommerce';
+import { createOrder, findCouponForCart, getBooks, WooCommerceError } from '@/lib/woocommerce';
 import { computeCartTotals } from '@/lib/pricing';
-import { getStoreSettings } from '@/lib/store-settings';
+import { getStoreSettings, type StoreCoupon } from '@/lib/store-settings';
 import { getClientIp, rateLimitResponse } from '@/lib/rate-limit';
 import { readJsonBody } from '@/lib/request-security';
 import { normalizePhone, normalizePincode } from '@/lib/validation';
@@ -117,7 +117,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const couponCode = typeof body.couponCode === 'string' ? body.couponCode : undefined;
+    const couponCode =
+      typeof body.couponCode === 'string' && body.couponCode.trim()
+        ? body.couponCode.trim()
+        : undefined;
     const [settings, books] = await Promise.all([getStoreSettings(), getBooks()]);
     const bookPrices = new Map(books.map((book) => [Number(book.id), book.price]));
     const subtotal = items.reduce(
@@ -131,7 +134,15 @@ export async function POST(request: NextRequest) {
       (sum: number, item: { productId: number; quantity: number }) => sum + item.quantity,
       0,
     );
-    const totals = computeCartTotals(subtotal, settings, couponCode, totalQuantity);
+    let coupon: StoreCoupon | undefined;
+    if (couponCode) {
+      const result = await findCouponForCart(couponCode, subtotal);
+      if ('error' in result) {
+        return NextResponse.json({ success: false, message: result.error }, { status: 400 });
+      }
+      coupon = result.coupon;
+    }
+    const totals = computeCartTotals(subtotal, settings, coupon, totalQuantity);
 
     const config = getPhonePeConfig();
     const merchantTransactionId = generateMerchantTransactionId();
@@ -150,8 +161,11 @@ export async function POST(request: NextRequest) {
       },
       shippingAmount: totals.shipping,
       shippingLabel: settings.shipping.label,
-      discountAmount: totals.discount,
+      // A coupon is applied by WooCommerce itself; only the site-wide discount
+      // goes in as a fee line.
+      discountAmount: coupon ? 0 : totals.discount,
       discountLabel: totals.discountLabel,
+      couponCode: coupon?.code,
       merchantTransactionId,
     });
 

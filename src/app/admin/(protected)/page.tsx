@@ -16,6 +16,7 @@ import {
   Quote,
   Settings2,
   ShieldCheck,
+  Tag,
 } from 'lucide-react';
 import LogoutButton from '@/app/admin/components/LogoutButton';
 
@@ -36,6 +37,13 @@ const ALL_TILES: Tile[] = [
     desc: 'Add, edit or delete books — synced to your WooCommerce store and mirrored to Firebase.',
     icon: <BookOpen className={TILE_ICON} />,
     bg: 'bg-brand-100 text-brand-700',
+  },
+  {
+    href: '/admin/coupons',
+    title: 'Coupons',
+    desc: 'Create, edit or delete discount codes — saved as WooCommerce coupons and used at checkout.',
+    icon: <Tag className={TILE_ICON} />,
+    bg: 'bg-lime-100 text-lime-700',
   },
   {
     href: '/admin/content',

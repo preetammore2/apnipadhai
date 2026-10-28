@@ -19,12 +19,12 @@ import { computeCartTotals } from '@/lib/pricing';
 export const CartDrawer: React.FC = () => {
   const dispatch = useAppDispatch();
   const { t, language } = useTranslation();
-  const { items, isCartOpen, couponCode } = useAppSelector((state) => state.cart);
+  const { items, isCartOpen, coupon } = useAppSelector((state) => state.cart);
   const settings = useStoreSettings();
 
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
-  const totals = computeCartTotals(subtotal, settings, couponCode, totalQuantity);
+  const totals = computeCartTotals(subtotal, settings, coupon, totalQuantity);
 
   return (
     <AnimatePresence>

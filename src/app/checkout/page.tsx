@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 import { useTranslation } from '@/i18n/useTranslation';
 import { BOOK_HI } from '@/i18n/data';
 import { useStoreSettings } from '@/lib/use-store-settings';
-import { computeCartTotals, findActiveCoupon } from '@/lib/pricing';
+import { computeCartTotals } from '@/lib/pricing';
 import { digitsOnly, isSixDigitPincode, isTenDigitPhone } from '@/lib/validation';
 import { COUNTRIES, INDIAN_STATES } from '@/lib/locations';
 
@@ -19,13 +19,14 @@ export default function CheckoutPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const cart = useAppSelector((state) => state.cart.items);
-  const couponCode = useAppSelector((state) => state.cart.couponCode);
+  const coupon = useAppSelector((state) => state.cart.coupon);
   const settings = useStoreSettings();
   const settingsLoaded = settings !== null;
+  const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const totals = computeCartTotals(
-    cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
+    subtotal,
     settings,
-    couponCode,
+    coupon,
     cart.reduce((sum, item) => sum + item.quantity, 0),
   );
   const [formData, setFormData] = useState({
@@ -41,6 +42,7 @@ export default function CheckoutPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [couponInput, setCouponInput] = useState('');
   const [couponError, setCouponError] = useState('');
+  const [isCheckingCoupon, setIsCheckingCoupon] = useState(false);
 
   const reminderSent = useRef(false);
 
@@ -69,25 +71,33 @@ export default function CheckoutPage() {
     };
   }, [cart, formData, language]);
 
-  const handleApplyCoupon = () => {
+  const handleApplyCoupon = async () => {
     const code = couponInput.trim();
     setCouponError('');
     if (!code) {
       setCouponError(t('Enter a coupon code'));
       return;
     }
-    if (!settings) {
-      setCouponError(t('Coupon codes are still loading. Please try again.'));
-      return;
+    setIsCheckingCoupon(true);
+    try {
+      const res = await fetch('/api/coupons/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, subtotal }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.success || !data.coupon) {
+        setCouponError(t(data?.message || 'Invalid or inactive coupon code'));
+        return;
+      }
+      dispatch(applyCoupon(data.coupon));
+      setCouponInput('');
+      toast.success(`${t('Coupon applied')}: ${data.coupon.code}`);
+    } catch {
+      setCouponError(t('Could not check the coupon. Please try again.'));
+    } finally {
+      setIsCheckingCoupon(false);
     }
-    const coupon = findActiveCoupon(settings, code);
-    if (!coupon) {
-      setCouponError(t('Invalid or inactive coupon code'));
-      return;
-    }
-    dispatch(applyCoupon(code));
-    setCouponInput('');
-    toast.success(`${t('Coupon applied')}: ${coupon.code}`);
   };
 
   const handleRemoveCoupon = () => {
@@ -135,7 +145,7 @@ export default function CheckoutPage() {
     try {
       const payload = {
         items: cart.map((item) => ({ productId: Number(item.id), quantity: item.quantity })),
-        couponCode,
+        couponCode: coupon?.code,
         customer: {
           name: formData.name,
           firstName: formData.name,
@@ -383,12 +393,12 @@ export default function CheckoutPage() {
 
               {/* Coupon */}
               <div className="pt-4 border-t border-slate-200">
-                {couponCode ? (
+                {coupon ? (
                   <div className="flex items-center justify-between bg-emerald-50 border border-emerald-200 rounded-xl px-3.5 py-2.5">
                     <div className="flex items-center gap-2">
                       <Tag className="w-4 h-4 text-emerald-600 shrink-0" />
                       <div>
-                        <p className="text-xs font-black text-emerald-700">{couponCode}</p>
+                        <p className="text-xs font-black text-emerald-700">{coupon.code}</p>
                         {totals.discount > 0 && (
                           <p className="text-[11px] text-emerald-600">-₹{totals.discount} applied</p>
                         )}
@@ -421,10 +431,10 @@ export default function CheckoutPage() {
                       <button
                         type="button"
                         onClick={handleApplyCoupon}
-                        disabled={!settingsLoaded}
+                        disabled={isCheckingCoupon}
                         className="px-4 py-2.5 bg-navy-900 enabled:hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold rounded-xl transition-colors"
                       >
-                        {t('Apply')}
+                        {isCheckingCoupon ? <Loader2 className="w-4 h-4 animate-spin" /> : t('Apply')}
                       </button>
                     </div>
                     {couponError && (

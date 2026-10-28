@@ -1,4 +1,5 @@
 import { Book, ComboBundleItem } from '@/types';
+import type { StoreCoupon } from '@/lib/store-settings';
 
 const WOO_URL = process.env.WOO_URL ?? 'https://apnipadhaipublication.com';
 const WOO_CONSUMER_KEY = process.env.WOO_CONSUMER_KEY ?? '';
@@ -558,9 +559,12 @@ export interface CreateOrderInput {
   shippingLabel?: string;
   discountAmount?: number;
   discountLabel?: string;
+  /** WooCommerce coupon code — WooCommerce applies and counts it via coupon_lines. */
+  couponCode?: string;
 }
 
-export async function createOrder(input: CreateOrderInput): Promise<WoocommerceOrder> {  const method = PAYMENT_METHODS[input.paymentMethod ?? 'phonepe'];
+export async function createOrder(input: CreateOrderInput): Promise<WoocommerceOrder> {
+  const method = PAYMENT_METHODS[input.paymentMethod ?? 'phonepe'];
   const body: Record<string, unknown> = {
     payment_method: method.id,
     payment_method_title: method.title,
@@ -588,6 +592,10 @@ export async function createOrder(input: CreateOrderInput): Promise<WoocommerceO
         total: `-${input.discountAmount.toFixed(2)}`,
       },
     ];
+  }
+
+  if (input.couponCode) {
+    body.coupon_lines = [{ code: input.couponCode }];
   }
 
   if (input.merchantTransactionId) {
@@ -695,4 +703,218 @@ export function phoneMatchesOrder(order: TrackedOrder, phone: string): boolean {
   const expected = normalizePhone(order.billingPhone);
   const actual = normalizePhone(phone);
   return expected !== '' && actual !== '' && expected === actual;
+}
+
+/* ───────── Coupons ───────── */
+
+export type WooCouponType = 'percent' | 'fixed_cart' | 'fixed_product';
+
+interface WoocommerceCoupon {
+  id: number;
+  code: string;
+  amount: string;
+  discount_type: WooCouponType;
+  description: string;
+  date_expires: string | null;
+  usage_count: number;
+  usage_limit: number | null;
+  minimum_amount: string;
+  maximum_amount: string;
+  product_ids?: number[];
+  product_categories?: number[];
+}
+
+export interface AdminCoupon {
+  id: number;
+  code: string;
+  type: WooCouponType;
+  amount: number;
+  description: string;
+  /** YYYY-MM-DD (valid until the end of that day), or null for never. */
+  expiresAt: string | null;
+  usageCount: number;
+  /** 0 = unlimited. */
+  usageLimit: number;
+  minimumAmount: number;
+  maximumAmount: number;
+  /** Limited to specific products/categories (set in WooCommerce admin). */
+  restricted: boolean;
+}
+
+export interface CouponPayload {
+  code?: string;
+  type?: WooCouponType;
+  amount?: number;
+  description?: string;
+  /** null clears the expiry; undefined leaves it unchanged. */
+  expiresAt?: string | null;
+  usageLimit?: number;
+  minimumAmount?: number;
+  maximumAmount?: number;
+}
+
+const COUPON_TYPES = new Set<WooCouponType>(['percent', 'fixed_cart', 'fixed_product']);
+
+export function isCouponCode(value: string): boolean {
+  return /^[A-Za-z0-9_-]{3,40}$/.test(value);
+}
+
+function mapCoupon(coupon: WoocommerceCoupon): AdminCoupon {
+  return {
+    id: coupon.id,
+    code: coupon.code.toUpperCase(),
+    type: coupon.discount_type,
+    amount: Number(coupon.amount) || 0,
+    description: coupon.description ?? '',
+    expiresAt: coupon.date_expires ? coupon.date_expires.slice(0, 10) : null,
+    usageCount: coupon.usage_count ?? 0,
+    usageLimit: coupon.usage_limit ?? 0,
+    minimumAmount: Number(coupon.minimum_amount) || 0,
+    maximumAmount: Number(coupon.maximum_amount) || 0,
+    restricted: Boolean(coupon.product_ids?.length || coupon.product_categories?.length),
+  };
+}
+
+export function parseCouponPayload(body: unknown): CouponPayload {
+  if (typeof body !== 'object' || body === null) return {};
+  const b = body as Record<string, unknown>;
+  const asNum = (v: unknown): number | undefined => {
+    if (typeof v === 'number') return Number.isFinite(v) && v >= 0 ? v : undefined;
+    if (typeof v === 'string' && v.trim() !== '') {
+      const n = Number(v);
+      return Number.isFinite(n) && n >= 0 ? n : undefined;
+    }
+    return undefined;
+  };
+  const code = typeof b.code === 'string' ? b.code.trim() : '';
+  const usageLimit = asNum(b.usageLimit);
+  let expiresAt: string | null | undefined;
+  if (b.expiresAt === null || b.expiresAt === '') {
+    expiresAt = null;
+  } else if (typeof b.expiresAt === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(b.expiresAt.trim())) {
+    expiresAt = b.expiresAt.trim();
+  }
+  return {
+    code: isCouponCode(code) ? code : undefined,
+    type: COUPON_TYPES.has(b.type as WooCouponType) ? (b.type as WooCouponType) : undefined,
+    amount: asNum(b.amount),
+    description: typeof b.description === 'string' ? b.description.trim().slice(0, 200) : undefined,
+    expiresAt,
+    usageLimit: usageLimit !== undefined ? Math.floor(usageLimit) : undefined,
+    minimumAmount: asNum(b.minimumAmount),
+    maximumAmount: asNum(b.maximumAmount),
+  };
+}
+
+function buildCouponBody(input: CouponPayload): Record<string, unknown> {
+  const body: Record<string, unknown> = {};
+  if (input.code) body.code = input.code;
+  if (input.type) body.discount_type = input.type;
+  if (typeof input.amount === 'number') body.amount = String(input.amount);
+  if (input.description !== undefined) body.description = input.description;
+  if (input.expiresAt !== undefined) body.date_expires = input.expiresAt;
+  if (typeof input.usageLimit === 'number') body.usage_limit = input.usageLimit;
+  if (typeof input.minimumAmount === 'number') body.minimum_amount = String(input.minimumAmount);
+  if (typeof input.maximumAmount === 'number') body.maximum_amount = String(input.maximumAmount);
+  return body;
+}
+
+function assertValidCoupon(input: CouponPayload, creating: boolean): void {
+  if (creating && !input.code) {
+    throw new WooCommerceError(400, 'Code must be 3–40 letters, numbers, - or _');
+  }
+  if (creating && (typeof input.amount !== 'number' || input.amount <= 0)) {
+    throw new WooCommerceError(400, 'Discount amount must be greater than zero');
+  }
+  if (input.type === 'percent' && typeof input.amount === 'number' && input.amount > 100) {
+    throw new WooCommerceError(400, 'A percentage discount cannot be more than 100');
+  }
+}
+
+export async function listCoupons(): Promise<AdminCoupon[]> {
+  const coupons = await request<WoocommerceCoupon[]>(
+    '/coupons?per_page=100&orderby=date&order=desc',
+    {},
+    { cache: 'no-store' },
+  );
+  return coupons.map(mapCoupon);
+}
+
+export async function createCoupon(input: CouponPayload): Promise<AdminCoupon> {
+  assertValidCoupon(input, true);
+  const coupon = await request<WoocommerceCoupon>('/coupons', {
+    method: 'POST',
+    body: JSON.stringify({ discount_type: 'percent', ...buildCouponBody(input) }),
+  });
+  return mapCoupon(coupon);
+}
+
+export async function updateCoupon(id: string, input: CouponPayload): Promise<AdminCoupon> {
+  if (!/^\d+$/.test(id)) {
+    throw new WooCommerceError(400, 'Invalid coupon ID');
+  }
+  assertValidCoupon(input, false);
+  const coupon = await request<WoocommerceCoupon>(`/coupons/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(buildCouponBody(input)),
+  });
+  return mapCoupon(coupon);
+}
+
+export async function deleteCoupon(id: string): Promise<void> {
+  if (!/^\d+$/.test(id)) {
+    throw new WooCommerceError(400, 'Invalid coupon ID');
+  }
+  await request<unknown>(`/coupons/${id}?force=true`, { method: 'DELETE' }, { cache: 'no-store' });
+}
+
+/**
+ * Look up the coupon a shopper typed and check the rules we can preview before
+ * the order exists (expiry, usage limit, min/max spend). WooCommerce re-checks
+ * everything — including product and email restrictions — when the order is
+ * created with coupon_lines, and the amount charged is always the WooCommerce
+ * order total.
+ */
+export async function findCouponForCart(
+  code: string,
+  subtotal: number,
+): Promise<{ coupon: StoreCoupon } | { error: string }> {
+  if (!isCouponCode(code)) return { error: 'Invalid or inactive coupon code' };
+
+  // ?code= only matches published coupons, so drafts count as inactive.
+  const matches = await request<WoocommerceCoupon[]>(
+    `/coupons?code=${encodeURIComponent(code)}`,
+    {},
+    { cache: 'no-store' },
+  );
+  const found = matches.find((c) => c.code.toLowerCase() === code.toLowerCase());
+  if (!found) return { error: 'Invalid or inactive coupon code' };
+
+  const coupon = mapCoupon(found);
+  if (coupon.expiresAt && new Date(`${coupon.expiresAt}T23:59:59+05:30`).getTime() < Date.now()) {
+    return { error: 'This coupon has expired' };
+  }
+  if (coupon.usageLimit > 0 && coupon.usageCount >= coupon.usageLimit) {
+    return { error: 'This coupon has reached its usage limit' };
+  }
+  if (coupon.minimumAmount > 0 && subtotal < coupon.minimumAmount) {
+    return { error: `Minimum order of ₹${coupon.minimumAmount} required for this coupon` };
+  }
+  if (coupon.maximumAmount > 0 && subtotal > coupon.maximumAmount) {
+    return { error: `This coupon is valid only on orders up to ₹${coupon.maximumAmount}` };
+  }
+
+  return {
+    coupon: {
+      code: coupon.code,
+      type:
+        coupon.type === 'percent'
+          ? 'percent'
+          : coupon.type === 'fixed_product'
+            ? 'flat_per_item'
+            : 'flat',
+      value: coupon.amount,
+      label: `Coupon ${coupon.code}`,
+    },
+  };
 }
