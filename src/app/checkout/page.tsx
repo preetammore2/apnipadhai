@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { applyCoupon, clearCoupon } from '@/redux/features/cart/cartSlice';
-import { ArrowRight, Loader2, ShoppingBag, Smartphone, Tag, X } from 'lucide-react';
+import { AlertTriangle, ArrowRight, Loader2, ShoppingBag, Smartphone, Tag, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from '@/i18n/useTranslation';
 import { BOOK_HI } from '@/i18n/data';
@@ -472,6 +472,13 @@ export default function CheckoutPage() {
                     <span className="w-2 h-2 rounded-full bg-brand-500" />
                   </span>
                 </button>
+              </div>
+
+              <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl px-3.5 py-2.5">
+                <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0 text-amber-600" />
+                <p className="text-[11px] font-semibold leading-relaxed text-amber-800">
+                  {t("After paying, wait until you are brought back to our website. Don't close this page or the PhonePe app, or your order may not be confirmed.")}
+                </p>
               </div>
 
               <button
