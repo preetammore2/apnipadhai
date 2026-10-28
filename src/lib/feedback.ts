@@ -12,7 +12,6 @@ const FEEDBACK_PAGE_SLUG = 'ap-feedback';
 export interface FeedbackItem extends FeedbackInput {
   id: string;
 }
-
 function stripHtml(html: string): string {
   return (html ?? '')
     .replace(/<[^>]*>/g, ' ')
