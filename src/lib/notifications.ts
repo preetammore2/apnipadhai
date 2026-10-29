@@ -154,9 +154,11 @@ export function isEmailConfigured(): boolean {
   return Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
 }
 
-let cachedTransporter: nodemailer.Transporter | null = null;
+type Transporter = ReturnType<typeof nodemailer.createTransport>;
 
-function getTransporter(): nodemailer.Transporter {
+let cachedTransporter: Transporter | null = null;
+
+function getTransporter(): Transporter {
   if (!cachedTransporter) {
     cachedTransporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
