@@ -541,7 +541,8 @@ const PAYMENT_METHODS: Record<PaymentMethod, { id: string; title: string }> = {
 };
 
 export interface CreateOrderInput {
-  items: { productId: number; quantity: number }[];
+  /** unitPrice overrides the WooCommerce price (store-wide book discount). */
+  items: { productId: number; quantity: number; unitPrice?: number }[];
   billing?: {
     firstName?: string;
     lastName?: string;
@@ -569,10 +570,20 @@ export async function createOrder(input: CreateOrderInput): Promise<WoocommerceO
     payment_method: method.id,
     payment_method_title: method.title,
     set_paid: false,
-    line_items: input.items.map((item) => ({
-      product_id: item.productId,
-      quantity: item.quantity,
-    })),
+    line_items: input.items.map((item) => {
+      const line: Record<string, unknown> = {
+        product_id: item.productId,
+        quantity: item.quantity,
+      };
+      if (typeof item.unitPrice === 'number' && Number.isFinite(item.unitPrice) && item.unitPrice >= 0) {
+        // WooCommerce keeps a posted subtotal/total instead of the product price;
+        // coupons are then calculated from this subtotal.
+        const lineTotal = (item.unitPrice * item.quantity).toFixed(2);
+        line.subtotal = lineTotal;
+        line.total = lineTotal;
+      }
+      return line;
+    }),
   };
 
   if (input.shippingAmount && input.shippingAmount > 0) {

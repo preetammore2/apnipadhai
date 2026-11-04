@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getBooks } from '@/lib/woocommerce';
+import { getDiscountedBooks } from '@/lib/db-book-discount';
 import { getClientIp, rateLimitResponse } from '@/lib/rate-limit';
 import { denyIfCrossOrigin, readJsonBody } from '@/lib/request-security';
 
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const wanted = new Set(ids);
-    const books = (await getBooks())
+    const books = (await getDiscountedBooks())
       .filter((book) => wanted.has(book.id))
       .map((book) => ({
         id: book.id,

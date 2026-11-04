@@ -43,7 +43,7 @@ export default function AdminBooksPage() {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch('/api/books');
+      const res = await fetch('/api/books?raw=1');
       if (!res.ok) throw new Error('Failed to load books');
       const data = (await res.json()) as Book[];
       setBooks(Array.isArray(data) ? data : []);

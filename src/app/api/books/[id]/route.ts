@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import {
   deleteBook,
-  getBookById,
   parseBookPayload,
   updateBook,
   type BookPayload,
   WooCommerceError,
 } from '@/lib/woocommerce';
+import { getDiscountedBookById } from '@/lib/db-book-discount';
 import { deleteMirroredBook, mirrorBooksSafe, upsertMirroredBook } from '@/lib/db-books';
 import { deleteBookCover, setBookCover } from '@/lib/db-book-covers';
 import { getRequestAdminRole } from '@/lib/auth';
@@ -22,7 +22,8 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const book = await getBookById(id);
+    // Public book page: show the store-wide book discount.
+    const book = await getDiscountedBookById(id);
     if (!book) {
       return NextResponse.json(
         { success: false, message: 'Book not found' },

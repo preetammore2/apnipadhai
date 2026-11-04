@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createOrder, findCouponForCart, getBooks, WooCommerceError } from '@/lib/woocommerce';
+import { createOrder, findCouponForCart, WooCommerceError } from '@/lib/woocommerce';
+import { getDiscountedBooks } from '@/lib/db-book-discount';
 import { computeCartTotals } from '@/lib/pricing';
 import type { StoreCoupon } from '@/lib/store-settings';
 import { getStoreSettings } from '@/lib/db-store-settings';
@@ -122,7 +123,9 @@ export async function POST(request: NextRequest) {
       typeof body.couponCode === 'string' && body.couponCode.trim()
         ? body.couponCode.trim()
         : undefined;
-    const [settings, books] = await Promise.all([getStoreSettings(), getBooks()]);
+    // Prices include the store-wide book discount; each line is sent to
+    // WooCommerce at that price so the order total matches the cart.
+    const [settings, books] = await Promise.all([getStoreSettings(), getDiscountedBooks()]);
     const bookPrices = new Map(books.map((book) => [Number(book.id), book.price]));
     const subtotal = items.reduce(
       (sum: number, item: { productId: number; quantity: number }) => {
@@ -149,7 +152,10 @@ export async function POST(request: NextRequest) {
     const merchantTransactionId = generateMerchantTransactionId();
 
     const order = await createOrder({
-      items,
+      items: items.map((item: { productId: number; quantity: number }) => ({
+        ...item,
+        unitPrice: bookPrices.get(item.productId),
+      })),
       billing: {
         firstName: name,
         phone,

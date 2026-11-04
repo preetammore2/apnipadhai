@@ -3,19 +3,25 @@ import { revalidatePath } from 'next/cache';
 import { createBook, getBooks, parseBookPayload, WooCommerceError } from '@/lib/woocommerce';
 import { enrichBooksWithSamples, getBookSamples } from '@/lib/wordpress';
 import { mirrorBooksSafe, replaceMirroredBooks, upsertMirroredBook } from '@/lib/db-books';
-import { hasAdminAccess } from '@/lib/auth';
+import { hasAdminAccess, hasAnyAdminAccess } from '@/lib/auth';
+import { withBookDiscount } from '@/lib/db-book-discount';
 import { getClientIp, rateLimitResponse } from '@/lib/rate-limit';
 import { denyIfCrossOrigin, readJsonBody } from '@/lib/request-security';
 
 export const runtime = 'nodejs';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const [books, samples] = await Promise.all([getBooks(), getBookSamples()]);
     const result = enrichBooksWithSamples(books, samples);
     // Keep the Firebase mirror fresh (best-effort, never blocks the response).
     void mirrorBooksSafe(() => replaceMirroredBooks(result));
-    return NextResponse.json(result);
+    // Admin screens edit and save prices, so they get the real WooCommerce
+    // prices (?raw=1). Everyone else sees the store-wide book discount.
+    if (request.nextUrl.searchParams.get('raw') === '1' && hasAnyAdminAccess(request)) {
+      return NextResponse.json(result);
+    }
+    return NextResponse.json(await withBookDiscount(result));
   } catch (error) {
     console.error('[api/books] error', error);
     return NextResponse.json(

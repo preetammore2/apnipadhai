@@ -16,6 +16,7 @@ import {
   Quote,
   Settings2,
   ShieldCheck,
+  Percent,
   Tag,
   Truck,
 } from 'lucide-react';
@@ -45,6 +46,13 @@ const ALL_TILES: Tile[] = [
     desc: 'Create, edit or delete discount codes — saved as WooCommerce coupons and used at checkout.',
     icon: <Tag className={TILE_ICON} />,
     bg: 'bg-lime-100 text-lime-700',
+  },
+  {
+    href: '/admin/book-discount',
+    title: 'Book Discount',
+    desc: 'Extra % or ₹ discount on every book’s selling price, with an optional end date.',
+    icon: <Percent className={TILE_ICON} />,
+    bg: 'bg-rose-100 text-rose-700',
   },
   {
     href: '/admin/delivery',

@@ -34,7 +34,7 @@ export default function AdminSamplePdfsPage() {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch('/api/books');
+      const res = await fetch('/api/books?raw=1');
       if (!res.ok) {
         const data = await res.json().catch(() => null);
         throw new Error(data?.message || 'Failed to load books');
