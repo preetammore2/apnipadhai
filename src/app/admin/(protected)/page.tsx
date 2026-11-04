@@ -16,7 +16,6 @@ import {
   Quote,
   Settings2,
   ShieldCheck,
-  Percent,
   Tag,
   Truck,
   Users,
@@ -38,7 +37,7 @@ const ALL_TILES: Tile[] = [
   {
     href: '/admin/books',
     title: 'Books Management',
-    desc: 'Add, edit or delete books — synced to your WooCommerce store and mirrored to Firebase.',
+    desc: 'Add, edit or delete books and set the discount on all books — synced to your WooCommerce store.',
     icon: <BookOpen className={TILE_ICON} />,
     bg: 'bg-brand-100 text-brand-700',
   },
@@ -48,13 +47,6 @@ const ALL_TILES: Tile[] = [
     desc: 'Create, edit or delete discount codes — saved as WooCommerce coupons and used at checkout.',
     icon: <Tag className={TILE_ICON} />,
     bg: 'bg-lime-100 text-lime-700',
-  },
-  {
-    href: '/admin/book-discount',
-    title: 'Book Discount',
-    desc: 'Extra % or ₹ discount on every book’s selling price, with an optional end date.',
-    icon: <Percent className={TILE_ICON} />,
-    bg: 'bg-rose-100 text-rose-700',
   },
   {
     href: '/admin/delivery',
@@ -147,7 +139,7 @@ const STAFF_TILE: Tile = {
 function visibleTiles(me: AdminMe): Tile[] {
   const paths = allowedAdminPaths(me.permissions, me.isOwner);
   const tiles = ALL_TILES.filter((tile) => paths.includes(tile.href));
-  return me.isOwner ? [STAFF_TILE, ...tiles] : tiles;
+  return me.isOwner ? [...tiles, STAFF_TILE] : tiles;
 }
 
 export default function AdminDashboardPage() {

@@ -6,6 +6,7 @@ import { ArrowLeft, ImageIcon, Loader2, Pencil, Plus, RefreshCw, Search, Trash2 
 import { Book } from '@/types';
 import LogoutButton from '@/app/admin/components/LogoutButton';
 import BookFormModal from './BookFormModal';
+import BookDiscountPanel from './BookDiscountPanel';
 import type { AdminMe } from '@/lib/admin-permissions';
 
 type Role = 'admin' | 'moderator';
@@ -14,6 +15,7 @@ export default function AdminBooksPage() {
   const [books, setBooks] = useState<Book[]>([]);
   const [role, setRole] = useState<Role>('admin');
   const [roleLoaded, setRoleLoaded] = useState(false);
+  const [canDiscount, setCanDiscount] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
@@ -28,6 +30,7 @@ export default function AdminBooksPage() {
         if (ignore) return;
         // Without the "Books" permission, staff can only change cover images.
         setRole(data?.permissions?.includes('books') ? 'admin' : 'moderator');
+        setCanDiscount(Boolean(data?.permissions?.includes('book-discount')));
         setRoleLoaded(true);
       })
       .catch(() => {
@@ -127,6 +130,8 @@ export default function AdminBooksPage() {
       </header>
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+        {canDiscount && <BookDiscountPanel />}
+
         {isModerator && roleLoaded && (
           <div className="flex items-start gap-3 bg-sky-50 border border-sky-200 rounded-2xl px-4 py-3 mb-6 text-sm text-sky-900">
             <ImageIcon className="w-5 h-5 shrink-0 mt-0.5" />

@@ -8,7 +8,7 @@ export const ADMIN_PERMISSIONS = [
   { key: 'book-covers', label: 'Book covers only', description: 'Change book cover images, nothing else', path: '/admin/books' },
   { key: 'sample-pdfs', label: 'Sample PDFs', description: 'Attach or remove free sample PDFs', path: '/admin/sample-pdfs' },
   { key: 'coupons', label: 'Coupons', description: 'Create, edit and delete discount codes', path: '/admin/coupons' },
-  { key: 'book-discount', label: 'Book Discount', description: 'Set the store-wide discount on all books', path: '/admin/book-discount' },
+  { key: 'book-discount', label: 'Book Discount', description: 'Set the store-wide discount on all books (on the Books page)', path: '/admin/books' },
   { key: 'delivery', label: 'Delivery Charges', description: 'Set delivery charges', path: '/admin/delivery' },
   { key: 'content', label: 'Site Content', description: 'Edit the hero text and FAQs, sync from WordPress', path: '/admin/content' },
   { key: 'hero-slider', label: 'Hero Slider', description: 'Manage homepage banner slides', path: '/admin/hero-slider' },
