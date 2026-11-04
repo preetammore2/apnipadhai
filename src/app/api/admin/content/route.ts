@@ -11,7 +11,16 @@ import {
   type HeroSectionValue,
   type TestimonialSectionValue,
 } from '@/lib/db-content';
-import { hasAdminAccess } from '@/lib/auth';
+import { hasAnyPermission, hasPermission } from '@/lib/auth';
+import type { AdminPermission } from '@/lib/admin-permissions';
+
+/** Hero text and FAQs are "Site Content"; testimonials and courses have their own pages. */
+const SECTION_PERMISSION: Record<ContentSection, AdminPermission> = {
+  hero: 'content',
+  faqs: 'content',
+  testimonials: 'testimonials',
+  courses: 'courses',
+};
 import { getClientIp, rateLimitResponse } from '@/lib/rate-limit';
 import { denyIfCrossOrigin, readJsonBody } from '@/lib/request-security';
 
@@ -96,7 +105,7 @@ async function readSection(section: ContentSection) {
 }
 
 export async function GET(request: NextRequest) {
-  if (!hasAdminAccess(request)) {
+  if (!(await hasAnyPermission(request, ['content', 'testimonials', 'courses']))) {
     return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
   }
 
@@ -121,7 +130,7 @@ export async function PUT(request: NextRequest) {
   const crossOrigin = denyIfCrossOrigin(request);
   if (crossOrigin) return crossOrigin;
 
-  if (!hasAdminAccess(request)) {
+  if (!(await hasAnyPermission(request, ['content', 'testimonials', 'courses']))) {
     return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
   }
 
@@ -141,6 +150,9 @@ export async function PUT(request: NextRequest) {
       );
     }
     const section = body.section as ContentSection;
+    if (!(await hasPermission(request, SECTION_PERMISSION[section]))) {
+      return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
+    }
     const value = cleanValue(section, body.value);
 
     if (value === null) {

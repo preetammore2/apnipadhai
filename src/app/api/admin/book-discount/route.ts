@@ -2,14 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { isDbConfigured } from '@/lib/db';
 import { BOOK_DISCOUNT_DEFAULTS, getBookDiscount, setBookDiscount } from '@/lib/db-book-discount';
-import { hasAdminAccess } from '@/lib/auth';
+import { hasPermission } from '@/lib/auth';
 import { getClientIp, rateLimitResponse } from '@/lib/rate-limit';
 import { denyIfCrossOrigin, readJsonBody } from '@/lib/request-security';
 
 export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
-  if (!hasAdminAccess(request)) {
+  if (!(await hasPermission(request, 'book-discount'))) {
     return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
   }
   const configured = isDbConfigured();
@@ -32,7 +32,7 @@ export async function PUT(request: NextRequest) {
   const crossOrigin = denyIfCrossOrigin(request);
   if (crossOrigin) return crossOrigin;
 
-  if (!hasAdminAccess(request)) {
+  if (!(await hasPermission(request, 'book-discount'))) {
     return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
   }
 

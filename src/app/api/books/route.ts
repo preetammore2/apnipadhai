@@ -3,7 +3,7 @@ import { revalidatePath } from 'next/cache';
 import { createBook, getBooks, parseBookPayload, WooCommerceError } from '@/lib/woocommerce';
 import { enrichBooksWithSamples, getBookSamples } from '@/lib/wordpress';
 import { mirrorBooksSafe, replaceMirroredBooks, upsertMirroredBook } from '@/lib/db-books';
-import { hasAdminAccess, hasAnyAdminAccess } from '@/lib/auth';
+import { hasAnyAdminAccess, hasPermission } from '@/lib/auth';
 import { withBookDiscount } from '@/lib/db-book-discount';
 import { getClientIp, rateLimitResponse } from '@/lib/rate-limit';
 import { denyIfCrossOrigin, readJsonBody } from '@/lib/request-security';
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     void mirrorBooksSafe(() => replaceMirroredBooks(result));
     // Admin screens edit and save prices, so they get the real WooCommerce
     // prices (?raw=1). Everyone else sees the store-wide book discount.
-    if (request.nextUrl.searchParams.get('raw') === '1' && hasAnyAdminAccess(request)) {
+    if (request.nextUrl.searchParams.get('raw') === '1' && (await hasAnyAdminAccess(request))) {
       return NextResponse.json(result);
     }
     return NextResponse.json(await withBookDiscount(result));
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
   });
   if (throttled) return throttled;
 
-  if (!hasAdminAccess(request)) {
+  if (!(await hasPermission(request, 'books'))) {
     return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
   }
 

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { isDbConfigured } from '@/lib/db';
 import { listFeedback, replaceFeedback, type FeedbackInput } from '@/lib/db-feedback';
-import { hasAdminAccess } from '@/lib/auth';
+import { hasPermission } from '@/lib/auth';
 import { getClientIp, rateLimitResponse } from '@/lib/rate-limit';
 import { denyIfCrossOrigin, readJsonBody } from '@/lib/request-security';
 
@@ -26,7 +26,7 @@ function cleanItems(value: unknown): FeedbackInput[] | null {
 }
 
 export async function GET(request: NextRequest) {
-  if (!hasAdminAccess(request)) {
+  if (!(await hasPermission(request, 'feedback'))) {
     return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
   }
 
@@ -50,7 +50,7 @@ export async function PUT(request: NextRequest) {
   const crossOrigin = denyIfCrossOrigin(request);
   if (crossOrigin) return crossOrigin;
 
-  if (!hasAdminAccess(request)) {
+  if (!(await hasPermission(request, 'feedback'))) {
     return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
   }
 

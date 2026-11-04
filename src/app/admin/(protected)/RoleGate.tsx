@@ -2,32 +2,29 @@
 
 import { useEffect, useMemo } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import type { AdminRole } from '@/lib/admin-auth';
-
-const MODERATOR_ALLOWED_ROOTS = ['/admin', '/admin/books'];
 
 /**
- * Moderators may only reach the dashboard and the books area. Any other admin
- * route redirects them back to /admin. Admin users pass through untouched.
- * (Server-side, the admin APIs reject moderators regardless — this gate is a
- * UX safeguard so moderators never see other admin screens.)
+ * Staff may only open the admin sections their role allows (plus the
+ * dashboard). Any other admin route redirects back to /admin. Server-side, the
+ * admin APIs check the same permissions regardless — this gate is a UX
+ * safeguard so people never see screens they cannot use.
  */
 export default function RoleGate({
-  role,
+  allowedPaths,
   children,
 }: {
-  role: AdminRole;
+  allowedPaths: string[];
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
   const router = useRouter();
 
-  const allowed = useMemo(() => {
-    if (role === 'admin') return true;
-    return MODERATOR_ALLOWED_ROOTS.some(
-      (root) => pathname === root || pathname.startsWith(`${root}/`),
-    );
-  }, [role, pathname]);
+  const allowed = useMemo(
+    () =>
+      pathname === '/admin' ||
+      allowedPaths.some((root) => root !== '/admin' && (pathname === root || pathname.startsWith(`${root}/`))),
+    [allowedPaths, pathname],
+  );
 
   useEffect(() => {
     if (!allowed) router.replace('/admin');

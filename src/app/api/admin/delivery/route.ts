@@ -6,14 +6,14 @@ import {
   setDeliverySettings,
 } from '@/lib/db-store-settings';
 import { getWpStoreSettings } from '@/lib/store-settings';
-import { hasAdminAccess } from '@/lib/auth';
+import { hasPermission } from '@/lib/auth';
 import { getClientIp, rateLimitResponse } from '@/lib/rate-limit';
 import { denyIfCrossOrigin, readJsonBody } from '@/lib/request-security';
 
 export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
-  if (!hasAdminAccess(request)) {
+  if (!(await hasPermission(request, 'delivery'))) {
     return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
   }
 
@@ -38,7 +38,7 @@ export async function PUT(request: NextRequest) {
   const crossOrigin = denyIfCrossOrigin(request);
   if (crossOrigin) return crossOrigin;
 
-  if (!hasAdminAccess(request)) {
+  if (!(await hasPermission(request, 'delivery'))) {
     return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
   }
 

@@ -6,6 +6,7 @@ import { ArrowLeft, ImageIcon, Loader2, Pencil, Plus, RefreshCw, Search, Trash2 
 import { Book } from '@/types';
 import LogoutButton from '@/app/admin/components/LogoutButton';
 import BookFormModal from './BookFormModal';
+import type { AdminMe } from '@/lib/admin-permissions';
 
 type Role = 'admin' | 'moderator';
 
@@ -23,14 +24,15 @@ export default function AdminBooksPage() {
     let ignore = false;
     fetch('/api/admin/me')
       .then((res) => (res.ok ? res.json() : null))
-      .then((data: { role?: string } | null) => {
+      .then((data: AdminMe | null) => {
         if (ignore) return;
-        setRole(data?.role === 'moderator' ? 'moderator' : 'admin');
+        // Without the "Books" permission, staff can only change cover images.
+        setRole(data?.permissions?.includes('books') ? 'admin' : 'moderator');
         setRoleLoaded(true);
       })
       .catch(() => {
         if (!ignore) {
-          setRole('admin');
+          setRole('moderator');
           setRoleLoaded(true);
         }
       });
@@ -115,7 +117,7 @@ export default function AdminBooksPage() {
               </h1>
               <p className="text-xs text-white/60 mt-1">
                 {isModerator && roleLoaded
-                  ? 'Moderator — cover images only'
+                  ? 'Cover images only'
                   : 'Synced to WooCommerce store & Firebase'}
               </p>
             </div>
@@ -129,8 +131,8 @@ export default function AdminBooksPage() {
           <div className="flex items-start gap-3 bg-sky-50 border border-sky-200 rounded-2xl px-4 py-3 mb-6 text-sm text-sky-900">
             <ImageIcon className="w-5 h-5 shrink-0 mt-0.5" />
             <p>
-              You are in <strong>moderator</strong> mode. You can only upload or change book cover
-              images — creating and deleting books requires an admin account.
+              You can only upload or change book cover images. Creating, editing and deleting
+              books needs the <strong>Books</strong> permission.
             </p>
           </div>
         )}

@@ -19,8 +19,10 @@ import {
   Percent,
   Tag,
   Truck,
+  Users,
 } from 'lucide-react';
 import LogoutButton from '@/app/admin/components/LogoutButton';
+import { ADMIN_PERMISSIONS, allowedAdminPaths, type AdminMe } from '@/lib/admin-permissions';
 
 interface Tile {
   href: string;
@@ -133,36 +135,40 @@ const ALL_TILES: Tile[] = [
   },
 ];
 
-const MODERATOR_TILES: Tile[] = [
-  {
-    href: '/admin/books',
-    title: 'Books Management',
-    desc: 'Upload or change book cover images. All other book details and admin areas are read-only for you.',
-    icon: <BookOpen className={TILE_ICON} />,
-    bg: 'bg-brand-100 text-brand-700',
-  },
-];
+const STAFF_TILE: Tile = {
+  href: '/admin/staff',
+  title: 'Staff & Roles',
+  desc: 'Create roles, choose what each role can do, and give staff their own passwords.',
+  icon: <Users className={TILE_ICON} />,
+  bg: 'bg-slate-200 text-slate-700',
+};
+
+/** Tiles this person may open: owner sees all, staff only their sections. */
+function visibleTiles(me: AdminMe): Tile[] {
+  const paths = allowedAdminPaths(me.permissions, me.isOwner);
+  const tiles = ALL_TILES.filter((tile) => paths.includes(tile.href));
+  return me.isOwner ? [STAFF_TILE, ...tiles] : tiles;
+}
 
 export default function AdminDashboardPage() {
-  const [role, setRole] = useState<'admin' | 'moderator' | null>(null);
+  const [me, setMe] = useState<AdminMe | null>(null);
 
   useEffect(() => {
     let ignore = false;
     fetch('/api/admin/me')
       .then((res) => (res.ok ? res.json() : null))
-      .then((data: { role?: string } | null) => {
-        if (ignore) return;
-        setRole(data?.role === 'moderator' ? 'moderator' : 'admin');
+      .then((data: AdminMe | null) => {
+        if (!ignore) setMe(data ?? { authed: false, name: '', isOwner: false, permissions: [] });
       })
       .catch(() => {
-        if (!ignore) setRole('admin');
+        if (!ignore) setMe({ authed: false, name: '', isOwner: false, permissions: [] });
       });
     return () => {
       ignore = true;
     };
   }, []);
 
-  const isModerator = role === 'moderator';
+  const tiles = me ? visibleTiles(me) : [];
 
   return (
     <main className="min-h-screen bg-slate-50">
@@ -175,7 +181,7 @@ export default function AdminDashboardPage() {
             <div>
               <h1 className="text-lg font-black font-heading leading-none">Admin Dashboard</h1>
               <p className="text-xs text-white/60 mt-1">
-                {isModerator ? 'Moderator — image access only' : 'Apni Padhai Publication'}
+                {me?.name ? `Signed in as ${me.name}` : 'Apni Padhai Publication'}
               </p>
             </div>
           </div>
@@ -184,24 +190,30 @@ export default function AdminDashboardPage() {
       </header>
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
-        {role === null ? (
+        {me === null ? (
           <div className="flex items-center justify-center py-20 text-slate-400">
             <Loader2 className="w-6 h-6 animate-spin" />
           </div>
         ) : (
           <>
-            {isModerator && (
+            {!me.isOwner && (
               <div className="flex items-start gap-3 bg-sky-50 border border-sky-200 rounded-2xl px-4 py-3 mb-6 text-sm text-sky-900">
                 <ShieldCheck className="w-5 h-5 shrink-0 mt-0.5" />
-                <p>
-                  You are signed in as a <strong>moderator</strong> and can only upload or change
-                  book cover images. Editing books, prices, results, PYQs and other data requires an
-                  admin account.
-                </p>
+                <div>
+                  <p className="font-bold">You can:</p>
+                  <ul className="mt-1 space-y-0.5">
+                    {ADMIN_PERMISSIONS.filter((p) => me.permissions.includes(p.key)).map((p) => (
+                      <li key={p.key}>
+                        <strong>{p.label}</strong> — {p.description}
+                      </li>
+                    ))}
+                  </ul>
+                  {me.permissions.length === 0 && <p>No sections yet. Ask the owner to give your role access.</p>}
+                </div>
               </div>
             )}
             <div className="grid sm:grid-cols-2 gap-4">
-              {(isModerator ? MODERATOR_TILES : ALL_TILES).map((tile) => (
+              {tiles.map((tile) => (
                 <Link
                   key={tile.title}
                   href={tile.href}

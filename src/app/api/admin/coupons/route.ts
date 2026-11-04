@@ -5,7 +5,7 @@ import {
   parseCouponPayload,
   WooCommerceError,
 } from '@/lib/woocommerce';
-import { hasAdminAccess } from '@/lib/auth';
+import { hasPermission } from '@/lib/auth';
 import { getClientIp, rateLimitResponse } from '@/lib/rate-limit';
 import { denyIfCrossOrigin, readJsonBody } from '@/lib/request-security';
 
@@ -22,7 +22,7 @@ function errorResponse(error: unknown, fallback: string) {
 }
 
 export async function GET(request: NextRequest) {
-  if (!hasAdminAccess(request)) {
+  if (!(await hasPermission(request, 'coupons'))) {
     return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
   }
   try {
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
   const crossOrigin = denyIfCrossOrigin(request);
   if (crossOrigin) return crossOrigin;
 
-  if (!hasAdminAccess(request)) {
+  if (!(await hasPermission(request, 'coupons'))) {
     return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
   }
 

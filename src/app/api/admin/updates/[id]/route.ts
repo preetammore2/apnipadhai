@@ -9,7 +9,7 @@ import {
   type PostStatus,
   type StoredPost,
 } from '@/lib/db-updates';
-import { hasAdminAccess } from '@/lib/auth';
+import { hasPermission } from '@/lib/auth';
 import { getClientIp, rateLimitResponse } from '@/lib/rate-limit';
 import { denyIfCrossOrigin, readJsonBody } from '@/lib/request-security';
 
@@ -50,7 +50,7 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  if (!hasAdminAccess(request)) {
+  if (!(await hasPermission(request, 'updates'))) {
     return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
   }
   const id = await resolveId(params);
@@ -77,7 +77,7 @@ export async function PUT(
   const crossOrigin = denyIfCrossOrigin(request);
   if (crossOrigin) return crossOrigin;
 
-  if (!hasAdminAccess(request)) {
+  if (!(await hasPermission(request, 'updates'))) {
     return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
   }
 
@@ -150,7 +150,7 @@ export async function DELETE(
   const crossOrigin = denyIfCrossOrigin(request);
   if (crossOrigin) return crossOrigin;
 
-  if (!hasAdminAccess(request)) {
+  if (!(await hasPermission(request, 'updates'))) {
     return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
   }
 
@@ -188,7 +188,7 @@ export async function PATCH(
   const crossOrigin = denyIfCrossOrigin(request);
   if (crossOrigin) return crossOrigin;
 
-  if (!hasAdminAccess(request)) {
+  if (!(await hasPermission(request, 'updates'))) {
     return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
   }
 

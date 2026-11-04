@@ -5,7 +5,7 @@ import {
   updateCoupon,
   WooCommerceError,
 } from '@/lib/woocommerce';
-import { hasAdminAccess } from '@/lib/auth';
+import { hasPermission } from '@/lib/auth';
 import { getClientIp, rateLimitResponse } from '@/lib/rate-limit';
 import { denyIfCrossOrigin, readJsonBody } from '@/lib/request-security';
 
@@ -21,10 +21,10 @@ function errorResponse(error: unknown, fallback: string) {
   return NextResponse.json({ success: false, message: fallback }, { status: 502 });
 }
 
-function guard(request: NextRequest): Response | null {
+async function guard(request: NextRequest): Promise<Response | null> {
   const crossOrigin = denyIfCrossOrigin(request);
   if (crossOrigin) return crossOrigin;
-  if (!hasAdminAccess(request)) {
+  if (!(await hasPermission(request, 'coupons'))) {
     return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
   }
   return rateLimitResponse(request, {
@@ -38,7 +38,7 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const blocked = guard(request);
+  const blocked = await guard(request);
   if (blocked) return blocked;
 
   const { id } = await params;
@@ -60,7 +60,7 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const blocked = guard(request);
+  const blocked = await guard(request);
   if (blocked) return blocked;
 
   const { id } = await params;

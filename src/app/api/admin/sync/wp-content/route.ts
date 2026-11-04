@@ -22,7 +22,7 @@ import {
 } from '@/lib/site-content';
 import { getPosts, getPyqs } from '@/lib/wordpress';
 import { importPyqs } from '@/lib/db-pyqs';
-import { hasAdminAccess } from '@/lib/auth';
+import { hasPermission } from '@/lib/auth';
 import { getClientIp, rateLimitResponse } from '@/lib/rate-limit';
 import { denyIfCrossOrigin } from '@/lib/request-security';
 
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
   const crossOrigin = denyIfCrossOrigin(request);
   if (crossOrigin) return crossOrigin;
 
-  if (!hasAdminAccess(request)) {
+  if (!(await hasPermission(request, 'content'))) {
     return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
   }
 

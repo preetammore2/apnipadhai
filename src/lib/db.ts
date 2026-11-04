@@ -11,6 +11,8 @@ export const COLLECTIONS = {
   books: 'books',
   pyqs: 'pyqs',
   storeSettings: 'storeSettings',
+  adminRoles: 'adminRoles',
+  adminStaff: 'adminStaff',
 } as const;
 
 /**

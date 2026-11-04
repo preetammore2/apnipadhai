@@ -4,8 +4,10 @@ import {
   ADMIN_SESSION_COOKIE,
   ADMIN_SESSION_MAX_AGE,
   signAdminSession,
-  type AdminRole,
+  type SessionSubject,
 } from '@/lib/admin-auth';
+import { isDbConfigured } from '@/lib/db';
+import { findStaffByPassword } from '@/lib/db-admin-staff';
 import { getClientIp, rateLimitResponse } from '@/lib/rate-limit';
 import { denyIfCrossOrigin, readJsonBody } from '@/lib/request-security';
 
@@ -41,22 +43,30 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  let role: AdminRole | null = null;
+  // One password box for everyone: the owner password, the legacy moderator
+  // password, or a staff password created in /admin/staff.
+  let subject: SessionSubject | null = null;
   if (tokenMatches(password, adminToken)) {
-    role = 'admin';
+    subject = { kind: 'owner' };
   } else if (tokenMatches(password, moderatorToken)) {
-    role = 'moderator';
+    subject = { kind: 'moderator' };
+  } else if (password && isDbConfigured()) {
+    const staff = await findStaffByPassword(password).catch((error) => {
+      console.error('[admin/login] staff lookup failed', error);
+      return null;
+    });
+    if (staff) subject = { kind: 'staff', staffId: staff.id, version: staff.sessionVersion };
   }
 
-  if (!role) {
+  if (!subject) {
     return NextResponse.json({ success: false, message: 'Invalid password' }, { status: 401 });
   }
 
   const response = NextResponse.json(
-    { success: true, role },
+    { success: true },
     { headers: { 'Cache-Control': 'no-store' } },
   );
-  response.cookies.set(ADMIN_SESSION_COOKIE, signAdminSession(role), {
+  response.cookies.set(ADMIN_SESSION_COOKIE, signAdminSession(subject), {
     httpOnly: true,
     sameSite: 'strict',
     secure: process.env.NODE_ENV === 'production',

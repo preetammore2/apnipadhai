@@ -10,7 +10,7 @@ import {
 import { getDiscountedBookById } from '@/lib/db-book-discount';
 import { deleteMirroredBook, mirrorBooksSafe, upsertMirroredBook } from '@/lib/db-books';
 import { deleteBookCover, setBookCover } from '@/lib/db-book-covers';
-import { getRequestAdminRole } from '@/lib/auth';
+import { getAdminPrincipal, hasPermission } from '@/lib/auth';
 import { getClientIp, rateLimitResponse } from '@/lib/rate-limit';
 import { denyIfCrossOrigin, readJsonBody } from '@/lib/request-security';
 
@@ -54,8 +54,13 @@ export async function PUT(
   });
   if (throttled) return throttled;
 
-  const role = getRequestAdminRole(request);
-  if (!role) {
+  // Three levels: "books" edits everything, "sample-pdfs" only the sample PDF,
+  // "book-covers" only the cover image. Other fields are ignored by the server.
+  const principal = await getAdminPrincipal(request);
+  const canEditBooks = Boolean(principal?.permissions.includes('books'));
+  const canEditSamples = Boolean(principal?.permissions.includes('sample-pdfs'));
+  const canEditCovers = Boolean(principal?.permissions.includes('book-covers'));
+  if (!canEditBooks && !canEditSamples && !canEditCovers) {
     return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
   }
 
@@ -76,12 +81,15 @@ export async function PUT(
         : typeof b.image === 'string'
           ? b.image.trim()
           : '';
-    const isModerator = role === 'moderator';
-
     let payload: BookPayload;
-    if (isModerator) {
-      // Moderators may only change the book cover image — every other field is
-      // ignored by the server.
+    if (canEditBooks) {
+      payload = parseBookPayload(body);
+      if (rawCover) {
+        payload.coverImage = await resolveCoverUrl(request, id, rawCover);
+      }
+    } else if (canEditSamples && 'samplePdfUrl' in b) {
+      payload = { samplePdfUrl: parseBookPayload({ samplePdfUrl: b.samplePdfUrl }).samplePdfUrl };
+    } else if (canEditCovers) {
       const coverUrl = rawCover ? await resolveCoverUrl(request, id, rawCover) : undefined;
       if (!coverUrl) {
         return NextResponse.json(
@@ -91,13 +99,10 @@ export async function PUT(
       }
       payload = { coverImage: coverUrl };
     } else {
-      payload = parseBookPayload(body);
-      if (rawCover) {
-        payload.coverImage = await resolveCoverUrl(request, id, rawCover);
-      }
+      return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
     }
 
-    if (rawCover && !rawCover.startsWith('data:image/')) {
+    if (payload.coverImage && rawCover && !rawCover.startsWith('data:image/')) {
       // An external https URL is the source of truth now; drop any previously
       // uploaded Mongo copy (best-effort).
       void mirrorBooksSafe(() => deleteBookCover(id));
@@ -173,7 +178,7 @@ export async function DELETE(
   });
   if (throttled) return throttled;
 
-  if (getRequestAdminRole(request) !== 'admin') {
+  if (!(await hasPermission(request, 'books'))) {
     return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
   }
 
