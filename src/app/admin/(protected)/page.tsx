@@ -12,6 +12,7 @@ import {
   Images,
   LayoutTemplate,
   Loader2,
+  Megaphone,
   MessageSquareQuote,
   Quote,
   Settings2,
@@ -96,6 +97,13 @@ const ALL_TILES: Tile[] = [
     desc: 'Edit the content of policies, careers, about and other info pages.',
     icon: <LayoutTemplate className={TILE_ICON} />,
     bg: 'bg-purple-100 text-purple-700',
+  },
+  {
+    href: '/admin/popup',
+    title: 'Popup',
+    desc: 'A photo that pops up when visitors open the website, with a close button.',
+    icon: <Megaphone className={TILE_ICON} />,
+    bg: 'bg-fuchsia-100 text-fuchsia-700',
   },
   {
     href: '/admin/hero-slider',

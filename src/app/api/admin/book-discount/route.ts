@@ -2,14 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { isDbConfigured } from '@/lib/db';
 import { BOOK_DISCOUNT_DEFAULTS, getBookDiscount, setBookDiscount } from '@/lib/db-book-discount';
-import { hasPermission } from '@/lib/auth';
+import { hasAnyPermission, hasPermission } from '@/lib/auth';
 import { getClientIp, rateLimitResponse } from '@/lib/rate-limit';
 import { denyIfCrossOrigin, readJsonBody } from '@/lib/request-security';
 
 export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
-  if (!(await hasPermission(request, 'book-discount'))) {
+  // Reading is allowed for everyone on the Books page (to show discounted
+  // prices); changing it needs the Book Discount permission.
+  if (!(await hasAnyPermission(request, ['book-discount', 'books', 'book-covers']))) {
     return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
   }
   const configured = isDbConfigured();

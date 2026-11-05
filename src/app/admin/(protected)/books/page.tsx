@@ -7,6 +7,7 @@ import { Book } from '@/types';
 import LogoutButton from '@/app/admin/components/LogoutButton';
 import BookFormModal from './BookFormModal';
 import BookDiscountPanel from './BookDiscountPanel';
+import { discountedPrice, isBookDiscountActive, type BookDiscount } from '@/lib/book-discount';
 import type { AdminMe } from '@/lib/admin-permissions';
 
 type Role = 'admin' | 'moderator';
@@ -16,6 +17,7 @@ export default function AdminBooksPage() {
   const [role, setRole] = useState<Role>('admin');
   const [roleLoaded, setRoleLoaded] = useState(false);
   const [canDiscount, setCanDiscount] = useState(false);
+  const [discount, setDiscount] = useState<BookDiscount | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
@@ -39,6 +41,20 @@ export default function AdminBooksPage() {
           setRoleLoaded(true);
         }
       });
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  // The store-wide book discount, to show each book's discounted price.
+  useEffect(() => {
+    let ignore = false;
+    fetch('/api/admin/book-discount')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: { discount?: BookDiscount } | null) => {
+        if (!ignore && data?.discount) setDiscount(data.discount);
+      })
+      .catch(() => undefined);
     return () => {
       ignore = true;
     };
@@ -130,7 +146,7 @@ export default function AdminBooksPage() {
       </header>
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
-        {canDiscount && <BookDiscountPanel />}
+        {canDiscount && <BookDiscountPanel onChange={setDiscount} />}
 
         {isModerator && roleLoaded && (
           <div className="flex items-start gap-3 bg-sky-50 border border-sky-200 rounded-2xl px-4 py-3 mb-6 text-sm text-sky-900">
@@ -228,6 +244,14 @@ export default function AdminBooksPage() {
                     {book.originalPrice > book.price && (
                       <span className="text-slate-400 font-semibold line-through ml-1.5">
                         ₹{book.originalPrice}
+                      </span>
+                    )}
+                    {discount && isBookDiscountActive(discount) && (
+                      <span
+                        className="ml-2 inline-block px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 font-black"
+                        title="Price customers pay with the book discount"
+                      >
+                        ₹{discountedPrice(book.price, book.originalPrice, discount)} with discount
                       </span>
                     )}
                     {!book.inStock && (

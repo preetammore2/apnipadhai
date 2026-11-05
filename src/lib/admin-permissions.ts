@@ -11,6 +11,7 @@ export const ADMIN_PERMISSIONS = [
   { key: 'book-discount', label: 'Book Discount', description: 'Set the store-wide discount on all books (on the Books page)', path: '/admin/books' },
   { key: 'delivery', label: 'Delivery Charges', description: 'Set delivery charges', path: '/admin/delivery' },
   { key: 'content', label: 'Site Content', description: 'Edit the hero text and FAQs, sync from WordPress', path: '/admin/content' },
+  { key: 'popup', label: 'Popup', description: 'Photo that pops up when visitors open the website', path: '/admin/popup' },
   { key: 'hero-slider', label: 'Hero Slider', description: 'Manage homepage banner slides', path: '/admin/hero-slider' },
   { key: 'courses', label: 'Courses', description: 'Manage course cards on the homepage', path: '/admin/courses' },
   { key: 'testimonials', label: 'Testimonials', description: 'Manage student success stories', path: '/admin/testimonials' },

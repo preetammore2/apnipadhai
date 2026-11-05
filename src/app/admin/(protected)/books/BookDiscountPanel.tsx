@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { CheckCircle2, ChevronDown, ChevronUp, Loader2, Percent, Save, XCircle } from 'lucide-react';
 import {
   discountedPrice,
@@ -44,7 +44,12 @@ function describe(discount: BookDiscount | null): string {
  * the Books page. Saved via /api/admin/book-discount (needs the "Book
  * Discount" permission). WooCommerce prices themselves are never changed.
  */
-export default function BookDiscountPanel() {
+export default function BookDiscountPanel({
+  onChange,
+}: {
+  /** Called with the saved discount after loading and after every save. */
+  onChange?: (discount: BookDiscount) => void;
+}) {
   const [form, setForm] = useState<DiscountForm>({
     enabled: false,
     type: 'percent',
@@ -60,8 +65,15 @@ export default function BookDiscountPanel() {
   const [saving, setSaving] = useState(false);
   const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
 
+  // Kept in a ref so `load` stays stable when the parent re-renders.
+  const onChangeRef = useRef(onChange);
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
+
   const applyLoaded = (d: BookDiscount) => {
     setSaved(d);
+    onChangeRef.current?.(d);
     setForm({
       enabled: d.enabled,
       type: d.type,

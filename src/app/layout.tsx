@@ -9,6 +9,7 @@ import { CartPersistence } from '@/components/layout/CartPersistence';
 import { WishlistPersistence } from '@/components/layout/WishlistPersistence';
 import { LanguagePersistence } from '@/components/layout/LanguagePersistence';
 import { WhatsAppFloat } from '@/components/layout/WhatsAppFloat';
+import { SitePopup } from '@/components/layout/SitePopup';
 import { Toaster } from 'sonner';
 
 const inter = Inter({
@@ -72,7 +73,8 @@ export default function RootLayout({
             <Footer />
             <CartDrawer />
             <WhatsAppFloat />
-            <Toaster position="top-right" richColors />
+            <SitePopup />
+            <Toaster position="top-right" richColors closeButton duration={2500} />
           </div>
         </ReduxProvider>
       </body>
