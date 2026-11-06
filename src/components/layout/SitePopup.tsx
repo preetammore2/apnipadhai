@@ -1,14 +1,30 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { usePathname } from 'next/navigation';
+import React, { useEffect, useRef, useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import { X } from 'lucide-react';
+import { popupMaxWidth, type PopupSize } from '@/lib/popup-sizes';
 
 interface PopupData {
   enabled: boolean;
   image?: string;
   alt?: string;
+  /** Optional page opened when the photo is clicked. */
+  link?: string;
+  size?: PopupSize;
   version?: number;
+}
+
+/** "/books/81" or a link to this same website → navigate in the same tab. */
+function internalPath(link: string): string | null {
+  if (link.startsWith('/') && !link.startsWith('//')) return link;
+  try {
+    const url = new URL(link);
+    if (url.origin === window.location.origin) return `${url.pathname}${url.search}${url.hash}`;
+  } catch {
+    // not a URL
+  }
+  return null;
 }
 
 const SEEN_KEY = 'apni_padhai_popup_seen';
@@ -22,8 +38,11 @@ const HIDDEN_PREFIXES = ['/admin', '/checkout', '/payment'];
  */
 export const SitePopup: React.FC = () => {
   const pathname = usePathname();
+  const router = useRouter();
   const [popup, setPopup] = useState<PopupData | null>(null);
   const [open, setOpen] = useState(false);
+  /** Page the popup opened on; moving to another page closes it. */
+  const openedOn = useRef<string | null>(null);
 
   const hiddenHere = HIDDEN_PREFIXES.some((prefix) => pathname?.startsWith(prefix));
 
@@ -42,6 +61,7 @@ export const SitePopup: React.FC = () => {
         }
         if (seen === String(data.version)) return;
         setPopup(data);
+        openedOn.current = window.location.pathname;
         setOpen(true);
       })
       .catch(() => undefined);
@@ -57,6 +77,25 @@ export const SitePopup: React.FC = () => {
     } catch {
       // Ignore storage failures; the popup simply may show again next page load.
     }
+  };
+
+  // Close as soon as the visitor goes to another page (link, menu, back button).
+  useEffect(() => {
+    if (open && openedOn.current !== null && pathname !== openedOn.current) close();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
+
+  /** Close first, then go — the popup is gone before the next page loads. */
+  const followLink = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    const link = popup?.link;
+    close();
+    if (!link) return;
+    const path = internalPath(link);
+    if (path) {
+      e.preventDefault();
+      router.push(path);
+    }
+    // Other websites open in a new tab through the anchor itself.
   };
 
   useEffect(() => {
@@ -85,7 +124,11 @@ export const SitePopup: React.FC = () => {
       aria-modal="true"
       aria-label={popup.alt || 'Announcement'}
     >
-      <div className="relative max-w-lg w-full" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="relative w-full"
+        style={{ maxWidth: popupMaxWidth(popup.size) }}
+        onClick={(e) => e.stopPropagation()}
+      >
         <button
           type="button"
           onClick={close}
@@ -94,12 +137,28 @@ export const SitePopup: React.FC = () => {
         >
           <X className="w-5 h-5" />
         </button>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={popup.image}
-          alt={popup.alt || 'Announcement'}
-          className="w-full h-auto max-h-[80vh] object-contain rounded-2xl shadow-2xl bg-white"
-        />
+        {popup.link ? (
+          <a
+            href={popup.link}
+            onClick={followLink}
+            {...(internalPath(popup.link) ? {} : { target: '_blank', rel: 'noopener noreferrer' })}
+            className="block cursor-pointer"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={popup.image}
+              alt={popup.alt || 'Announcement'}
+              className="w-full h-auto max-h-[80vh] object-contain rounded-2xl shadow-2xl bg-white"
+            />
+          </a>
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={popup.image}
+            alt={popup.alt || 'Announcement'}
+            className="w-full h-auto max-h-[80vh] object-contain rounded-2xl shadow-2xl bg-white"
+          />
+        )}
       </div>
     </div>
   );

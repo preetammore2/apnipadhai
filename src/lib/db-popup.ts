@@ -1,4 +1,5 @@
 import { COLLECTIONS, getDb, isDbConfigured } from '@/lib/db';
+import { DEFAULT_POPUP_SIZE, isPopupSize, type PopupSize } from '@/lib/popup-sizes';
 
 /**
  * Site popup: a photo shown to visitors when they open the website, set in
@@ -9,6 +10,10 @@ export interface SitePopup {
   /** Uploaded image (data URL) or an https image link. */
   image: string;
   alt: string;
+  /** Optional: opened when the photo is clicked ("/books/81" or https://…). */
+  link: string;
+  /** How big the popup is on a computer (phones always fit the screen). */
+  size: PopupSize;
   /** YYYY-MM-DD: shown until the end of this day (IST). Always required. */
   expiresAt: string;
   /** Changes on every save so visitors who closed the old photo see a new one. */
@@ -20,7 +25,28 @@ const CACHE_MS = 30 * 1000;
 /** Firestore documents are limited to 1 MB; uploads are compressed well below this. */
 export const MAX_POPUP_IMAGE_LENGTH = 900 * 1024;
 
-export const POPUP_DEFAULTS: SitePopup = { enabled: false, image: '', alt: '', expiresAt: '', version: 0 };
+export const POPUP_DEFAULTS: SitePopup = {
+  enabled: false,
+  image: '',
+  alt: '',
+  link: '',
+  size: DEFAULT_POPUP_SIZE,
+  expiresAt: '',
+  version: 0,
+};
+
+/** A page on this site ("/books/81") or an http(s) address. Empty = no link. */
+export function isValidPopupLink(value: string): boolean {
+  if (!value) return true;
+  if (value.length > 500) return false;
+  if (value.startsWith('/')) return !value.startsWith('//');
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' || url.protocol === 'http:';
+  } catch {
+    return false;
+  }
+}
 
 export function isPopupDate(value: unknown): value is string {
   return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value);
@@ -61,6 +87,8 @@ export async function getPopup(): Promise<SitePopup> {
     enabled: data.enabled === true && image !== '',
     image,
     alt: typeof data.alt === 'string' ? data.alt.slice(0, 200) : '',
+    link: typeof data.link === 'string' && isValidPopupLink(data.link) ? data.link : '',
+    size: isPopupSize(data.size) ? data.size : DEFAULT_POPUP_SIZE,
     expiresAt: isPopupDate(data.expiresAt) ? data.expiresAt : '',
     version: Number(data.version) || 0,
   };

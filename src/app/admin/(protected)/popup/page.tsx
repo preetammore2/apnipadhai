@@ -5,11 +5,18 @@ import Link from 'next/link';
 import { ArrowLeft, CheckCircle2, Loader2, RefreshCw, Save, XCircle } from 'lucide-react';
 import LogoutButton from '@/app/admin/components/LogoutButton';
 import ImageUploader from '@/app/admin/components/ImageUploader';
+import { DEFAULT_POPUP_SIZE, POPUP_SIZES, type PopupSize } from '@/lib/popup-sizes';
+
+/** Screen widths used by the preview (a typical laptop and phone). */
+const DESKTOP_WIDTH = 1440;
 
 interface PopupForm {
   enabled: boolean;
   image: string;
   alt: string;
+  /** Optional page opened when the photo is clicked. */
+  link: string;
+  size: PopupSize;
   /** YYYY-MM-DD, shown until the end of that day. Always required. */
   expiresAt: string;
 }
@@ -24,7 +31,14 @@ function isExpired(expiresAt: string): boolean {
 }
 
 export default function AdminPopupPage() {
-  const [form, setForm] = useState<PopupForm>({ enabled: false, image: '', alt: '', expiresAt: '' });
+  const [form, setForm] = useState<PopupForm>({
+    enabled: false,
+    image: '',
+    alt: '',
+    link: '',
+    size: DEFAULT_POPUP_SIZE,
+    expiresAt: '',
+  });
   const [configured, setConfigured] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -46,6 +60,8 @@ export default function AdminPopupPage() {
         enabled: data.popup.enabled,
         image: data.popup.image,
         alt: data.popup.alt,
+        link: data.popup.link ?? '',
+        size: data.popup.size ?? DEFAULT_POPUP_SIZE,
         expiresAt: data.popup.expiresAt ?? '',
       });
     } catch {
@@ -66,6 +82,11 @@ export default function AdminPopupPage() {
 
   async function save() {
     setResult(null);
+    const link = form.link.trim();
+    if (link && !(link.startsWith('/') && !link.startsWith('//')) && !/^https?:\/\/\S+$/i.test(link)) {
+      setResult({ ok: false, message: 'Link must start with / (a page on this site) or https://' });
+      return;
+    }
     if (form.enabled && !form.image) {
       setResult({ ok: false, message: 'Add a photo before turning the popup on.' });
       return;
@@ -195,6 +216,20 @@ export default function AdminPopupPage() {
               </p>
             )}
 
+            <label className="grid gap-1 text-xs font-bold text-navy-900">
+              Link when clicked (optional)
+              <input
+                value={form.link}
+                onChange={(e) => update({ link: e.target.value })}
+                placeholder="/books/81  or  https://www.youtube.com/…"
+                className="input-field font-mono text-xs"
+              />
+              <span className="font-normal text-slate-500">
+                A page on this site (starting with /) opens in the same tab; other websites open in
+                a new tab. Leave empty if the photo should not be clickable.
+              </span>
+            </label>
+
             <input
               value={form.alt}
               onChange={(e) => update({ alt: e.target.value })}
@@ -202,15 +237,54 @@ export default function AdminPopupPage() {
               className="input-field w-full"
             />
 
+            <div>
+              <p className="text-xs font-bold text-navy-900 mb-1.5">Popup size</p>
+              <div className="flex flex-wrap gap-2">
+                {POPUP_SIZES.map((size) => (
+                  <button
+                    key={size.key}
+                    type="button"
+                    onClick={() => update({ size: size.key })}
+                    className={`px-4 py-2 rounded-xl border text-xs font-bold transition-colors ${
+                      form.size === size.key
+                        ? 'border-brand-500 bg-brand-50 text-brand-700'
+                        : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    {size.label}
+                    <span className="block text-[10px] font-semibold text-slate-400">
+                      up to {size.maxWidth}px wide
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {form.image && (
               <div>
                 <p className="text-xs font-bold text-navy-900 mb-1.5">Preview</p>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={form.image}
-                  alt={form.alt || 'Popup preview'}
-                  className="max-h-80 w-auto rounded-2xl border border-slate-200"
-                />
+                <div className="grid sm:grid-cols-[1fr_auto] gap-4 items-start">
+                  <figure>
+                    <PreviewScreen
+                      image={form.image}
+                      alt={form.alt}
+                      aspect="16 / 9"
+                      popupWidth={`${Math.min(
+                        (POPUP_SIZES.find((s) => s.key === form.size)?.maxWidth ?? 512) / DESKTOP_WIDTH,
+                        0.96,
+                      ) * 100}%`}
+                    />
+                    <figcaption className="text-[11px] text-slate-500 mt-1.5 text-center">
+                      Computer
+                    </figcaption>
+                  </figure>
+                  <figure className="w-32 sm:w-36 mx-auto">
+                    <PreviewScreen image={form.image} alt={form.alt} aspect="9 / 19" popupWidth="88%" />
+                    <figcaption className="text-[11px] text-slate-500 mt-1.5 text-center">
+                      Phone (always fits the screen)
+                    </figcaption>
+                  </figure>
+                </div>
               </div>
             )}
 
@@ -241,5 +315,45 @@ export default function AdminPopupPage() {
         )}
       </div>
     </main>
+  );
+}
+
+/** A miniature screen with dimmed page and the popup centred, like visitors see it. */
+function PreviewScreen({
+  image,
+  alt,
+  aspect,
+  popupWidth,
+}: {
+  image: string;
+  alt: string;
+  aspect: string;
+  popupWidth: string;
+}) {
+  return (
+    <div
+      className="relative w-full overflow-hidden rounded-xl border-4 border-slate-800 bg-white"
+      style={{ aspectRatio: aspect }}
+    >
+      {/* Stand-in for the website behind the popup */}
+      <div className="absolute inset-0 p-[4%] space-y-[3%]">
+        <div className="h-[8%] rounded bg-slate-200" />
+        <div className="h-[30%] rounded bg-slate-100" />
+        <div className="grid grid-cols-3 gap-[3%] h-[35%]">
+          <div className="rounded bg-slate-100" />
+          <div className="rounded bg-slate-100" />
+          <div className="rounded bg-slate-100" />
+        </div>
+      </div>
+      <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+        <div className="relative" style={{ width: popupWidth }}>
+          <span className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 rounded-full bg-white shadow text-[8px] leading-[14px] text-center text-navy-900">
+            ✕
+          </span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={image} alt={alt || 'Popup preview'} className="w-full h-auto rounded-md bg-white" />
+        </div>
+      </div>
+    </div>
   );
 }

@@ -5,10 +5,12 @@ import {
   isPopupDate,
   isPopupExpired,
   isValidPopupImage,
+  isValidPopupLink,
   POPUP_DEFAULTS,
   setPopup,
 } from '@/lib/db-popup';
 import { hasPermission } from '@/lib/auth';
+import { DEFAULT_POPUP_SIZE, isPopupSize } from '@/lib/popup-sizes';
 import { getClientIp, rateLimitResponse } from '@/lib/rate-limit';
 import { denyIfCrossOrigin, readJsonBody } from '@/lib/request-security';
 
@@ -67,6 +69,15 @@ export async function PUT(request: NextRequest) {
   const image = typeof body.image === 'string' ? body.image.trim() : '';
   const alt = typeof body.alt === 'string' ? body.alt.trim().slice(0, 200) : '';
   const expiresAt = isPopupDate(body.expiresAt) ? body.expiresAt : '';
+  const link = typeof body.link === 'string' ? body.link.trim() : '';
+  const size = isPopupSize(body.size) ? body.size : DEFAULT_POPUP_SIZE;
+
+  if (!isValidPopupLink(link)) {
+    return NextResponse.json(
+      { success: false, message: 'Link must be a page on this site like /books or an https:// address' },
+      { status: 400 },
+    );
+  }
 
   if (image && !isValidPopupImage(image)) {
     return NextResponse.json(
@@ -95,7 +106,7 @@ export async function PUT(request: NextRequest) {
   }
 
   try {
-    const popup = await setPopup({ enabled, image, alt, expiresAt });
+    const popup = await setPopup({ enabled, image, alt, link, size, expiresAt });
     return NextResponse.json({ success: true, popup });
   } catch (error) {
     console.error('[api/admin/popup] save error', error);
