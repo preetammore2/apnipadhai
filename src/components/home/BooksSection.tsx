@@ -210,6 +210,10 @@ export const BooksSection: React.FC = () => {
                     >
                       <Package className="w-4 h-4" />
                     </Link>
+                    ) : !book.inStock ? (
+                    <span className="px-2 py-2 bg-slate-100 text-slate-500 text-[10px] font-bold rounded-xl shrink-0">
+                      {t('Out of stock')}
+                    </span>
                     ) : (
                     <button
                       onClick={() => {

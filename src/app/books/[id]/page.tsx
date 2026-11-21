@@ -165,7 +165,15 @@ export default function BookDetailsPage({ params }: { params: Promise<{ id: stri
                 </div>
 
                 <div className="flex flex-wrap gap-3">
-                  {book && !isComboBook(book) && (
+                  {book && !isComboBook(book) && !book.inStock && (
+                  <button
+                    disabled
+                    className="flex-1 py-4 bg-slate-200 text-slate-500 font-bold text-sm rounded-2xl cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    <span>{t('Out of stock')}</span>
+                  </button>
+                  )}
+                  {book && !isComboBook(book) && book.inStock && (
                   <button
                     onClick={() => {
                       dispatch(addToCart({ item: book, type: 'book' }));

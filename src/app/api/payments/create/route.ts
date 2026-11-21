@@ -127,6 +127,20 @@ export async function POST(request: NextRequest) {
     // WooCommerce at that price so the order total matches the cart.
     const [settings, books] = await Promise.all([getStoreSettings(), getDiscountedBooks()]);
     const bookPrices = new Map(books.map((book) => [Number(book.id), book.price]));
+    const outOfStock = items
+      .map((item: { productId: number }) => books.find((book) => Number(book.id) === item.productId))
+      .filter((book): book is (typeof books)[number] => book !== undefined && !book.inStock);
+    if (outOfStock.length > 0) {
+      const titles = outOfStock.map((book) => book.title).join(', ');
+      return NextResponse.json(
+        {
+          success: false,
+          message: `Out of stock: ${titles}. Please remove ${outOfStock.length > 1 ? 'them' : 'it'} from your cart.`,
+          outOfStockIds: outOfStock.map((book) => book.id),
+        },
+        { status: 409 },
+      );
+    }
     const subtotal = items.reduce(
       (sum: number, item: { productId: number; quantity: number }) => {
         const price = bookPrices.get(item.productId);

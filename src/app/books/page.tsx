@@ -145,7 +145,7 @@ export default function BooksPage() {
                             <Eye className="w-5 h-5" />
                           </button>
                         )}
-                        {!isComboBook(book) && (
+                        {!isComboBook(book) && book.inStock && (
                         <button
                           onClick={() => {
                             dispatch(addToCart({ item: book, type: 'book' }));
@@ -213,6 +213,7 @@ export default function BooksPage() {
                       </Link>
                     ) : (
                     <div className="flex items-center gap-2">
+                      {book.inStock ? (
                       <button
                         onClick={() => {
                           dispatch(addToCart({ item: book, type: 'book' }));
@@ -222,6 +223,11 @@ export default function BooksPage() {
                       >
                         {t('Add to Cart')}
                       </button>
+                      ) : (
+                      <span className="px-4 py-2 bg-slate-100 text-slate-500 text-xs font-bold rounded-xl">
+                        {t('Out of stock')}
+                      </span>
+                      )}
                       <Link
                         href={`/books/${book.id}`}
                         className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors"
