@@ -41,6 +41,10 @@ export interface PhonePePaymentData {
   merchantTransactionId?: string;
   orderId?: string;
   transactionId?: string;
+  /** Bank reference number (UTR) for UPI / net-banking payments, when PhonePe reports one. */
+  utr?: string;
+  /** e.g. UPI_INTENT, UPI_QR, CARD, NET_BANKING. */
+  paymentMode?: string;
   state?: string;
   amount?: number;
   redirectUrl?: string;
@@ -250,18 +254,70 @@ async function getAccessToken(config: PhonePeConfig): Promise<string> {
 
 /* ───────── Response mapping ───────── */
 
+function asRecord(value: unknown): Record<string, unknown> | undefined {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : undefined;
+}
+
+/**
+ * Pull the PhonePe transaction id, UTR and payment mode out of a status
+ * response.
+ *   v1: data.transactionId + data.paymentInstrument { type, utr, ... }
+ *   v2: data.paymentDetails[] { transactionId, paymentMode, rail { utr }, splitInstruments[] }
+ */
+function extractPaymentReferences(d: Record<string, unknown>): {
+  transactionId?: string;
+  utr?: string;
+  paymentMode?: string;
+} {
+  const v1Instrument = asRecord(d.paymentInstrument);
+  if (v1Instrument) {
+    return {
+      transactionId: toStr(d.transactionId),
+      utr: toStr(v1Instrument.utr) ?? toStr(v1Instrument.bankTransactionId),
+      paymentMode: toStr(v1Instrument.type),
+    };
+  }
+
+  const attempts = Array.isArray(d.paymentDetails)
+    ? d.paymentDetails.map(asRecord).filter((a): a is Record<string, unknown> => a !== undefined)
+    : [];
+  // A shopper can retry within one order; the completed attempt is the real payment.
+  const attempt =
+    [...attempts].reverse().find((a) => a.state === 'COMPLETED') ?? attempts[attempts.length - 1];
+  if (!attempt) return { transactionId: toStr(d.transactionId) };
+
+  const rails = [
+    asRecord(attempt.rail),
+    ...(Array.isArray(attempt.splitInstruments)
+      ? attempt.splitInstruments.map((s) => asRecord(asRecord(s)?.rail))
+      : []),
+  ];
+  const utr = rails.map((rail) => toStr(rail?.utr)).find(Boolean);
+
+  return {
+    transactionId: toStr(attempt.transactionId) ?? toStr(d.transactionId),
+    utr,
+    paymentMode: toStr(attempt.paymentMode),
+  };
+}
+
 function mapPhonePeResponse(
   raw: Record<string, unknown> | null,
 ): PhonePePaymentData | null {
   if (!raw) return null;
   const d = normalizeData(raw.data ?? raw);
+  const refs = extractPaymentReferences(d);
 
   const mapped: PhonePePaymentData = {
     merchantId: toStr(d.merchantId),
     merchantOrderId: toStr(d.merchantTransactionId) ?? toStr(d.merchantOrderId) ?? toStr(d.orderId),
     merchantTransactionId: toStr(d.merchantTransactionId) ?? toStr(d.merchantOrderId) ?? toStr(d.orderId),
     orderId: toStr(d.orderId),
-    transactionId: toStr(d.transactionId),
+    transactionId: refs.transactionId,
+    utr: refs.utr,
+    paymentMode: refs.paymentMode,
     state: toStr(d.state),
     amount: toNumber(d.amount),
     responseCode: toStr(d.responseCode),

@@ -158,6 +158,8 @@ export async function handlePhonePeS2S(request: NextRequest): Promise<Response> 
     let finalState = reportedState;
     let finalAmount = reportedAmount;
     let transactionId: string | undefined;
+    let utr: string | undefined;
+    let paymentMode: string | undefined;
     if (merchantTransactionId && isMerchantTransactionId(merchantTransactionId)) {
       try {
         const status = await getPhonePePaymentStatus({
@@ -168,6 +170,8 @@ export async function handlePhonePeS2S(request: NextRequest): Promise<Response> 
           finalState = status.data.state ?? finalState;
           if (status.data.amount !== undefined) finalAmount = status.data.amount;
           transactionId = status.data.transactionId;
+          utr = status.data.utr;
+          paymentMode = status.data.paymentMode;
         }
       } catch {
         console.error('[phonepe/s2s] status re-check failed, using verified callback data', {
@@ -209,7 +213,12 @@ export async function handlePhonePeS2S(request: NextRequest): Promise<Response> 
         return NextResponse.json({ success: false }, { status: 400 });
       }
 
-      const transition = await markOrderPaidIfNeeded(orderId).catch(() => 'missing' as const);
+      const transition = await markOrderPaidIfNeeded(orderId, {
+        merchantTransactionId,
+        transactionId,
+        utr,
+        paymentMode,
+      }).catch(() => 'missing' as const);
       if (transition === 'paid') {
         console.log('[phonepe/s2s] order marked paid', {
           merchantTransactionId,

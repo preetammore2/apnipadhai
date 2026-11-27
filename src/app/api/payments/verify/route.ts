@@ -56,6 +56,8 @@ export async function POST(request: NextRequest) {
 
     let completed = false;
     let transactionId: string | null = null;
+    let utr: string | undefined;
+    let paymentMode: string | undefined;
     let state: string | null = null;
     let errorCode: string | null = null;
     let detailedErrorCode: string | null = null;
@@ -74,6 +76,8 @@ export async function POST(request: NextRequest) {
       completed = status?.ok === true && data?.state === 'COMPLETED';
       state = data?.state ?? null;
       transactionId = data?.transactionId ?? null;
+      utr = data?.utr;
+      paymentMode = data?.paymentMode;
       errorCode = data?.errorCode ?? null;
       detailedErrorCode = data?.detailedErrorCode ?? null;
 
@@ -92,7 +96,12 @@ export async function POST(request: NextRequest) {
     }
 
     if (completed) {
-      const transition = await markOrderPaidIfNeeded(order.woocommerceOrderId).catch(
+      const transition = await markOrderPaidIfNeeded(order.woocommerceOrderId, {
+        merchantTransactionId,
+        transactionId: transactionId ?? undefined,
+        utr,
+        paymentMode,
+      }).catch(
         (error) => {
           console.error('[payments/verify] failed to mark WooCommerce order paid', error);
           return 'missing' as const;

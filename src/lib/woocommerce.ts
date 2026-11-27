@@ -649,8 +649,47 @@ export async function updateOrder(
   });
 }
 
-export async function markOrderPaid(orderId: number): Promise<WoocommerceOrder> {
-  return updateOrder(orderId, { set_paid: true });
+/** Gateway references for a payment, saved on the WooCommerce order once it is paid. */
+export interface PaymentReferences {
+  merchantTransactionId?: string;
+  transactionId?: string;
+  utr?: string;
+  paymentMode?: string;
+}
+
+export async function markOrderPaid(
+  orderId: number,
+  refs: PaymentReferences = {},
+): Promise<WoocommerceOrder> {
+  const data: Record<string, unknown> = { set_paid: true };
+  // WooCommerce's own "Transaction ID" field, shown next to the payment method in the order screen.
+  const wooTransactionId = refs.transactionId ?? refs.utr;
+  if (wooTransactionId) data.transaction_id = wooTransactionId;
+
+  const meta: WoocommerceMeta[] = [];
+  if (refs.transactionId) meta.push({ key: '_ap_phonepe_transaction_id', value: refs.transactionId });
+  if (refs.utr) meta.push({ key: '_ap_phonepe_utr', value: refs.utr });
+  if (refs.paymentMode) meta.push({ key: '_ap_phonepe_payment_mode', value: refs.paymentMode });
+  if (meta.length > 0) data.meta_data = meta;
+
+  const order = await updateOrder(orderId, data);
+
+  const lines = [
+    'PhonePe payment received.',
+    refs.transactionId && `PhonePe Transaction ID: ${refs.transactionId}`,
+    refs.utr && `UTR: ${refs.utr}`,
+    refs.paymentMode && `Payment mode: ${refs.paymentMode}`,
+    refs.merchantTransactionId && `Merchant reference: ${refs.merchantTransactionId}`,
+  ].filter(Boolean);
+  // A private note for staff; the order is already paid, so a failed note is only logged.
+  await request(`/orders/${orderId}/notes`, {
+    method: 'POST',
+    body: JSON.stringify({ note: lines.join('\n'), customer_note: false }),
+  }).catch((error) => {
+    console.error('[woocommerce] failed to add payment note', { orderId, error });
+  });
+
+  return order;
 }
 
 function normalizePhone(phone: string): string {
@@ -702,11 +741,12 @@ export const PAID_ORDER_STATUSES = new Set(['processing', 'completed']);
  */
 export async function markOrderPaidIfNeeded(
   orderId: number,
+  refs: PaymentReferences = {},
 ): Promise<'paid' | 'already' | 'missing'> {
   const order = await getOrderById(orderId).catch(() => undefined);
   if (!order) return 'missing';
   if (PAID_ORDER_STATUSES.has(order.status)) return 'already';
-  await markOrderPaid(orderId);
+  await markOrderPaid(orderId, refs);
   return 'paid';
 }
 
